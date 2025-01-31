@@ -68,7 +68,7 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
     {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
 };
 
-// Connect generic R4A I2C layer to the CPU's I2C controller code
+// Specify the R4A ESP32 I2C layer parameters
 R4A_I2C_BUS i2cBus =
 {
     &Wire,              // _i2cBus, ESP32 controller code
