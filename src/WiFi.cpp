@@ -952,7 +952,7 @@ void R4A_WIFI::verifyTables()
     Print * debug;
     if (WIFI_AUTH_MAX != r4aEsp32WiFiAuthorizationNameEntries)
     {
-        debug = (Print *)debug;
+        debug = (Print *)_debug;
         if (!debug)
             debug = &Serial;
         ((Print *)debug)->printf("ERROR: Fix authorizationNameName list to match wifi_auth_mode_t in esp_wifi_types.h!\r\n");
