@@ -7,6 +7,27 @@
   Modify the blfChallenge routine later in this file to read the line
   sensors and set the motor speeds (run the challenge.
 
+  Flow of Control (Very Simplified):
+
+                           Power Up
+                               |
+                               V
+                             Setup
+                               |
+                               V
+                     Robot Initialization
+                               |
+                               V
+                               +<----------.
+                               |           |
+                               V           |
+                             Loop          |
+                               |           |
+                               V           |
+                         r4aRobotUpdate    | Infinite loop
+                               |           |
+                               '-----------'
+
   Call stack:
 
     setup - Sketch entry point
