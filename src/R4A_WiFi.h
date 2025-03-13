@@ -1,7 +1,7 @@
 /**********************************************************************
   R4A_WiFi.h
 
-  Robots-For-All (R4A_WIFI * wifi, R4A)
+  Robots-For-All (R4A)
   Definitions and declarations for WiFi support
 
   Modified from https://raw.githubusercontent.com/sparkfun/SparkFun_RTK_Everywhere_Firmware/refs/heads/main/Firmware/RTK_Everywhere/settings.h
@@ -12,67 +12,38 @@
 
 #include "R4A_ESP32.h"
 
-// Handle the WiFi event
-// Inputs:
-//   event: Arduino ESP32 event number found on
-//      https://github.com/espressif/arduino-esp32
-//      in libraries/Network/src/NetworkEvents.h
-//   info: Additional data about the event
-void wifiEventHandler(R4A_WIFI * wifi, arduino_event_id_t event, arduino_event_info_t info);
+#include <WiFi.h>               // Built-in
+#include <WiFiClient.h>         // Built-in
+#include <WiFiMulti.h>          // Built-in, multiple WiFi AP support
+#include <WiFiServer.h>         // Built-in
+#include <DNSServer.h>          // Built-in
 
-typedef uint8_t WIFI_CHANNEL_t;
-typedef uint32_t WIFI_ACTION_t;
+//****************************************
+// Types and data structures
+//****************************************
 
-// Structure containing WiFi private data
-typedef struct _R4A_WIFI
+typedef uint8_t R4A_WIFI_CHANNEL_t;
+typedef uint32_t R4A_WIFI_ACTION_t;
+
+// Entry in the SSID and password table r4aSsidPassword
+typedef struct _R4A_SSID_PASSWORD
 {
-WIFI_CHANNEL_t _apChannel;  // Channel required for soft AP, zero (R4A_WIFI * wifi, 0) use wifiChannel
-int16_t _apCount;           // The number or remote APs detected in the WiFi network
-IPAddress _apDnsAddress;    // DNS IP address to use while translating names into IP addresses
-IPAddress _apFirstDhcpAddress;  // First IP address to use for DHCP
-IPAddress _apGatewayAddress;// IP address of the gateway to the larger network (R4A_WIFI * wifi, internet?)
-IPAddress _apIpAddress;     // IP address of the soft AP
-uint8_t _apMacAddress[6];   // MAC address of the soft AP
-IPAddress _apSubnetMask;    // Subnet mask for soft AP
-WIFI_CHANNEL_t _espNowChannel;  // Channel required for ESPNow, zero (R4A_WIFI * wifi, 0) use wifiChannel
-volatile bool _scanRunning; // Scan running
-int _staAuthType;           // Authorization type for the remote AP
-bool _staConnected;         // True when station is connected
-bool _staHasIp;             // True when station has IP address
-IPAddress _staIpAddress;    // IP address of the station
-uint8_t _staIpType;         // 4 or 6 when IP address is assigned
-volatile uint8_t _staMacAddress[6]; // MAC address of the station
-const char * _staRemoteApSsid;      // SSID of remote AP
-const char * _staRemoteApPassword;  // Password of remote AP
-volatile WIFI_ACTION_t _started;    // Components that are started and running
-WIFI_CHANNEL_t _stationChannel; // Channel required for station, zero (R4A_WIFI * wifi, 0) use wifiChannel
-uint32_t _timer;            // Reconnection timer
-bool _usingDefaultChannel;  // Using default WiFi channel
-bool _verbose;              // True causes more debug output to be displayed
-} R4A_WIFI;
+    const char ** ssid;     // ID of access point
+    const char ** password; // Password for the access point
+} R4A_SSID_PASSWORD;
+
+//****************************************
+// Common WiFi support
+//****************************************
+
+// WiFi Globals - For other module direct access
+extern R4A_WIFI_CHANNEL_t r4aWifiChannel; // Current WiFi channel number
+extern bool r4aWifiDebug;                 // Set true to display debug output
+extern const char * r4aWifiHostName;      // Host name for use by mDNS
+extern bool r4aWifiVerbose;               // True causes more debug output to be displayed
 
 // Perform the WiFi initialization
-// Inputs:
-//   verbose: Set to true to display additional WiFi debug data
-wifiBegin(R4A_WIFI * wifi, bool debug = false, bool verbose = false);
-
-// Clear some of the started components
-// Inputs:
-//   components: Bitmask of components to clear
-// Outputs:
-//   Returns the bitmask of started components
-WIFI_ACTION_t clearStarted(R4A_WIFI * wifi, WIFI_ACTION_t components);
-
-// Attempts a connection to all provided SSIDs
-// Inputs:
-//    timeout: Number of milliseconds to wait for the connection
-//    startAP: Set true to start AP mode, false does not change soft AP
-//             status
-// Outputs:
-//    Returns true if successful and false upon timeout, no matching
-//    SSID or other failure
-bool connect(R4A_WIFI * wifi, unsigned long timeout,
-             bool startAP);
+void r4aWifiBegin();
 
 // Enable or disable the WiFi modes
 // Inputs:
@@ -83,106 +54,137 @@ bool connect(R4A_WIFI * wifi, unsigned long timeout,
 //   lineNumber: Line number in the file calling the enable routine
 // Outputs:
 //   Returns true if the modes were successfully configured
-bool enable(R4A_WIFI * wifi, bool enableESPNow,
-            bool enableSoftAP,
-            bool enableStation,
-            const char * fileName,
-            int lineNumber);
+bool r4aWifiEnable(bool enableESPNow,
+                   bool enableSoftAP,
+                   bool enableStation,
+                   const char * fileName,
+                   int lineNumber);
 
-// Get the ESP-NOW status
+// Test the WiFi modes
+// Inputs:
+//   testDurationMsec: Milliseconds to run each test
+void r4aWifiTest(uint32_t testDurationMsec);
+
+// Update the WiFi state, called from loop
+void r4aWifiUpdate();
+
+// Verify the WiFi tables
+void r4aWifiVerifyTables();
+
+//****************************************
+// ESP-NOW support
+//****************************************
+
+extern bool r4aWifiEspNowOnline;          // ESP-Now started successfully
+extern bool r4aWifiEspNowRunning;         // False: stopped, True: starting, running, stopping
+
+// Stop ESP-NOW
+// Inputs:
+//   fileName: Name of file calling the enable routine
+//   lineNumber: Line number in the file calling the enable routine
 // Outputs:
-//   Returns true when ESP-NOW is online and ready for use
-bool espNowOnline(R4A_WIFI * wifi);
+//   Returns true if successful and false upon failure
+bool r4aWifiEspNowOff(const char * fileName, uint32_t lineNumber);
+
+// Start ESP-NOW
+// Inputs:
+//   fileName: Name of file calling the enable routine
+//   lineNumber: Line number in the file calling the enable routine
+// Outputs:
+//   Returns true if successful and false upon failure
+bool r4aWifiEspNowOn(const char * fileName, uint32_t lineNumber);
 
 // Set the ESP-NOW channel
 // Inputs:
 //   channel: New ESP-NOW channel number
-void espNowSetChannel(R4A_WIFI * wifi, WIFI_CHANNEL_t channel);
+void r4aWifiEspNowSetChannel(R4A_WIFI_CHANNEL_t channel);
 
-// Handle the WiFi event
-// Inputs:
-//   event: Arduino ESP32 event number found on
-//          https://github.com/espressif/arduino-esp32
-//          in libraries/Network/src/NetworkEvents.h
-//   info: Additional data about the event
-void eventHandler(R4A_WIFI * wifi, arduino_event_id_t event, arduino_event_info_t info);
+//****************************************
+// Soft AP support
+//****************************************
 
-// Get the current WiFi channel
-// Outputs:
-//   Returns the current WiFi channel number
-WIFI_CHANNEL_t getChannel(R4A_WIFI * wifi);
+extern bool r4aWifiSoftApOnline;          // WiFi soft AP started successfully
+extern bool r4aWifiSoftApRunning;         // False: stopped, True: starting, running, stopping
+
+extern const char * r4aWifiSoftApSsid;    // SSID of the soft AP
+extern const char * r4aWifiSoftApPassword;// Password of the soft AP
 
 // Configure the soft AP
 // Inputs:
 //   ipAddress: IP address of the soft AP
 //   subnetMask: Subnet mask for the soft AP network
-//   firstDhcpAddress: First IP address to use in the DHCP range
-//   dnsAddress: IP address to use for DNS lookup (R4A_WIFI * wifi, translate name to IP address)
-//   gatewayAddress: IP address of the gateway to a larger network (R4A_WIFI * wifi, internet?)
+//   firstDhcpAddress: First IP address to use in the DHCP range, set to
+//          IPAddress((uint32_t)0) to use ipAddress + 1
+//   dnsAddress: IP address to use for DNS lookup (translate name to IP
+//          address), none = IPAddress((uint32_t)0)
+//   gatewayAddress: IP address of the gateway to a larger network (internet?),
+//          none = IPAddress((uint32_t)0)
 // Outputs:
 //   Returns true if the soft AP was successfully configured.
-bool softApConfiguration(R4A_WIFI * wifi, IPAddress ipAddress,
-                         IPAddress subnetMask,
-                         IPAddress firstDhcpAddress,
-                         IPAddress dnsAddress,
-                         IPAddress gateway);
+bool r4aWifiSoftApConfiguration(IPAddress ipAddress,
+                                IPAddress subnetMask,
+                                IPAddress firstDhcpAddress,
+                                IPAddress dnsAddress,
+                                IPAddress gateway);
 
 // Display the soft AP configuration
 // Inputs:
 //   display: Address of a Print object
-void softApConfigurationDisplay(R4A_WIFI * wifi, Print * display);
+void r4aWifiSoftApConfigurationDisplay(Print * display);
 
-// Get the soft AP IP address
-// Returns the soft IP address
-IPAddress softApIpAddress(R4A_WIFI * wifi);
-
-// Get the soft AP status
-// Outputs:
-//   Returns true when the soft AP is ready for use
-bool softApOnline(R4A_WIFI * wifi);
-
-// Attempt to start the soft AP mode
+// Turn off WiFi soft AP mode
 // Inputs:
-//    forceAP: Set to true to force AP to start, false will only start
-//             soft AP if settings.wifiConfigOverAP is true
+//   fileName: Name of file calling the enable routine
+//   lineNumber: Line number in the file calling the enable routine
 // Outputs:
-//    Returns true if the soft AP was started successfully and false
-//    otherwise
-bool startAp(R4A_WIFI * wifi, bool forceAP);
+//   Returns the status of WiFi soft AP stop
+bool r4aWifiSoftApOff(const char * fileName, uint32_t lineNumber);
+
+// Turn on WiFi soft AP mode
+// Inputs:
+//   fileName: Name of file calling the enable routine
+//   lineNumber: Line number in the file calling the enable routine
+// Outputs:
+//   Returns the status of WiFi soft AP start
+bool r4aWifiSoftApOn(const char * fileName, uint32_t lineNumber);
+
+//****************************************
+// Station support
+//****************************************
+
+extern uint32_t r4aWifiReconnectionTimer; // Delay before reconnection, timer running when non-zero
+extern bool r4aWifiRestartRequested;      // Restart WiFi if user changes anything
+extern bool r4aWifiStationOnline;         // WiFi station started successfully
+extern bool r4aWifiStationRunning;        // False: stopped, True: starting, running, stopping
+
+// List of known access points (APs)
+extern const R4A_SSID_PASSWORD r4aWifiSsidPassword[];
+extern const int r4aWifiSsidPasswordEntries;
 
 // Get the WiFi station IP address
-// Returns the IP address of the WiFi station
-IPAddress stationIpAddress(R4A_WIFI * wifi);
-
-// Get the station status
 // Outputs:
-//   Returns true when the WiFi station is online and ready for use
-bool stationOnline(R4A_WIFI * wifi);
+//   Returns the IP address of the WiFi station
+IPAddress r4aWifiStationIpAddress();
+
+// Stop the WiFi station
+// Inputs:
+//   fileName: Name of file calling the enable routine
+//   lineNumber: Line number in the file calling the enable routine
+// Outputs:
+//   Returns true if successful and false upon failure
+bool r4aWifiStationOff(const char * fileName, uint32_t lineNumber);
+
+// Start the WiFi station
+// Inputs:
+//   fileName: Name of file calling the enable routine
+//   lineNumber: Line number in the file calling the enable routine
+// Outputs:
+//   Returns true if successful and false upon failure
+bool r4aWifiStationOn(const char * fileName, uint32_t lineNumber);
 
 // Get the SSID of the remote AP
-const char * stationSsid(R4A_WIFI * wifi);
-
-// Stop and start WiFi components
-// Inputs:
-//   stopping: WiFi components that need to be stopped
-//   starting: WiFi components that neet to be started
 // Outputs:
-//   Returns true if the modes were successfully configured
-bool stopStart(R4A_WIFI * wifi, WIFI_ACTION_t stopping, WIFI_ACTION_t starting);
-
-// Test the WiFi modes
-// Inputs:
-//   testDurationMsec: Milliseconds to run each test
-void test(R4A_WIFI * wifi, uint32_t testDurationMsec);
-
-// Enable or disable verbose debug output
-// Inputs:
-//   enable: Set true to enable verbose debug output
-// Outputs:
-//   Return the previous enable value
-bool verbose(R4A_WIFI * wifi, bool enable);
-
-// Verify the WiFi tables
-void verifyTables(R4A_WIFI * wifi);
+//   Returns the zero terminated SSID string of the remote AP
+const char * r4aWifiStationSsid();
 
 #endif  // __R4A_WIFI_H__

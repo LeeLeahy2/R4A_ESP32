@@ -311,8 +311,6 @@ const R4A_SSID_PASSWORD r4aWifiSsidPassword[] =
 const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword)
                                      / sizeof(r4aWifiSsidPassword[0]);
 
-R4A_WIFI wifi(nullptr, nullptr);
-
 //*********************************************************************
 // Entry point for the application
 void setup()
@@ -373,9 +371,7 @@ void setup()
 
     // Start WiFi if enabled
     log_v("Calling wifiBegin");
-    if (wifiDebug)
-        wifi._debug = &Serial;
-    wifi.begin(mdnsHostName);
+    r4aWifiBegin();
 
 #ifdef  USE_NTRIP
     // Validate the NTRIP tables
@@ -437,7 +433,6 @@ void loop()
     uint32_t currentMsec;
     static uint32_t lastBatteryCheckMsec;
     static bool previousConnected;
-    bool wifiConnected;
 
     // Turn on the ESP32 WROVER blue LED when the battery power is OFF
     currentMsec = millis();
@@ -467,29 +462,29 @@ void loop()
         callingRoutine("car.ledsUpdate");
     car.ledsUpdate(currentMsec);
 
+    // Update the WiFi status
+    r4aWifiUpdate();
+
     // Determine if WiFi station mode is configured
     if (r4aWifiSsidPasswordEntries)
     {
-        // Determine if WiFi is connected
-        wifiConnected = wifi.stationHasIp();
-
         // Check for NTP updates
         if (DEBUG_LOOP_CORE_1)
             callingRoutine("r4aNtpUpdate");
-        r4aNtpUpdate(wifiConnected);
+        r4aNtpUpdate(r4aWifiStationOnline);
 
 #ifdef  USE_NTRIP
         // Update the NTRIP client state
         if (DEBUG_LOOP_CORE_1)
             callingRoutine("ntrip.update\r\n");
-        ntrip.update(wifiConnected);
+        ntrip.update(r4aWifiStationOnline);
 #endif  // USE_NTRIP
 
         // Notify the telnet server of WiFi changes
-        if (previousConnected != wifiConnected)
+        if (previousConnected != r4aWifiStationOnline)
         {
-            previousConnected = wifiConnected;
-            if (wifiConnected)
+            previousConnected = r4aWifiStationOnline;
+            if (r4aWifiStationOnline)
             {
                 if (DEBUG_LOOP_CORE_1)
                     callingRoutine("telnet.begin\r\n");
@@ -506,12 +501,12 @@ void loop()
         }
         if (DEBUG_LOOP_CORE_1)
             callingRoutine("telnet.update");
-        telnet.update(wifiConnected);
+        telnet.update(r4aWifiStationOnline);
 
         // Update the web server
         if (DEBUG_LOOP_CORE_1)
             callingRoutine("r4aWebServerUpdate");
-        r4aWebServerUpdate(&webServer, wifiConnected && webServerEnable);
+        r4aWebServerUpdate(&webServer, r4aWifiStationOnline && webServerEnable);
     }
 
     // Process the next image

@@ -12,10 +12,6 @@
 #include "ESPmDNS.h"            // Built-in
 #include <HTTPClient.h>         // Built-in
 #include <LittleFS.h>           // Built-in, load and store files in flash
-#include <WiFi.h>               // Built-in
-#include <WiFiClient.h>         // Built-in
-#include <WiFiMulti.h>          // Built-in, multiple WiFi AP support
-#include <WiFiServer.h>         // Built-in
 
 #include <esp_camera.h>         // IDF built-in, needed for OV2640 camera
 #include <esp32-hal-spi.h>      // IDF built-in
@@ -26,6 +22,7 @@
 #include <R4A_I2C.h>            // Robots-For-All I2C support
 #include "R4A_ESP32_GPIO.h"     // Robots-For-All ESP32 GPIO declarations
 #include "R4A_ESP32_Timer.h"    // Robots-For-All ESP32 Timer declarations
+#include "R4A_WiFi.h"           // Robots-For-All WiFi support
 
 //****************************************
 // Constants
@@ -1033,176 +1030,5 @@ void r4aWebServerStop(R4A_WEB_SERVER * object);
 //   object: Address of a R4A_WEB_SERVER data structure
 //   wifiConnected: True when WiFi has an IP address and false otherwise
 void r4aWebServerUpdate(R4A_WEB_SERVER * object, bool wifiConnected);
-
-//****************************************
-// WiFi API
-//****************************************
-
-typedef uint8_t R4A_WIFI_CHANNEL_t;
-
-// Entry in the SSID and password table r4aSsidPassword
-typedef struct _R4A_SSID_PASSWORD
-{
-    const char ** ssid;     // ID of access point
-    const char ** password; // Password for the access point
-} R4A_SSID_PASSWORD;
-
-// List of known access points (APs)
-extern const R4A_SSID_PASSWORD r4aWifiSsidPassword[];
-extern const int r4aWifiSsidPasswordEntries;
-
-// Class to simplify WiFi handling
-class R4A_WIFI
-{
-  private:
-
-    uint8_t _apCount;               // Number of AP in the list
-    bool _apFound;                  // Remote AP found
-    const char * _apPassword;       // Remote AP password
-    const char * _apSSID;           // Remote AP SSID
-    int _authType;                  // Remote AP authorization type
-    const char * _hostName;         // Name of this host
-    volatile bool _mdnsAvailable;   // True when the mDNS address translation is available
-    volatile bool _stationConnected;// True if station is connected to remote AP
-    volatile bool _stationHasIp;    // True if the station has an IP address
-    R4A_WIFI_CHANNEL_t _wifiChannel;// WiFi channel in use
-    bool _wifiScanRunning;          // WiFi scan is running
-    uint32_t _wifiTimer;            // WiFi timer is running when non-zero
-
-    // Connect to an access point
-    // Inputs:
-    //   apCount: Number of access points found during the scan
-    // Outputs:
-    //   Returns the channel number of the access point to which the connection
-    //   attempt was made
-    uint8_t connect(uint8_t apCount);
-
-    // Start the WiFi event handler
-    void eventHandlerStart();
-
-    // Stop the WiFi event handler
-    void eventHandlerStop();
-
-    // Start the multicast domain name server
-    // Outputs:
-    //   Returns true if successful and false upon failure
-    bool mDNSStart();
-
-    // Stop the multicast domain name server
-    void mDNSStop();
-
-    // Connect the station to a remote AP
-    bool stationConnectAP();
-
-    // Disconnect the station from an AP
-    // Outputs:
-    //   Returns true if successful and false upon failure
-    bool stationDisconnect();
-
-    // Set the station's host name
-    // Inputs:
-    //   hostName: Zero terminated host name character string
-    // Outputs:
-    //   Returns true if successful and false upon failure
-    bool stationHostName(const char * hostName);
-
-    // Start the WiFi scan
-    // Inputs:
-    //   channel: Channel number for the scan, zero (0) scan all channels
-    // Outputs:
-    //   Returns true if successful and false upon failure
-    bool stationScanStart(R4A_WIFI_CHANNEL_t channel);
-
-    // Select the AP and channel to use for WiFi station
-    // Inputs:
-    //   connect: Set to true for connection
-    //   list: Address of a Print object used to list the APs
-    // Outputs:
-    //   Returns the channel number of the AP
-    R4A_WIFI_CHANNEL_t stationSelectAP(bool connect, Print * list);
-
-    // Verify the WiFi tables
-    void verifyTables();
-
-    // Handle the WiFi event
-    // Inputs:
-    //   event: Arduino ESP32 event number found on
-    //          https://github.com/espressif/arduino-esp32
-    //          in libraries/Network/src/NetworkEvents.h
-    //   info: Additional data about the event
-    void wifiEvent(arduino_event_id_t event, arduino_event_info_t info);
-
-  public:
-
-    volatile Print * _debug;        // Display debugging data
-    volatile Print * _display;      // Display WiFi IP address and loss
-
-    // Constructor
-    // Inputs:
-    //   display: Print object to display WiFi startup summary
-    //   debug: Print object to display WiFi debugging messages
-    R4A_WIFI(Print * display = nullptr,
-             Print * debug = nullptr);
-
-    // Setup WiFi
-    // Inputs:
-    //   hostName: Zero terminated string of characters
-    void begin(const char * hostName);
-
-    // Get the active channel
-    //   Returns the channel number or zero (0) if not connected
-    uint8_t channelGet();
-
-    // Handle the WiFi event
-    // Inputs:
-    //   events: Event number found in libraries/Network/src/NetworkEvent.h
-    //   info: Information associated with the event
-    void eventHandler(arduino_event_id_t event, arduino_event_info_t info);
-
-    // Get the mDNS host name
-    // Outputs:
-    //   Returns the address of a zero terminated string of characters or nullptr
-    const char * hostNameGet();
-
-    // List the remote APs
-    // Inputs:
-    //   display: Address of a Print object used to list the APs
-    void listAPs(Print * display);
-
-    // Determine if mDNS is available
-    // Outputs:
-    //   True when the mDNS address translation is available
-    bool mdnsAvailable();
-
-    // Get the connected SSID
-    //   Returns the address of a zero terminated string of characters or nullptr
-    const char * ssidGet();
-
-    // Determine if the stataion is connected to a remote access point
-    // Outputs:
-    //   True if station is connected to remote AP
-    bool stationConnected();
-
-    // Determine if the station has an IP address
-    // Outputs:
-    //    True if the station has an IP address
-    bool stationHasIp();
-
-    // Start the Wifi station
-    // Outputs:
-    //   Returns true if the WiFi station was started
-    bool stationStart();
-
-    // Stop the WiFi station
-    // Outputs:
-    //   Returns true if the WiFi station was stopped
-    bool stationStop();
-
-    // Test the WiFi modes, call from loop
-    void test();
-
-    // Check for reconnection after disconnect, call from loop
-    void update();
-};
 
 #endif  // __R4A_ESP32_H__

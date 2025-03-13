@@ -2,6 +2,20 @@
   03_Telnet_Output.ino
 
   Perform basic line following with telnet output
+
+  WiFi Setup:
+
+    The list WiFi Access Point SSIDs and passwords is found in secrets.h.
+    1.  Change the values as needed
+    2.  Remove any unused entries
+    3.  Add new entries if needed by defining new symbols for the values
+    4.  Update r4aWifiSsidPassword (in this file) as needed
+
+    WiFi Soft AP (Access Point), default IP Address: 192.168.4.1
+    1.  Enabled by setting r4aWifiSoftApSsid
+    2.  Set r4aWifiSoftApPassword to enable a password
+    3.  Optionally call r4aWifiSoftApConfiguration before r4aWifiBegin
+        to change the soft AP (IP Address, subnet mask, first DHCP address)
 **********************************************************************/
 
 #include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
@@ -91,6 +105,14 @@ R4A_ROBOT_CHALLENGE basicLineFollowing =
 // WiFi support
 //****************************************
 
+// List of known access points (APs)
+const R4A_SSID_PASSWORD r4aWifiSsidPassword[] =
+{
+    {&wifiSSID1, &wifiPassword1},
+    {&wifiSSID2, &wifiPassword2},
+};
+const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword) / sizeof(r4aWifiSsidPassword[0]);
+
 #define TELNET_PORT         23
 
 bool telnetFailed;
@@ -98,8 +120,6 @@ R4A_TELNET_SERVER telnet(4,         // Max clients
                          nullptr,   // ProcessInput
                          nullptr,   // Create
                          nullptr);  // Delete
-
-WiFiMulti wifiMulti;
 
 //*********************************************************************
 // The robotRunning routine calls this routine to actually perform
@@ -191,31 +211,9 @@ void setup()
 
     // Scan WiFi for possible remote APs
     Serial.println("Scanning WiFi ");
-    wifiMulti.addAP(wifiSSID1, wifiPassword1);
-    wifiMulti.addAP(wifiSSID2, wifiPassword2);
-
-    // Connect to a remote AP if possible
-    Serial.println("Connecting Wifi ");
-    for (int loops = 10; loops > 0; loops--)
-    {
-        if (wifiMulti.run() == WL_CONNECTED)
-            break;
-        else
-        {
-            Serial.println(loops);
-            delay(1000);
-        }
-    }
-    if (wifiMulti.run() != WL_CONNECTED)
-    {
-        Serial.println("WiFi connect failed");
-        delay(1000);
-        ESP.restart();
-    }
-
-    // Wait for WiFi to connect
-    while (WiFi.STA.connected() == false)
-        delay(100);
+    r4aWifiBegin();
+    if (r4aWifiStationOn(__FILE__, __LINE__) == false)
+        r4aReportFatalError("Failed to connect to a WiFi Access Porint!");
 
     // Start the telnet server
     telnet.begin(WiFi.STA.localIP(), TELNET_PORT);

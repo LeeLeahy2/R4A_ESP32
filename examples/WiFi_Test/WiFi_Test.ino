@@ -59,8 +59,6 @@ const R4A_SSID_PASSWORD r4aWifiSsidPassword[] =
 const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword)
                                      / sizeof(r4aWifiSsidPassword[0]);
 
-R4A_WIFI wifi(nullptr, nullptr);
-
 //*********************************************************************
 // Entry point for the application
 void setup()
@@ -77,7 +75,7 @@ void setup()
     r4aEsp32NvmGetParameters(&parameterFilePath);
 
     // Start the WiFi network
-    wifi.begin(mdnsHostName);
+    r4aWifiBegin();
 
     // Initialize the NTP client
     r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
@@ -90,7 +88,6 @@ void loop()
     uint32_t currentMsec;
     static uint32_t lastWiFiStateChangeMsec;
     static bool previousConnected;
-    bool wifiConnected;
     static bool wifiStop;
 
     // Determine if it is time to change the WiFi state for testing
@@ -102,22 +99,22 @@ void loop()
         // Toggle the WiFi state
         wifiStop = !wifiStop;
         if (wifiStop)
-            wifi.stationStart();
+            r4aWifiStationOn(__FILE__, __LINE__);
         else
-            wifi.stationStop();
+            r4aWifiStationOff(__FILE__, __LINE__);
     }
 
-    // Determine if WiFi is connected
-    wifiConnected = wifi.stationHasIp();
+    // Update the WiFi state
+    r4aWifiUpdate();
 
     // Check for NTP updates
-    r4aNtpUpdate(wifiConnected);
+    r4aNtpUpdate(r4aWifiStationOnline);
 
     // Notify the telnet server of WiFi changes
-    if (previousConnected != wifiConnected)
+    if (previousConnected != r4aWifiStationOnline)
     {
-        previousConnected = wifiConnected;
-        if (wifiConnected)
+        previousConnected = r4aWifiStationOnline;
+        if (r4aWifiStationOnline)
         {
             telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
             Serial.printf("Telnet: %s:%d\r\n", WiFi.localIP().toString().c_str(),
@@ -126,7 +123,7 @@ void loop()
         else
             telnet.end();
     }
-    telnet.update(wifiConnected);
+    telnet.update(r4aWifiStationOnline);
 
     // Process serial commands
     r4aSerialMenu(&serialMenu);

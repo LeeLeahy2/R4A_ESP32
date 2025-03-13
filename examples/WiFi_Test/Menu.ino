@@ -11,36 +11,22 @@ void mainMenuPre(Print * display)
     if (r4aWifiSsidPasswordEntries)
     {
         // Display the WIFI status
-        const char * hostName = wifi.hostNameGet();
+        const char * hostName = r4aWifiHostName;
         if (hostName)
             display->printf("%s (%s): %s channel %d\r\n",
                             hostName,
-                            WiFi.localIP().toString().c_str(),
-                            wifi.ssidGet(),
-                            wifi.channelGet());
+                            r4aWifiStationIpAddress().toString().c_str(),
+                            r4aWifiStationSsid(),
+                            r4aWifiChannel);
         else
             display->printf("%s: %s channel %d\r\n",
-                            WiFi.localIP().toString().c_str(),
-                            wifi.ssidGet(),
-                            wifi.channelGet());
+                            r4aWifiStationIpAddress().toString().c_str(),
+                            r4aWifiStationSsid(),
+                            r4aWifiChannel);
 
         // Display the current time
         r4aNtpDisplayDateTime(display);
     }
-}
-
-//*********************************************************************
-// Toggle WiFi debugging
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void wifiMenuDebug(const R4A_MENU_ENTRY * menuEntry,
-                   const char * command,
-                   Print * display)
-{
-    r4aMenuBoolToggle(menuEntry, command, display);
-    wifi._debug = wifiDebug ? &Serial : nullptr;
 }
 
 //*********************************************************************
@@ -53,9 +39,9 @@ void wifiMenuRestart(const R4A_MENU_ENTRY * menuEntry,
                      const char * command,
                      Print * display)
 {
-    wifi.stationStop();
+    r4aWifiStationOff(__FILE__, __LINE__);
     delay(5 * 1000);
-    wifi.stationStart();
+    r4aWifiStationOn(__FILE__, __LINE__);
 }
 
 //*********************************************************************
@@ -80,14 +66,15 @@ const R4A_MENU_ENTRY debugMenuTable[] =
 // Main menu
 const R4A_MENU_ENTRY mainMenuTable[] =
 {
-    // Command  menuRoutine         menuParam       HelpRoutine align   HelpText
-    {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
-    {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
-    {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
-    {"telnet",  nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the Telnet menu"},
-    {"wd",     wifiMenuDebug, (intptr_t)&wifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
-    {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
-    {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
+    // Command  menuRoutine         menuParam                   HelpRoutine     align   HelpText
+    {"d",       nullptr,            MTI_DEBUG,                  nullptr,        0,      "Enter the debug menu"},
+    {"nvm",     nullptr,            MTI_NVM,                    nullptr,        0,      "Enter the NVM menu"},
+    {"r",  r4aEsp32MenuSystemReset, 0,                          nullptr,        0,      "System reset"},
+    {"telnet",  nullptr,            MTI_TELNET,                 nullptr,        0,      "Enter the Telnet menu"},
+    {"wd",      r4aMenuBoolToggle,  (intptr_t)&r4aWifiDebug,   r4aMenuBoolHelp, 0,      "Toggle WiFi debugging"},
+    {"wr",      wifiMenuRestart,    0,                          nullptr,        0,      "Restart WiFi"},
+    {"wv",      r4aMenuBoolToggle,  (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0,      "Toggle WiFi verbose debugging"},
+    {"x",       nullptr,            R4A_MENU_NONE,              nullptr,        0,      "Exit the menu system"},
 };
 #define MAIN_MENU_ENTRIES       sizeof(mainMenuTable) / sizeof(mainMenuTable[0])
 

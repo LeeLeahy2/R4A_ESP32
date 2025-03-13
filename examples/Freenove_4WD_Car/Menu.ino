@@ -98,18 +98,18 @@ void mainMenuPre(Print * display)
     if (r4aWifiSsidPasswordEntries)
     {
         // Display the WIFI status
-        const char * hostName = wifi.hostNameGet();
+        const char * hostName = r4aWifiHostName;
         if (hostName)
             display->printf("%s (%s): %s channel %d\r\n",
                             hostName,
                             WiFi.localIP().toString().c_str(),
-                            wifi.ssidGet(),
-                            wifi.channelGet());
+                            r4aWifiStationSsid(),
+                            r4aWifiChannel);
         else
             display->printf("%s: %s channel %d\r\n",
                             WiFi.localIP().toString().c_str(),
-                            wifi.ssidGet(),
-                            wifi.channelGet());
+                            r4aWifiStationSsid(),
+                            r4aWifiChannel);
 
         // Display the current time
         r4aNtpDisplayDateTime(display);
@@ -213,20 +213,6 @@ void robotMenuStop(const R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
-// Toggle WiFi debugging
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void wifiMenuDebug(const R4A_MENU_ENTRY * menuEntry,
-                   const char * command,
-                   Print * display)
-{
-    r4aMenuBoolToggle(menuEntry, command, display);
-    wifi._debug = wifiDebug ? &Serial : nullptr;
-}
-
-//*********************************************************************
 // Restart the WiFi station
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry
@@ -236,9 +222,21 @@ void wifiMenuRestart(const R4A_MENU_ENTRY * menuEntry,
                      const char * command,
                      Print * display)
 {
-    wifi.stationStop();
-    delay(5 * 1000);
-    wifi.stationStart();
+    r4aWifiRestartRequested = true;
+}
+
+//*********************************************************************
+// Toggle WiFi boolean
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void wifiToggleBool(const R4A_MENU_ENTRY * menuEntry,
+                    const char * command,
+                    Print * display)
+{
+    r4aMenuBoolToggle(menuEntry, command, display);
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }
 
 //*********************************************************************
@@ -380,12 +378,13 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
     {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
-    {"wd",     wifiMenuDebug, (intptr_t)&wifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
+    {"wd",    wifiToggleBool, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
 #ifdef  USE_ZED_F9P
     {"wpf",     wpfStart,           0,              nullptr,    0,      "Waypoint following"},
 #endif  // USE_ZED_F9P
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
+    {"wv",  wifiToggleBool, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
 };
 #define MAIN_MENU_ENTRIES       sizeof(mainMenuTable) / sizeof(mainMenuTable[0])
