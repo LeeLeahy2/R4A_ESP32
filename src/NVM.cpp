@@ -443,7 +443,6 @@ bool r4aEsp32NvmWriteParameterValue(File &parameterFile,
             display->printf("%s: %p%s%s\r\n", parameter->name,
                             value.pcc, value.pcc ? ": " : "",
                             value.pcc ? value.pcc : "");
-        value.pcc = *(const char **)(parameter->addr);
         if (value.pcc)
             data = value.pcc;
         else
