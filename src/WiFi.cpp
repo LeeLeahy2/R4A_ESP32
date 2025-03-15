@@ -32,61 +32,6 @@ static const char * r4aWifiAuthorizationName[] =
 static const int r4aWifiAuthorizationNameEntries =
     sizeof(r4aWifiAuthorizationName) / sizeof(r4aWifiAuthorizationName[0]);
 
-const char * arduinoEventName[] =
-{
-    "ARDUINO_EVENT_NONE",
-    "ARDUINO_EVENT_ETH_START",
-    "ARDUINO_EVENT_ETH_STOP",
-    "ARDUINO_EVENT_ETH_CONNECTED",
-    "ARDUINO_EVENT_ETH_DISCONNECTED",
-    "ARDUINO_EVENT_ETH_GOT_IP",
-    "ARDUINO_EVENT_ETH_LOST_IP",
-    "ARDUINO_EVENT_ETH_GOT_IP6",
-    "ARDUINO_EVENT_WIFI_OFF",
-    "ARDUINO_EVENT_WIFI_READY",
-    "ARDUINO_EVENT_WIFI_SCAN_DONE",
-    "ARDUINO_EVENT_WIFI_STA_START",
-    "ARDUINO_EVENT_WIFI_STA_STOP",
-    "ARDUINO_EVENT_WIFI_STA_CONNECTED",
-    "ARDUINO_EVENT_WIFI_STA_DISCONNECTED",
-    "ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE",
-    "ARDUINO_EVENT_WIFI_STA_GOT_IP",
-    "ARDUINO_EVENT_WIFI_STA_GOT_IP6",
-    "ARDUINO_EVENT_WIFI_STA_LOST_IP",
-    "ARDUINO_EVENT_WIFI_AP_START",
-    "ARDUINO_EVENT_WIFI_AP_STOP",
-    "ARDUINO_EVENT_WIFI_AP_STACONNECTED",
-    "ARDUINO_EVENT_WIFI_AP_STADISCONNECTED",
-    "ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED",
-    "ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED",
-    "ARDUINO_EVENT_WIFI_AP_GOT_IP6",
-    "ARDUINO_EVENT_WIFI_FTM_REPORT",
-    "ARDUINO_EVENT_WPS_ER_SUCCESS",
-    "ARDUINO_EVENT_WPS_ER_FAILED",
-    "ARDUINO_EVENT_WPS_ER_TIMEOUT",
-    "ARDUINO_EVENT_WPS_ER_PIN",
-    "ARDUINO_EVENT_WPS_ER_PBC_OVERLAP",
-    "ARDUINO_EVENT_SC_SCAN_DONE",
-    "ARDUINO_EVENT_SC_FOUND_CHANNEL",
-    "ARDUINO_EVENT_SC_GOT_SSID_PSWD",
-    "ARDUINO_EVENT_SC_SEND_ACK_DONE",
-    "ARDUINO_EVENT_PROV_INIT",
-    "ARDUINO_EVENT_PROV_DEINIT",
-    "ARDUINO_EVENT_PROV_START",
-    "ARDUINO_EVENT_PROV_END",
-    "ARDUINO_EVENT_PROV_CRED_RECV",
-    "ARDUINO_EVENT_PROV_CRED_FAIL",
-    "ARDUINO_EVENT_PROV_CRED_SUCCESS",
-    "ARDUINO_EVENT_PPP_START",
-    "ARDUINO_EVENT_PPP_STOP",
-    "ARDUINO_EVENT_PPP_CONNECTED",
-    "ARDUINO_EVENT_PPP_DISCONNECTED",
-    "ARDUINO_EVENT_PPP_GOT_IP",
-    "ARDUINO_EVENT_PPP_LOST_IP",
-    "ARDUINO_EVENT_PPP_GOT_IP6",
-};
-const int arduinoEventNameEntries = sizeof(arduinoEventName) / sizeof(arduinoEventName[0]);
-
 //****************************************
 // Constants
 //****************************************
@@ -612,7 +557,7 @@ void r4aWifiEventHandler(arduino_event_id_t event, arduino_event_info_t info)
     bool success;
 
     if (r4aWifiDebug)
-        Serial.printf("event: %d (%s)\r\n", event, arduinoEventName[event]);
+        Serial.printf("event: %d (%s)\r\n", event, NetworkEvents::eventName(event));
 
     // Handle the event
     switch (event)
@@ -2733,13 +2678,6 @@ void r4aWifiVerifyTables()
     {
         Serial.printf("ERROR: Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types.h!\r\n");
         r4aReportFatalError("Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types.h!");
-    }
-
-    // Verify the Arduino event name table
-    if (ARDUINO_EVENT_MAX != arduinoEventNameEntries)
-    {
-        Serial.printf("ERROR: Fix arduinoEventName list to match arduino_event_id_t in NetworkEvents.h!\r\n");
-        r4aReportFatalError("Fix arduinoEventName list to match arduino_event_id_t in NetworkEvents.h!");
     }
 
     // Verify the start name table
