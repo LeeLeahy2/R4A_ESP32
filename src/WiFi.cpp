@@ -2131,6 +2131,9 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Start the soft AP mode
         if (starting & WIFI_AP_SET_MODE)
         {
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Setting soft AP mode\r\n");
+
             if (!r4aWifiSetWiFiMode(WIFI_MODE_AP, 0))
                 break;
             r4aWiFi._started = r4aWiFi._started | WIFI_AP_SET_MODE;
@@ -2139,6 +2142,9 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Start the station mode
         if (starting & (WIFI_EN_SET_MODE | WIFI_STA_SET_MODE))
         {
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Setting WiFi station mode\r\n");
+
             if (!r4aWifiSetWiFiMode(WIFI_MODE_STA, 0))
                 break;
             r4aWiFi._started = r4aWiFi._started | (starting & (WIFI_EN_SET_MODE | WIFI_STA_SET_MODE));
@@ -2147,6 +2153,9 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Start the soft AP protocols
         if (starting & WIFI_AP_SET_PROTOCOLS)
         {
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Enabling WiFi protocols for soft AP\r\n");
+
             if (!r4aWifiSetWiFiProtocols(WIFI_IF_AP, true, false))
                 break;
             r4aWiFi._started = r4aWiFi._started | WIFI_AP_SET_PROTOCOLS;
@@ -2156,6 +2165,9 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         if (starting & (WIFI_EN_SET_PROTOCOLS | WIFI_STA_SET_PROTOCOLS))
         {
             bool lrEnable = (starting & WIFI_EN_SET_PROTOCOLS) ? true : false;
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Enabling WiFi%s for WiFi station\r\n",
+                              lrEnable ? " & ESP-NOW" : "");
             if (!r4aWifiSetWiFiProtocols(WIFI_IF_STA, true, lrEnable))
                 break;
             r4aWiFi._started = r4aWiFi._started | (starting & (WIFI_EN_SET_PROTOCOLS | WIFI_STA_SET_PROTOCOLS));
@@ -2230,6 +2242,9 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Set the soft AP subnet mask, IP, gateway, DNS, and first DHCP addresses
         if (starting & WIFI_AP_SET_IP_ADDR)
         {
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Setting WiFi soft AP IP address and subnet mask\r\n");
+
             if (!r4aWifiSoftApSetIpAddress(r4aWiFi._apIpAddress.toString().c_str(),
                                            r4aWiFi._apSubnetMask.toString().c_str(),
                                            r4aWiFi._apGatewayAddress.toString().c_str(),
@@ -2319,7 +2334,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
                 break;
             }
             r4aWiFi._started = r4aWiFi._started | WIFI_STA_DISABLE_AUTO_RECONNECT;
-            if (r4aWifiDebug)
+            if (r4aWifiDebug && r4aWifiVerbose)
                 Serial.printf("WiFi auto-reconnect disabled\r\n");
         }
 
@@ -2329,9 +2344,15 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             IPAddress ipAddress;
             uint32_t timer;
 
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Connecting to the remote AP\r\n");
+
             if (!r4aWifiStationConnectAP())
                 break;
             r4aWiFi._started = r4aWiFi._started | WIFI_STA_CONNECT_TO_REMOTE_AP;
+
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Waiting for an IP address\r\n");
 
             // Wait for an IP address
             ipAddress = WiFi.STA.localIP();
@@ -2349,9 +2370,18 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
                 break;
             }
 
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("Waiting for a MAC address\r\n");
+
             // Wait for the station MAC address to be set
             while (!r4aWiFi._staMacAddress[0])
                 delay(1);
+
+            if (r4aWifiDebug && r4aWifiVerbose)
+                Serial.printf("    MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+                              r4aWiFi._staMacAddress[0], r4aWiFi._staMacAddress[1],
+                              r4aWiFi._staMacAddress[2], r4aWiFi._staMacAddress[3],
+                              r4aWiFi._staMacAddress[4], r4aWiFi._staMacAddress[5]);
 
             // Save the IP address
             r4aWiFi._staHasIp = true;
