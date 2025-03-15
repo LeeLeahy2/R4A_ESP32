@@ -15,6 +15,24 @@ static uint8_t r4aEsp32GpioPinMode[256];
 static float r4aEsp32VoltageReference;
 
 //*********************************************************************
+// Display the name of a zero terminated string and it's value.
+// Inputs:
+//   name: Name of the string variable
+//   value: Value of the string variable
+//   display: Device used for output
+void r4aEsp32DisplayCharPointer(const char * name,
+                                const char * value,
+                                Print * display)
+{
+    display->printf("%s: %p%s%s%s\r\n",
+                    name,
+                    value,
+                    value ? ", (" : "",
+                    value ? value : "",
+                    value ? ")"   : "");
+}
+
+//*********************************************************************
 // Allocate DMA buffer
 // Inputs:
 //   length: Number of data bytes to allocate

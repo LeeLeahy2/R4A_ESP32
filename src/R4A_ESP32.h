@@ -51,6 +51,15 @@ extern const R4A_GPIO_MATRIX r4aGpioMatrixNames[256];
 //   Returns the buffer address if successful and nullptr otherwise
 uint8_t * r4aEsp32AllocateDmaBuffer(int length);
 
+// Display the name of a zero terminated string and it's value.
+// Inputs:
+//   name: Name of the string variable
+//   value: Value of the string variable
+//   display: Device used for output
+void r4aEsp32DisplayCharPointer(const char * name,
+                                const char * value,
+                                Print * display = &Serial);
+
 // Determine if the address is SRAM that supports DMA
 // Inputs:
 //   addr: Address in question
