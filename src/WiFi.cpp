@@ -1156,14 +1156,24 @@ bool r4aWifiSoftApSetIpAddress(const char * ipAddress,
 // Set the soft AP SSID and password
 // Outputs:
 //   Returns true if successful and false upon failure
-bool r4aWifiSoftApSetSsidPassword(const char * ssid, const char * password)
+bool r4aWifiSoftApSetSsidPassword(const char * ssid,
+                                  const char * password,
+                                  R4A_WIFI_CHANNEL_t channel)
 {
     bool created;
 
     // Set the WiFi soft AP SSID and password
     if (r4aWifiDebug)
         Serial.printf("WiFi AP: Attempting to set AP SSID and password\r\n");
-    created = WiFi.AP.create(ssid, password);
+    if (r4aWifiDebug && r4aWifiVerbose)
+    {
+        r4aEsp32DisplayCharPointer("ssid", ssid);
+        r4aEsp32DisplayCharPointer("password", password);
+        Serial.printf("r4aWifiChannel: %d\r\n", channel);
+    }
+
+    // Attempt to set the soft AP SSID, password and channel
+    created = WiFi.AP.create(ssid, password, channel);
     if (!created)
         Serial.printf("ERROR: Failed to set soft AP SSID and Password!\r\n");
     else if (r4aWifiDebug)
@@ -2212,7 +2222,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Set the soft AP SSID and password
         if (starting & WIFI_AP_SET_SSID_PASSWORD)
         {
-            if (!r4aWifiSoftApSetSsidPassword(r4aWifiSoftApSsid, r4aWifiSoftApPassword))
+            if (!r4aWifiSoftApSetSsidPassword(r4aWifiSoftApSsid, r4aWifiSoftApPassword, r4aWifiChannel))
                 break;
             r4aWiFi._started = r4aWiFi._started | WIFI_AP_SET_SSID_PASSWORD;
         }
