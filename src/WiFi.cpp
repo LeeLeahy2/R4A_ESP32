@@ -2220,6 +2220,8 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             // Use the default channel if necessary
             if (!channel)
                 channel = WIFI_DEFAULT_CHANNEL;
+            else
+                r4aWiFi._usingDefaultChannel = false;
             r4aWifiChannel = channel;
 
             // Display the selected channel
