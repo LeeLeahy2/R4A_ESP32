@@ -99,13 +99,18 @@ void loop()
         // Toggle the WiFi state
         wifiStop = !wifiStop;
         if (wifiStop)
+        {
             r4aWifiStationOn(__FILE__, __LINE__);
+            if (r4aWifiSoftApSsid)
+                r4aWifiSoftApOn(__FILE__, __LINE__);
+        }
         else
+        {
             r4aWifiStationOff(__FILE__, __LINE__);
+            if (r4aWifiSoftApSsid)
+                r4aWifiSoftApOff(__FILE__, __LINE__);
+        }
     }
-
-    // Update the WiFi state
-    r4aWifiUpdate();
 
     // Check for NTP updates
     r4aNtpUpdate(r4aWifiStationOnline);
@@ -124,6 +129,9 @@ void loop()
             telnet.end();
     }
     telnet.update(r4aWifiStationOnline);
+
+    // Update the WiFi state
+    r4aWifiUpdate();
 
     // Process serial commands
     r4aSerialMenu(&serialMenu);
