@@ -453,13 +453,19 @@ bool r4aWifiEnable(bool enableESPNow,
     if (enableSoftAP)
     {
         // Verify that the SSID is set
-        if (r4aWifiSoftApSsid && strlen(r4aWifiSoftApSsid))
+        if (r4aWifiSoftApSsid && strlen(r4aWifiSoftApSsid)
+            && ((r4aWifiSoftApPassword == nullptr) || (strlen(r4aWifiSoftApPassword) >= 8)))
         {
             starting |= WIFI_START_SOFT_AP;
             r4aWifiSoftApRunning = true;
         }
         else
-            Serial.printf("ERROR: AP SSID or password is missing\r\n");
+        {
+            if (r4aWifiSoftApPassword == nullptr)
+                Serial.printf("ERROR: AP SSID or password is missing\r\n");
+            else
+                Serial.printf("ERROR: AP password must be >= 8 characters\r\n");
+        }
     }
     else
     {
