@@ -249,7 +249,6 @@ bool r4aWifiSoftApOnlineStatus();
 bool r4aWiFiStationEnabled();
 void r4aWifiStationEventHandler(arduino_event_id_t event, arduino_event_info_t info);
 void r4aWifiStationLostIp();
-bool r4aWifiStationOnlineStatus();
 bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting);
 
 //*********************************************************************
@@ -1438,7 +1437,7 @@ bool r4aWifiStationHostName(const char * hostName)
 // Returns the IP address of the WiFi station
 IPAddress r4aWifiStationIpAddress()
 {
-    if (r4aWifiStationOnlineStatus())
+    if (r4aWiFi._staHasIp)
         return r4aWiFi._staIpAddress;
     return IPAddress((uint32_t)0);
 }
@@ -1485,15 +1484,6 @@ bool r4aWifiStationOn(const char * fileName, uint32_t lineNumber)
                       fileName, lineNumber);
 
     return r4aWifiEnable(r4aWifiEspNowRunning, r4aWifiSoftApRunning, true, __FILE__, __LINE__);
-}
-
-//*********************************************************************
-// Get the station status
-// Outputs:
-//   Returns true when WiFi station is online and ready for use
-bool r4aWifiStationOnlineStatus()
-{
-    return (r4aWiFi._started & WIFI_STA_ONLINE) ? true : false;
 }
 
 //*********************************************************************
@@ -1692,7 +1682,7 @@ R4A_WIFI_CHANNEL_t r4aWifiStationSelectAP(uint8_t apCount, bool list)
 // Get the SSID of the remote AP
 const char * r4aWifiStationSsid()
 {
-    if (r4aWifiStationOnlineStatus())
+    if (r4aWiFi._staHasIp)
         return r4aWiFi._staRemoteApSsid;
     else
         return "";
@@ -1971,6 +1961,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Mark the WiFi station offline
         if (stopping & WIFI_STA_ONLINE)
         {
+            r4aWifiStationOnline = false;
             if (r4aWiFi._started & WIFI_STA_ONLINE)
                 Serial.printf("WiFi: Station offline!\r\n");
             r4aWiFi._started = r4aWiFi._started & ~WIFI_STA_ONLINE;
@@ -2099,7 +2090,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         //****************************************
 
         // Reset the channel if all components are stopped
-        if ((r4aWifiSoftApOnlineStatus() == false) && (r4aWifiStationOnlineStatus() == false))
+        if ((r4aWifiSoftApOnlineStatus() == false) && (r4aWifiStationOnline == false))
         {
             r4aWifiChannel = 0;
             r4aWiFi._usingDefaultChannel = true;
@@ -2374,6 +2365,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             r4aWiFi._started = r4aWiFi._started | WIFI_STA_ONLINE;
             Serial.printf("WiFi: Station online (%s: %s)\r\n",
                          r4aWiFi._staRemoteApSsid, r4aWiFi._staIpAddress.toString().c_str());
+            r4aWifiStationOnline = true;
         }
 
         //****************************************
@@ -2538,7 +2530,6 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
     // Set the online flags
     r4aWifiEspNowOnline = r4aWifiEspNowOnlineStatus();
     r4aWifiSoftApOnline = r4aWifiSoftApOnlineStatus();
-    r4aWifiStationOnline = r4aWifiStationOnlineStatus();
 
     // Return the enable status
     bool enabled = ((r4aWiFi._started & allOnline) == expected);
