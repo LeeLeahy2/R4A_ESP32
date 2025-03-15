@@ -375,6 +375,7 @@ typedef struct _R4A_ESP32_NVM_PARAMETER
 extern const char * parameterFilePath; // Path to the parameter file
 extern const R4A_ESP32_NVM_PARAMETER nvmParameters[];
 extern const int nvmParameterCount;
+extern bool r4aEsp32NvmDebug; // Set to true to enable debug output
 
 // Clear a parameter by setting its value to zero
 // Inputs:
@@ -434,7 +435,7 @@ void r4aEsp32NvmGetDefaultParameters(const R4A_ESP32_NVM_PARAMETER * parameterTa
 //   Returns true if successful and false upon failure
 bool r4aEsp32NvmGetParameters(const char ** filePath,
                               Print * display = nullptr,
-                              bool debug = false);
+                              bool debug = r4aEsp32NvmDebug);
 
 // Look up a parameter by address
 // Inputs:
@@ -478,7 +479,7 @@ bool r4aEsp32NvmParameterSet(const char * filePath,
                              const R4A_ESP32_NVM_PARAMETER * parameter,
                              const char * valueString,
                              Print * display = &Serial,
-                             bool debug = false);
+                             bool debug = r4aEsp32NvmDebug);
 
 // Read a line from the file
 // Inputs:
@@ -537,14 +538,14 @@ bool r4aEsp32NvmWriteParameters(const char * filePath,
                                 const R4A_ESP32_NVM_PARAMETER * parameterTable,
                                 int parametersCount,
                                 Print * display = &Serial,
-                                bool debug = false);
+                                bool debug = r4aEsp32NvmDebug);
 
 //****************************************
 // NVM Menu API
 //****************************************
 
 extern const R4A_MENU_ENTRY r4aEsp32NvmMenuTable[]; // Menu table for NVM menu
-#define R4A_ESP32_NVM_MENU_ENTRIES    16            // Length of NVM menu table
+#define R4A_ESP32_NVM_MENU_ENTRIES    17            // Length of NVM menu table
 
 // Display all of the parameters
 // Inputs:

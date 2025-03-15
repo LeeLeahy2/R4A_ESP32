@@ -7,6 +7,10 @@
 
 #include "R4A_ESP32.h"
 
+//****************************************
+// Constants
+//****************************************
+
 const char * r4aEsp32NvmTypeTable[] =
 {
     "nullptr",      //  0
@@ -23,6 +27,12 @@ const char * r4aEsp32NvmTypeTable[] =
     "double",       // 11
     "const char *", // 12
 };
+
+//****************************************
+// Globals
+//****************************************
+
+bool r4aEsp32NvmDebug; // Set to true to enable debug output
 
 //*********************************************************************
 // Support routines
