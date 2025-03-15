@@ -577,9 +577,45 @@ void r4aEsp32NvmDisplayParameters(const R4A_ESP32_NVM_PARAMETER * parameterTable
                                   int parameterCount,
                                   Print * display)
 {
-    // Walk the list of parameters
-    for (int parameter = 0; parameter < parameterCount; parameter++)
-        r4aEsp32NvmDisplayParameter(&parameterTable[parameter], display);
+    int i;
+    uint16_t * index;
+    int j;
+    uint16_t temp;
+
+    // Allocate the parameter index table
+    index = (uint16_t *)ps_malloc(parameterCount * sizeof(*index));
+    if (index)
+    {
+        // Initialize the index table
+        for (i = 0; i < parameterCount; i++)
+            index[i] = i;
+
+        // Bubble sort the parameter table
+        for (i = 0; i < (parameterCount - 1); i++)
+        {
+            for (j = i + 1; j < parameterCount; j++)
+            {
+                if (r4aStricmp(parameterTable[index[i]].name, parameterTable[index[j]].name) > 0)
+                {
+                    // Switch the entries
+                    temp = index[i];
+                    index[i] = index[j];
+                    index[j] = temp;
+                }
+            }
+        }
+
+        // Display the parameters as listed in the parameter table
+        for (i = 0; i < parameterCount; i++)
+            r4aEsp32NvmDisplayParameter(&parameterTable[index[i]], display);
+
+        // Done with the index table
+        free(index);
+    }
+    else
+        // Display the parameters as listed in the parameter table
+        for (int parameter = 0; parameter < parameterCount; parameter++)
+            r4aEsp32NvmDisplayParameter(&parameterTable[parameter], display);
 }
 
 //*********************************************************************
