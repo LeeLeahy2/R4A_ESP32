@@ -1414,6 +1414,18 @@ void r4aEsp32NvmMenuParameterDisplay(const struct _R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
+// Write the parameters to the parameter file
+void r4aEsp32NvmMenuParameterFileWrite(const struct _R4A_MENU_ENTRY * menuEntry,
+                                       const char * command,
+                                       Print * display)
+{
+    r4aEsp32NvmWriteParameters(parameterFilePath,
+                               nvmParameters,
+                               nvmParameterCount,
+                               display);
+}
+
+//*********************************************************************
 // Set the parameter value
 void r4aEsp32NvmMenuParameterSet(const struct _R4A_MENU_ENTRY * menuEntry,
                                  const char * command,
@@ -1464,18 +1476,6 @@ void r4aEsp32NvmMenuParameterSet(const struct _R4A_MENU_ENTRY * menuEntry,
                                     value,
                                     display);
     }
-}
-
-//*********************************************************************
-// Write the parameters to the parameter file
-void r4aEsp32NvmMenuWriteParameterFile(const struct _R4A_MENU_ENTRY * menuEntry,
-                                       const char * command,
-                                       Print * display)
-{
-    r4aEsp32NvmWriteParameters(parameterFilePath,
-                               nvmParameters,
-                               nvmParameterCount,
-                               display);
 }
 
 //*********************************************************************

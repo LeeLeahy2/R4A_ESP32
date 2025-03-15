@@ -674,6 +674,15 @@ void r4aEsp32NvmMenuParameterDisplay(const struct _R4A_MENU_ENTRY * menuEntry,
                                      const char * command,
                                      Print * display);
 
+// Write the parameters to the parameter file
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32NvmMenuParameterFileWrite(const struct _R4A_MENU_ENTRY * menuEntry,
+                                       const char * command,
+                                       Print * display);
+
 // Set the parameter value
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry
@@ -691,15 +700,6 @@ void r4aEsp32NvmMenuParameterSet(const struct _R4A_MENU_ENTRY * menuEntry,
 //   Returns true if all of the data was successfully written and false
 //   upon error
 bool r4aEsp32NvmWriteFileString(File &file, const char * string);
-
-// Write the parameters to the parameter file
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void r4aEsp32NvmMenuWriteParameterFile(const struct _R4A_MENU_ENTRY * menuEntry,
-                                       const char * command,
-                                       Print * display);
 
 //****************************************
 // OV2640 API
