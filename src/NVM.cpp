@@ -1414,6 +1414,18 @@ void r4aEsp32NvmMenuParameterDisplay(const struct _R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
+// Read the parameters from the parameter file
+void r4aEsp32NvmMenuParameterFileRead(const struct _R4A_MENU_ENTRY * menuEntry,
+                                      const char * command,
+                                      Print * display)
+{
+    r4aEsp32NvmReadParameters(parameterFilePath,
+                              nvmParameters,
+                              nvmParameterCount,
+                              display);
+}
+
+//*********************************************************************
 // Write the parameters to the parameter file
 void r4aEsp32NvmMenuParameterFileWrite(const struct _R4A_MENU_ENTRY * menuEntry,
                                        const char * command,

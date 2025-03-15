@@ -20,13 +20,14 @@ const R4A_MENU_ENTRY r4aEsp32NvmMenuTable[] =
     {"dump",    r4aEsp32NvmMenuFileDump,        (intptr_t)"ffff",   r4aMenuHelpSuffix,  4,      "Dump the contents of file ffff"},      //  3
     {"f",     r4aEsp32NvmMenuDumpParameterFile, 0,                  nullptr,            0,      "Dump the parameter file"},             //  4
     {"g",  r4aEsp32NvmMenuGetDefaultParameters, 0,                  nullptr,            0,      "Get default parameters"},              //  5
-    {"ls",      r4aEsp32NvmMenuFileList,        0,                  nullptr,            0,      "List the NVM directory"},              //  6
-    {"mv",      r4aEsp32NvmMenuFileMove,      (intptr_t)"src dest", r4aMenuHelpSuffix,  8,      "Rename a file"},                       //  7
-    {"p",      r4aEsp32NvmMenuParameterDisplay, (intptr_t)"pppp",   r4aMenuHelpSuffix,  4,      "Display parameter pppp value"},        //  8
-    {"rm",      r4aEsp32NvmMenuFileRemove,      (intptr_t)"ffff",   r4aMenuHelpSuffix,  4,      "Remove file ffff"},                    //  9
-    {"s",       r4aEsp32NvmMenuParameterSet, (intptr_t)"pppp ssss", r4aMenuHelpSuffix,  9,      "Set parameter pppp value to xxxx"},    // 10
-    {"w",    r4aEsp32NvmMenuParameterFileWrite, 0,                  nullptr,            0,      "Write the parameter file"},            // 11
-    {"wget",    r4aEsp32NvmMenuHttpFileGet,     (intptr_t)"url",    r4aMenuHelpSuffix,  3,      "Get a file from a web server"},        // 12
-    {"x",       nullptr,                        R4A_MENU_MAIN,      nullptr,            0,      "Exit the menu system"},                // 13
-    {"z",       r4aEsp32NvmMenuParameterClear,  (intptr_t)"pppp",   r4aMenuHelpSuffix,  4,      "Zero the parameter"},                  // 14
-};                                                                                                                                      // 15
+    {"l",     r4aEsp32NvmMenuParameterFileRead, 0,                  nullptr,            0,      "Load the parameter file"},             //  6
+    {"ls",      r4aEsp32NvmMenuFileList,        0,                  nullptr,            0,      "List the NVM directory"},              //  7
+    {"mv",      r4aEsp32NvmMenuFileMove,      (intptr_t)"src dest", r4aMenuHelpSuffix,  8,      "Rename a file"},                       //  8
+    {"p",      r4aEsp32NvmMenuParameterDisplay, (intptr_t)"pppp",   r4aMenuHelpSuffix,  4,      "Display parameter pppp value"},        //  9
+    {"rm",      r4aEsp32NvmMenuFileRemove,      (intptr_t)"ffff",   r4aMenuHelpSuffix,  4,      "Remove file ffff"},                    // 10
+    {"s",       r4aEsp32NvmMenuParameterSet, (intptr_t)"pppp ssss", r4aMenuHelpSuffix,  9,      "Set parameter pppp value to xxxx"},    // 11
+    {"w",    r4aEsp32NvmMenuParameterFileWrite, 0,                  nullptr,            0,      "Write the parameter file"},            // 12
+    {"wget",    r4aEsp32NvmMenuHttpFileGet,     (intptr_t)"url",    r4aMenuHelpSuffix,  3,      "Get a file from a web server"},        // 13
+    {"x",       nullptr,                        R4A_MENU_MAIN,      nullptr,            0,      "Exit the menu system"},                // 14
+    {"z",       r4aEsp32NvmMenuParameterClear,  (intptr_t)"pppp",   r4aMenuHelpSuffix,  4,      "Zero the parameter"},                  // 15
+};                                                                                                                                      // 16
