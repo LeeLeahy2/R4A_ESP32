@@ -609,27 +609,6 @@ void r4aWifiEventHandler(arduino_event_id_t event, arduino_event_info_t info)
 }
 
 //*********************************************************************
-// Start the WiFi event handler
-void r4aWifiEventHandlerStart()
-{
-    if (r4aWifiDebug)
-        Serial.printf("Starting the WiFi event handler\r\n");
-
-    // Establish the WiFi event handler
-    Network.onEvent(r4aWifiEventHandler);
-}
-
-//*********************************************************************
-// Stop the WiFi event handler
-void r4aWifiEventHandlerStop()
-{
-    if (r4aWifiDebug)
-        Serial.printf("Stopping the WiFi event handler\r\n");
-
-    Network.removeEvent(r4aWifiEventHandler);
-}
-
-//*********************************************************************
 // Return the start timeout in milliseconds
 uint32_t r4aWifiGetStartTimeout()
 {
@@ -1820,13 +1799,6 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
     // Determine the components that are being started
     expected = starting & allOnline;
 
-    // Only start or stop the WiFi event handler
-    if (restarting & WIFI_START_EVENT_HANDLER)
-    {
-        stopping &= ~WIFI_START_EVENT_HANDLER;
-        starting &= ~WIFI_START_EVENT_HANDLER;
-    }
-
     // Determine if mDNS is being stopped or if mDNS needs to restart
     // due to a interface change
     mask = WIFI_AP_START_MDNS | WIFI_STA_START_MDNS;
@@ -1839,6 +1811,16 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
 
     // Determine which components are being restarted
     restarting = r4aWiFi._started & stopping & starting;
+
+    // Only start or stop the WiFi event handler
+    if (restarting & WIFI_START_EVENT_HANDLER)
+    {
+        restarting &= ~WIFI_START_EVENT_HANDLER;
+        stopping &= ~WIFI_START_EVENT_HANDLER;
+        starting &= ~WIFI_START_EVENT_HANDLER;
+    }
+
+    // Display the values
     if (r4aWifiDebug && r4aWifiVerbose)
     {
         Serial.printf("0x%08x: _started\r\n", r4aWiFi._started);
@@ -2081,7 +2063,9 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Stop the event handler
         if (stopping & WIFI_START_EVENT_HANDLER)
         {
-            r4aWifiEventHandlerStop();
+            if (r4aWifiDebug)
+                Serial.printf("Stopping the WiFi event handler\r\n");
+            Network.removeEvent(r4aWifiEventHandler);
             r4aWiFi._started = r4aWiFi._started & ~WIFI_START_EVENT_HANDLER;
         }
 
@@ -2120,7 +2104,13 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         if (starting & WIFI_START_EVENT_HANDLER)
         {
             if (!(r4aWiFi._started & WIFI_START_EVENT_HANDLER))
-                r4aWifiEventHandlerStart();
+            {
+                if (r4aWifiDebug && r4aWifiVerbose)
+                    Serial.printf("Starting the WiFi event handler\r\n");
+
+                // Establish the WiFi event handler
+                Network.onEvent(r4aWifiEventHandler);
+            }
             r4aWiFi._started = r4aWiFi._started | WIFI_START_EVENT_HANDLER;
         }
 
