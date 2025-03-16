@@ -2505,13 +2505,12 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
     {
         mask = starting & (WIFI_AP_START_MDNS | WIFI_STA_START_MDNS);
 
+        bool startForStation = r4aWiFi._staHasIp && (starting & WIFI_STA_START_MDNS);
+
         // Attempt to start mDNS
         bool mdnsStarted = false;
-        if (r4aWifiStationOnline && (starting & WIFI_STA_START_MDNS)
-            && r4aWifiMdnsStart(false))
-        {
+        if (startForStation && r4aWifiMdnsStart(false))
             mdnsStarted = true;
-        }
         else if (r4aWifiSoftApOnline)
             mdnsStarted = r4aWifiMdnsStart(false);
         if (mdnsStarted)
