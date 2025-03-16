@@ -532,15 +532,6 @@ bool r4aWifiEspNowOn(const char * fileName, uint32_t lineNumber)
 }
 
 //*********************************************************************
-// Get the ESP-NOW status
-// Outputs:
-//   Returns true when ESP-NOW is online and ready for use
-bool r4aWifiEspNowOnlineStatus()
-{
-    return (r4aWiFi._started & WIFI_EN_ESP_NOW_ONLINE) ? true : false;
-}
-
-//*********************************************************************
 // Set the ESP-NOW channel
 // Inputs:
 //   channel: New ESP-NOW channel number
@@ -1893,6 +1884,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Mark the ESP-NOW offline
         if (stopping & WIFI_EN_ESP_NOW_ONLINE)
         {
+            r4aWifiEspNowOnline = false;
             if (r4aWifiDebug)
                 Serial.printf("WiFi: ESP-NOW offline!\r\n");
             r4aWiFi._started = r4aWiFi._started & ~WIFI_EN_ESP_NOW_ONLINE;
@@ -2477,6 +2469,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             // Wait for the station MAC address to be set
             while (!r4aWiFi._staMacAddress[0])
                 delay(1);
+            r4aWifiEspNowOnline = true;
 
             // Display the ESP-NOW MAC address
             r4aWiFi._started = r4aWiFi._started | WIFI_EN_ESP_NOW_ONLINE;
@@ -2555,9 +2548,6 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
     // Restart WiFi if necessary
     if (restartWiFiStation)
         r4aWifiReconnectRequest = true;
-
-    // Set the online flags
-    r4aWifiEspNowOnline = r4aWifiEspNowOnlineStatus();
 
     // Return the enable status
     bool enabled = ((r4aWiFi._started & allOnline) == expected);
