@@ -245,7 +245,6 @@ const char * r4aWifiPrintStatus(wl_status_t wifiStatus);
 void r4aWifiResetThrottleTimeout();
 void r4aWifiResetTimeout();
 void r4aWifiSoftApEventHandler(arduino_event_id_t event, arduino_event_info_t info);
-bool r4aWifiSoftApOnlineStatus();
 bool r4aWiFiStationEnabled();
 void r4aWifiStationEventHandler(arduino_event_id_t event, arduino_event_info_t info);
 void r4aWifiStationLostIp();
@@ -970,7 +969,7 @@ void r4aWifiSoftApEventHandler(arduino_event_id_t event, arduino_event_info_t in
     {
     case ARDUINO_EVENT_WIFI_AP_STOP:
         // Mark the soft AP as offline
-        if (r4aWifiDebug && r4aWifiSoftApOnlineStatus())
+        if (r4aWifiDebug && r4aWifiSoftApOnline)
             Serial.printf("AP: Offline\r\n");
         r4aWiFi._started = r4aWiFi._started & ~WIFI_AP_ONLINE;
         if (r4aWifiDebug && r4aWifiVerbose)
@@ -1021,15 +1020,6 @@ bool r4aWifiSoftApOn(const char * fileName, uint32_t lineNumber)
                       fileName, lineNumber);
 
     return r4aWifiEnable(r4aWifiEspNowRunning, true, r4aWifiStationRunning, __FILE__, __LINE__);
-}
-
-//*********************************************************************
-// Get the soft AP status
-// Outputs:
-//   Returns true when soft AP is online and ready for use
-bool r4aWifiSoftApOnlineStatus()
-{
-    return (r4aWiFi._started & WIFI_AP_ONLINE) ? true : false;
 }
 
 //*********************************************************************
@@ -2032,9 +2022,10 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Mark the soft AP offline
         if (stopping & WIFI_AP_ONLINE)
         {
-            if (r4aWifiSoftApOnlineStatus())
+            if (r4aWifiSoftApOnline)
                 Serial.printf("WiFi: Soft AP offline!\r\n");
             r4aWiFi._started = r4aWiFi._started & ~WIFI_AP_ONLINE;
+            r4aWifiSoftApOnline = false;
         }
 
         // Stop the DNS server
@@ -2090,7 +2081,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         //****************************************
 
         // Reset the channel if all components are stopped
-        if ((r4aWifiSoftApOnlineStatus() == false) && (r4aWifiStationOnline == false))
+        if ((r4aWifiSoftApOnline == false) && (r4aWifiStationOnline == false))
         {
             r4aWifiChannel = 0;
             r4aWiFi._usingDefaultChannel = true;
@@ -2302,6 +2293,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         if (starting & WIFI_AP_ONLINE)
         {
             r4aWiFi._started = r4aWiFi._started | WIFI_AP_ONLINE;
+            r4aWifiSoftApOnline = true;
 
             // Display the soft AP status
             Serial.printf("WiFi: Soft AP online, SSID: %s (%s)%s%s\r\n",
@@ -2566,7 +2558,6 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
 
     // Set the online flags
     r4aWifiEspNowOnline = r4aWifiEspNowOnlineStatus();
-    r4aWifiSoftApOnline = r4aWifiSoftApOnlineStatus();
 
     // Return the enable status
     bool enabled = ((r4aWiFi._started & allOnline) == expected);
