@@ -100,12 +100,6 @@ void blfInit(R4A_ROBOT_CHALLENGE * object)
 void blfStart(R4A_ROBOT_CHALLENGE * object)
 {
     challengeStart();
-
-    // Set the reference voltage from the photo-resistor voltage divider
-    r4aEsp32VoltageGet(LIGHT_SENSOR_PIN,
-                       0,
-                       1,
-                       &lsAdcReference);
 }
 
 //*********************************************************************
