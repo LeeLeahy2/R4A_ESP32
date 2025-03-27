@@ -157,6 +157,16 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 uint8_t lineSensors;        // Last value of the line sensors
 
 //****************************************
+// Loop globals
+//****************************************
+
+#define LOOP_CORE_1_TIME_ENTRIES    8192
+
+R4A_TIME_USEC_t * loopCore1OutTimeUsec;
+R4A_TIME_USEC_t * loopCore1TimeUsec;
+uint32_t loopsCore1;
+
+//****************************************
 // Menus
 //****************************************
 
@@ -292,6 +302,15 @@ void setup()
                  nullptr,                // Idle routine
                  nullptr);               // Time display routine
 
+    // Allocate the loop buffers
+    uint32_t length = sizeof(R4A_TIME_USEC_t) * LOOP_CORE_1_TIME_ENTRIES;
+    loopCore1TimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    if (!loopCore1TimeUsec)
+        r4aReportFatalError("Failed to allocate loopCore1TimeUsec!");
+    loopCore1OutTimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    if (!loopCore1OutTimeUsec)
+        r4aReportFatalError("Failed to allocate loopCore1OutTimeUsec!");
+
     //****************************************
     // Execute loop forever
     //****************************************
@@ -302,8 +321,16 @@ void setup()
 void loop()
 {
     uint32_t currentMsec;
+    R4A_TIME_USEC_t currentUsec;
+    R4A_TIME_USEC_t endUsec;
     static uint32_t lastBatteryCheckMsec;
+    static R4A_TIME_USEC_t loopEndTimeUsec;
+    static uint32_t loopIndex;
     static bool previousConnected;
+
+    // Computing the time outside the loop
+    currentUsec = esp_timer_get_time();
+    loopCore1OutTimeUsec[loopIndex] = currentUsec - loopEndTimeUsec;
 
     // Turn on the ESP32 WROVER blue LED when the battery power is OFF
     currentMsec = millis();
@@ -355,4 +382,12 @@ void loop()
     // Process serial commands
     log_v("r4aSerialMenu");
     r4aSerialMenu(&serialMenu);
+
+    // Update the loop time
+    if (loopsCore1 < LOOP_CORE_1_TIME_ENTRIES)
+        loopsCore1 += 1;
+    endUsec = esp_timer_get_time();
+    loopEndTimeUsec = endUsec;
+    loopCore1TimeUsec[loopIndex] = endUsec - currentUsec;
+    loopIndex = (loopIndex + 1) % LOOP_CORE_1_TIME_ENTRIES;
 }

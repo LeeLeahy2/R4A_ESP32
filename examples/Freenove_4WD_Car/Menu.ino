@@ -92,6 +92,21 @@ void gnssMenuDisplayLocation(const R4A_MENU_ENTRY * menuEntry,
 #endif  // USE_ZED_F9P
 
 //*********************************************************************
+// Display loop times
+void loopTimesMenu(const R4A_MENU_ENTRY * menuEntry,
+                   const char * command,
+                   Print * display)
+{
+    // Display the header
+    display->printf("  Average      Maximum      Minimum       StdDev     Loops\r\n");
+    display->printf("-----------  -----------  -----------  -----------  ------\r\n");
+    r4aTimeDisplayLoopTimes(display, loopCore0TimeUsec, loopsCore0, "Core 0 in loopCore0");
+    r4aTimeDisplayLoopTimes(display, loopCore0OutTimeUsec, loopsCore0, "Core 0 outside loopCore0");
+    r4aTimeDisplayLoopTimes(display, loopCore1TimeUsec, loopsCore1, "Core 1 in loop");
+    r4aTimeDisplayLoopTimes(display, loopCore1OutTimeUsec, loopsCore1, "Core 1 outside loop");
+}
+
+//*********************************************************************
 // Display data before the main menu header
 void mainMenuPre(Print * display)
 {
@@ -382,6 +397,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"g",       nullptr,            MTI_GNSS,       nullptr,    0,      "Enter the GNSS menu"},
 #endif  // USE_ZED_F9P
     {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
+    {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
 #ifdef  USE_NTRIP
     {"NTRIP",   nullptr,            MTI_NTRIP,      nullptr,    0,      "Enter the NTRIP menu"},
 #endif  // USE_NTRIP
