@@ -286,6 +286,7 @@ enum MENU_TABLE_INDEX
 #endif  // USE_NTRIP
     MTI_NVM,
     MTI_SERVO,
+    MTI_TELNET,
     MTI_WAY_POINT,
 };
 
@@ -334,6 +335,16 @@ const R4A_MENU_ENTRY ledMenuTable[] =
 };
 #define LED_MENU_ENTRIES      sizeof(ledMenuTable) / sizeof(ledMenuTable[0])
 
+// Telnet menu
+const R4A_MENU_ENTRY telnetMenuTable[] =
+{
+    // Command  menuRoutine     menuParam       HelpRoutine align   HelpText
+    {"c",       listClients,    0,              nullptr,    0,      "Client list"},
+    {"s",       serverInfo,     0,              nullptr,    0,      "Server information"},
+    {"x",       nullptr,        R4A_MENU_MAIN,  nullptr,    0,      "Exit the menu system"},
+};
+#define TELNET_MENU_ENTRIES  sizeof(telnetMenuTable) / sizeof(telnetMenuTable[0])
+
 // Way Point menu
 #ifdef  USE_ZED_F9P
 const R4A_MENU_ENTRY wayPointMenuTable[] =
@@ -377,6 +388,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
+    {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
     {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
     {"wd",    wifiToggleBool, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
@@ -406,6 +418,7 @@ const R4A_MENU_TABLE menuTable[] =
 #endif  // USE_NTRIP
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Servo Menu",      nullptr,  r4aPca9685ServoMenuTable, R4A_PCA9685_SERVO_MENU_ENTRIES},
+    {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
 #ifdef  USE_ZED_F9P
     {"Waypoint Menu",   wpMenuPre,      wayPointMenuTable,  WAYPOINT_MENU_ENTRIES},
 #endif  // USE_ZED_F9P

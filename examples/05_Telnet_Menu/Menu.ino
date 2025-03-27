@@ -78,6 +78,7 @@ enum MENU_TABLE_INDEX
     MTI_I2C,
     MTI_MOTOR,
     MTI_NVM,
+    MTI_TELNET,
 };
 
 // Debug menu
@@ -92,6 +93,16 @@ const R4A_MENU_ENTRY debugMenuTable[] =
 };
 #define DEBUG_MENU_ENTRIES      sizeof(debugMenuTable) / sizeof(debugMenuTable[0])
 
+// Telnet menu
+const R4A_MENU_ENTRY telnetMenuTable[] =
+{
+    // Command  menuRoutine     menuParam       HelpRoutine align   HelpText
+    {"c",       listClients,    0,              nullptr,    0,      "Client list"},
+    {"s",       serverInfo,     0,              nullptr,    0,      "Server information"},
+    {"x",       nullptr,        R4A_MENU_MAIN,  nullptr,    0,      "Exit the menu system"},
+};
+#define TELNET_MENU_ENTRIES  sizeof(telnetMenuTable) / sizeof(telnetMenuTable[0])
+
 // Main menu
 const R4A_MENU_ENTRY mainMenuTable[] =
 {
@@ -102,6 +113,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
+    {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
     {"ulf",     menuUlfStart,       0,              nullptr,    0,      "User line following"},
     {"wd",    wifiToggleBool, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging,"},
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
@@ -118,5 +130,6 @@ const R4A_MENU_TABLE menuTable[] =
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
+    {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
 };
 const int menuTableEntries = sizeof(menuTable) / sizeof(menuTable[0]);
