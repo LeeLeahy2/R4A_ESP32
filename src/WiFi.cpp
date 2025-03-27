@@ -197,11 +197,11 @@ typedef struct _R4A_WIFI
     bool _staHasIp;             // True when station has IP address
     IPAddress _staIpAddress;    // IP address of the station
     uint8_t _staIpType;         // 4 or 6 when IP address is assigned
-    volatile uint8_t _staMacAddress[6]; // MAC address of the station
-    const char * _staRemoteApSsid;      // SSID of remote AP
-    const char * _staRemoteApPassword;  // Password of remote AP
+    volatile uint8_t _staMacAddress[6];  // MAC address of the station
+    const char * _staRemoteApSsid;       // SSID of remote AP
+    const char * _staRemoteApPassword;   // Password of remote AP
     volatile R4A_WIFI_ACTION_t _started; // Components that are started and running
-    R4A_WIFI_CHANNEL_t _stationChannel; // Channel required for station, zero (0) use _channel
+    R4A_WIFI_CHANNEL_t _stationChannel;  // Channel required for station, zero (0) use _channel
     uint32_t _timer;            // Reconnection timer
     bool _usingDefaultChannel;  // Using default WiFi channel
 } R4A_WIFI;
@@ -1307,9 +1307,6 @@ void r4aWifiStationEventHandler(arduino_event_id_t event, arduino_event_info_t i
 
     case ARDUINO_EVENT_WIFI_STA_STOP:
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        // Start the reconnection timer
-        if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED)
-            r4aWifiStationLostIp();
 
         // Fall through
         //      |
@@ -1335,7 +1332,9 @@ void r4aWifiStationEventHandler(arduino_event_id_t event, arduino_event_info_t i
             Serial.printf("WiFi: Station offline!\r\n");
         r4aWiFi._started = r4aWiFi._started & ~WIFI_STA_ONLINE;
 
-        if (event == ARDUINO_EVENT_WIFI_STA_LOST_IP)
+        // Start the reconnection timer
+        if ((event == ARDUINO_EVENT_WIFI_STA_LOST_IP)
+            || (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED))
             r4aWifiStationLostIp();
 
         // Notify user of loss of IP address
@@ -1425,6 +1424,7 @@ void r4aWifiStationLostIp()
     if (r4aWifiDebug && r4aWiFi._staHasIp)
         Serial.printf("WiFi station lost IPv%c address %s\r\n",
                      r4aWiFi._staIpType, r4aWiFi._staIpAddress.toString().c_str());
+    r4aWiFi._staHasIp = false;
     r4aWifiReconnectRequest = true;
 }
 
