@@ -4,6 +4,7 @@
   Waypoint following support
 **********************************************************************/
 
+#ifdef  USE_WAYPOINT_FOLLOWING
 #ifdef  USE_ZED_F9P
 
 //*********************************************************************
@@ -368,3 +369,4 @@ void wpfStart(const struct _R4A_MENU_ENTRY * menuEntry,
 }
 
 #endif  // USE_ZED_F9P
+#endif  // USE_WAYPOINT_FOLLOWING
