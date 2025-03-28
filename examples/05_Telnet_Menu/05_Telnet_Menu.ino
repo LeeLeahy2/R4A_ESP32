@@ -67,6 +67,19 @@
   debugging of sections of the code and Serial.print* functions to display
   the debug output.
 
+  Memory Use and Debugging
+  ------------------------
+
+  Set the MallocMax parameter to the largest size that is allocated from
+  the heap in RAM.  Larger size chunks are instead allocated from PSRAM
+  (SPI RAM device).  The default value is 128 bytes.
+
+  Use r4aMalloc to allocate memory with a unique text value describing
+  how the memory is being used.  Use the same text value when calling
+  r4aFree to return that block of memory to the heap.  Set r4aMallocDebug
+  parameter to true to display the allocation address, size and text on
+  the serial port.
+
   User Line Following
   -------------------
 
@@ -304,10 +317,10 @@ void setup()
 
     // Allocate the loop buffers
     uint32_t length = sizeof(R4A_TIME_USEC_t) * LOOP_CORE_1_TIME_ENTRIES;
-    loopCore1TimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    loopCore1TimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 loop time buffer (loopCore1TimeUsec)");
     if (!loopCore1TimeUsec)
         r4aReportFatalError("Failed to allocate loopCore1TimeUsec!");
-    loopCore1OutTimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    loopCore1OutTimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 out of loop time buffer (loopCore1OutTimeUsec)");
     if (!loopCore1OutTimeUsec)
         r4aReportFatalError("Failed to allocate loopCore1OutTimeUsec!");
 

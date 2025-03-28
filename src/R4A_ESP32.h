@@ -318,6 +318,13 @@ bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * object,
                                  bool releaseI2cBus = true);
 
 //****************************************
+// Memory API
+//****************************************
+
+extern bool r4aMallocDebug;
+extern size_t r4aMallocMaxBytes;
+
+//****************************************
 // NVM API
 //****************************************
 

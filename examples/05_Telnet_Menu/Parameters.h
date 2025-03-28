@@ -33,15 +33,20 @@ const char * wifiPassword4;
 
 const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 {
+    // Memory parameters
+// Required    Type                  Minimum     Maximum        Address                     Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_INT32,  0, (uint64_t)0xffffffff,   &r4aMallocMaxBytes,         "MallocMax",    (uint64_t)128},
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &r4aMallocDebug,            "MallocDebug",  false},
+
     // NVM parameters
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &parameterFilePath,         "ParamFile",    R4A_ESP32_NVM_STRING("/Parameters.txt")},
 
     // Time zone
-// Required    Type                  Minimum        Maximum    Address                     Name            Default Value
-    {true,  R4A_ESP32_NVM_PT_INT8,   (uint64_t)-12, 12,        &r4aTimeZoneHours,          "tzHours",      (uint64_t)-10},
-    {true,  R4A_ESP32_NVM_PT_INT8,   (uint64_t)-59, 59,        &r4aTimeZoneMinutes,        "tzMinutes",    0},
-    {true,  R4A_ESP32_NVM_PT_INT8,   (uint64_t)-59, 59,        &r4aTimeZoneSeconds,        "tzSeconds",    0},
+// Required    Type                  Minimum        Maximum    Address                      Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_INT8,   (uint64_t)-12, 12,        &r4aTimeZoneHours,           "tzHours",      (uint64_t)-10},
+    {true,  R4A_ESP32_NVM_PT_INT8,   (uint64_t)-59, 59,        &r4aTimeZoneMinutes,         "tzMinutes",    0},
+    {true,  R4A_ESP32_NVM_PT_INT8,   (uint64_t)-59, 59,        &r4aTimeZoneSeconds,         "tzSeconds",    0},
 
     // WiFi: Public Access Points (APs)
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value

@@ -137,7 +137,7 @@ esp_err_t r4aWebServerFileDownload(httpd_req_t *request)
         }
 
         // Allocate the buffer
-        buffer = (uint8_t *)malloc(bufferLength);
+        buffer = (uint8_t *)r4aMalloc(bufferLength, "WebServer data buffer (buffer)");
         if (!buffer)
         {
             if (r4aWebServerDebug)
@@ -188,7 +188,7 @@ esp_err_t r4aWebServerFileDownload(httpd_req_t *request)
         } while (bytesRead > 0);
 
         // Free the data buffer
-        free(buffer);
+        r4aFree((void **)&buffer, "WebServer data buffer (buffer)");
 
         // Close the file
         file.close();
@@ -201,7 +201,7 @@ esp_err_t r4aWebServerFileDownload(httpd_req_t *request)
 
     // Free the data buffer
     if (buffer)
-        free(buffer);
+        r4aFree((void **)&buffer, "WebServer data buffer (buffer)");
 
     // Failed to access the requested page
     return ESP_FAIL;

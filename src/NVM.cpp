@@ -198,8 +198,8 @@ bool r4aEsp32NvmParseValue(const R4A_ESP32_NVM_PARAMETER * parameter,
 
     case R4A_ESP32_NVM_PT_P_CHAR:
         length = strlen(valueString) + 1;
-        newValue = (char *)malloc(length);
-        if (!newValue && display)
+        newValue = (char *)r4aMalloc(length, "NVM char value (newValue)");
+        if (!newValue && display && (display != &Serial))
             display->println("ERROR: Failed to allocate parameter value string!");
         else
         {
@@ -282,7 +282,7 @@ void r4aEsp32NvmSetParameterValue(const R4A_ESP32_NVM_PARAMETER * parameter,
         // Free the previously allocated value
         dataAddress = *(char **)(parameter->addr);
         if (dataAddress && (r4aEsp32IsAddressInRAM(dataAddress)))
-            free(dataAddress);
+            r4aFree((void *)dataAddress, "NVM char value (newValue)");
         *(const char **)(parameter->addr) = nullptr;
         break;
 
@@ -290,7 +290,7 @@ void r4aEsp32NvmSetParameterValue(const R4A_ESP32_NVM_PARAMETER * parameter,
         // Free the previously allocated value
         dataAddress = *(char **)(parameter->addr);
         if (dataAddress && (r4aEsp32IsAddressInRAM(dataAddress)))
-            free(dataAddress);
+            r4aFree((void *)dataAddress, "NVM char value (newValue)");
         *(const char **)(parameter->addr) = value.pcc;
         break;
     }
@@ -592,7 +592,7 @@ void r4aEsp32NvmDisplayParameters(const R4A_ESP32_NVM_PARAMETER * parameterTable
     uint16_t temp;
 
     // Allocate the parameter index table
-    index = (uint16_t *)ps_malloc(parameterCount * sizeof(*index));
+    index = (uint16_t *)r4aMalloc(parameterCount * sizeof(*index), "Parameter index table (index)");
     if (index)
     {
         // Initialize the index table
@@ -619,7 +619,7 @@ void r4aEsp32NvmDisplayParameters(const R4A_ESP32_NVM_PARAMETER * parameterTable
             r4aEsp32NvmDisplayParameter(&parameterTable[index[i]], display);
 
         // Done with the index table
-        free(index);
+        r4aFree((void *)index, "Parameter index table (index)");
     }
     else
         // Display the parameters as listed in the parameter table
@@ -666,10 +666,10 @@ void r4aEsp32NvmDumpParameterFile(const char * filePath, Print * display)
         }
 
         // Allocate the file data buffer
-        nvmData = (uint8_t *)malloc(fileBytes);
+        nvmData = (uint8_t *)r4aMalloc(fileBytes, "NVM file data buffer (nvmData)");
         if (!nvmData)
         {
-            if (display)
+            if (display && (display != &Serial))
                  display->println("ERROR: Failed to allocate read buffer!");
             break;
         }
@@ -688,7 +688,7 @@ void r4aEsp32NvmDumpParameterFile(const char * filePath, Print * display)
 
     // Free the NVM data
     if (nvmData)
-        free(nvmData);
+        r4aFree((void *)nvmData, "NVM file data buffer (nvmData)");
 
     // Close the file
     if (parameterFile)
@@ -1800,10 +1800,10 @@ bool r4aEsp32NvmReadParameters(const char * filePath,
             break;
 
         // Allocate the file data buffer
-        nvmData = (uint8_t *)malloc(fileBytes);
+        nvmData = (uint8_t *)r4aMalloc(fileBytes, "NVM file data buffer (nvmData)");
         if (!nvmData)
         {
-            if (display)
+            if (display && (display != &Serial))
                 display->println("ERROR: Failed to allocate read buffer!");
             break;
         }
@@ -1842,7 +1842,7 @@ bool r4aEsp32NvmReadParameters(const char * filePath,
 
     // Free the NVM data
     if (nvmData)
-        free(nvmData);
+        r4aFree((void *)nvmData, "NVM file data buffer (nvmData)");
 
     // Close the file
     if (parameterFile)

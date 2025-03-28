@@ -421,10 +421,10 @@ void setup()
 
     // Allocate the loop buffers
     uint32_t length = sizeof(R4A_TIME_USEC_t) * LOOP_CORE_1_TIME_ENTRIES;
-    loopCore1TimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    loopCore1TimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 loop time buffer (loopCore1TimeUsec)");
     if (!loopCore1TimeUsec)
         r4aReportFatalError("Failed to allocate loopCore1TimeUsec!");
-    loopCore1OutTimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    loopCore1OutTimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 out of loop time buffer (loopCore1OutTimeUsec)");
     if (!loopCore1OutTimeUsec)
         r4aReportFatalError("Failed to allocate loopCore1OutTimeUsec!");
 
@@ -634,10 +634,10 @@ void setupCore0(void *parameter)
 
     // Allocate the loop buffers
     uint32_t length = sizeof(R4A_TIME_USEC_t) * LOOP_CORE_0_TIME_ENTRIES;
-    loopCore0TimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    loopCore0TimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 0 loop time buffer (loopCore0TimeUsec)");
     if (!loopCore0TimeUsec)
         r4aReportFatalError("Failed to allocate loopCore0TimeUsec!");
-    loopCore0OutTimeUsec = (R4A_TIME_USEC_t *)ps_malloc(length);
+    loopCore0OutTimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 0 out of loop time buffer (loopCore0OutTimeUsec)");
     if (!loopCore0OutTimeUsec)
         r4aReportFatalError("Failed to allocate loopCore0OutTimeUsec!");
 
