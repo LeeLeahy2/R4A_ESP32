@@ -691,6 +691,7 @@ void loopCore0()
     // Update the location
     if (zedf9pPresent)
     {
+        static uint32_t lastGnssI2cPollMsec;
         if ((currentMsec - lastGnssI2cPollMsec) >= r4aZedF9pPollMsec)
         {
             lastGnssI2cPollMsec = currentMsec;
