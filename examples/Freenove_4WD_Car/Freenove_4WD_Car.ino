@@ -186,64 +186,6 @@ USE_MOTOR_TABLE;
 bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display = nullptr);
 
 //****************************************
-// NTRIP Client
-//****************************************
-
-#ifdef  USE_NTRIP
-// Define the back-off intervals between connection attempts in milliseconds
-const uint32_t r4aNtripClientBbackoffIntervalMsec[] =
-{
-    0,
-    15 * R4A_MILLISECONDS_IN_A_SECOND,
-    30 * R4A_MILLISECONDS_IN_A_SECOND,
-     1 * R4A_MILLISECONDS_IN_A_MINUTE,
-     2 * R4A_MILLISECONDS_IN_A_MINUTE,
-};
-
-const int r4aNtripClientBbackoffCount = sizeof(r4aNtripClientBbackoffIntervalMsec) / sizeof(r4aNtripClientBbackoffIntervalMsec[0]);
-
-class NTRIP_CLIENT : public R4A_NTRIP_CLIENT
-{
-  private:
-
-    // Get the active serial port
-    Print * getSerial()
-    {
-        return &Serial;
-    }
-
-    // Get the I2C bus transaction size
-    uint8_t i2cTransactionSize()
-    {
-#ifdef  USE_ZED_F9P
-        if (zedf9pPresent)
-            return zedf9p._i2cTransactionSize;
-#endif  // USE_ZED_F9P
-        return 32;
-    }
-
-    // Push data to the GNSS
-    int pushRawData(uint8_t * buffer, int bytesToPush, Print * display)
-    {
-#ifdef  USE_ZED_F9P
-        if (zedf9pPresent)
-            return zedf9p.pushRawData(buffer, bytesToPush, display);
-#endif  // USE_ZED_F9P
-        return bytesToPush;
-    }
-
-  public:
-
-    // Constructor
-    NTRIP_CLIENT() : R4A_NTRIP_CLIENT()
-    {
-    }
-};
-
-NTRIP_CLIENT ntrip;
-#endif  // USE_NTRIP
-
-//****************************************
 // Robot
 //****************************************
 
@@ -390,8 +332,8 @@ void setup()
 
 #ifdef  USE_NTRIP
     // Validate the NTRIP tables
-    log_v("ntrip.validateTables");
-    ntrip.validateTables();
+    log_v("r4aNtripClientValidateTables");
+    r4aNtripClientValidateTables();
 #endif  // USE_NTRIP
 
     // Initialize the NTP client
@@ -508,8 +450,8 @@ void loop()
 #ifdef  USE_NTRIP
         // Update the NTRIP client state
         if (DEBUG_LOOP_CORE_1)
-            callingRoutine("ntrip.update\r\n");
-        ntrip.update(r4aWifiStationOnline);
+            callingRoutine("r4aNtripClientUpdate\r\n");
+        r4aNtripClientUpdate(r4aWifiStationOnline, &Serial);
 #endif  // USE_NTRIP
 
         // Notify the telnet server of WiFi changes
@@ -707,8 +649,8 @@ void loopCore0()
     if (r4aNtripClientEnable)
     {
         if (DEBUG_LOOP_CORE_0)
-            callingRoutine("ntrip.rbRemoveData");
-        ntrip.rbRemoveData(r4aNtripClientDebugRtcm ? &Serial : nullptr);
+            callingRoutine("r4aNtripClientRbRemoveData");
+        r4aNtripClientRbRemoveData(&Serial);
     }
 #endif  // USE_NTRIP
 
