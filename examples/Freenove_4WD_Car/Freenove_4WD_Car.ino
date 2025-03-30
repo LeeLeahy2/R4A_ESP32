@@ -70,17 +70,19 @@ bool ov2640ProcessWebServerFrameBuffer(R4A_OV2640 * object,
 //****************************************
 
 // I2C addresses
+#define AK09916_I2C_ADDRESS     0x0c
+#define ICM20948_I2C_ADDRESS    0x69
 #define ZEDF9P_I2C_ADDRESS      0x42
 
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
+    {AK09916_I2C_ADDRESS,  "AK09916 3-axis Electronic Compass"},
+    {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"},
     {OV2640_I2C_ADDRESS,   "OV2640 Camera"},
     {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"},
     {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"},
     {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
-#ifdef  USE_ZED_F9P
     {ZEDF9P_I2C_ADDRESS,   "u-blox ZED F9P GNSS receiver"}
-#endif  // USE_ZED_F9P
 };
 
 R4A_I2C_BUS i2cBus =
