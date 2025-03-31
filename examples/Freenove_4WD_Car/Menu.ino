@@ -302,8 +302,16 @@ enum MENU_TABLE_INDEX
     MTI_NVM,
     MTI_SERVO,
     MTI_TELNET,
+#ifdef  USE_ZED_F9P
     MTI_WAY_POINT,
+#endif  // USE_ZED_F9P
+
+//#define USE_WAYPOINT_FOLLOWING
+//#define USE_ZED_F9P
+    // Add new menu values before this line
+    MTI_MAX
 };
+const int menuTableIndexMax = MTI_MAX;
 
 // Debug menu
 const R4A_MENU_ENTRY debugMenuTable[] =
@@ -407,12 +415,12 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
     {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
     {"wd",    wifiToggleBool, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
+#ifdef  USE_ZED_F9P
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
 #ifdef  USE_WAYPOINT_FOLLOWING
-#ifdef  USE_ZED_F9P
     {"wpf",     menuWpfStart,       0,              nullptr,    0,      "Waypoint following"},
-#endif  // USE_ZED_F9P
 #endif  // USE_WAYPOINT_FOLLOWING
+#endif  // USE_ZED_F9P
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
     {"wv",  wifiToggleBool, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},

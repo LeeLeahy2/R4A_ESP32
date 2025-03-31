@@ -178,6 +178,7 @@ uint32_t loopsCore1;
 
 extern const R4A_MENU_TABLE menuTable[];
 extern const int menuTableEntries;
+extern const int menuTableIndexMax;
 
 //****************************************
 // Motor support
@@ -332,11 +333,9 @@ void setup()
     log_v("Calling wifiBegin");
     r4aWifiBegin();
 
-#ifdef  USE_NTRIP
-    // Validate the NTRIP tables
-    log_v("r4aNtripClientValidateTables");
-    r4aNtripClientValidateTables();
-#endif  // USE_NTRIP
+    // Validate the tables
+    log_v("validateTables");
+    validateTables();
 
     // Initialize the NTP client
     log_v("Calling r4aNtpSetup");
@@ -668,6 +667,25 @@ void loopCore0()
     loopEndTimeUsec = endUsec;
     loopCore0TimeUsec[loopIndex] = endUsec - currentUsec;
     loopIndex = (loopIndex + 1) % LOOP_CORE_0_TIME_ENTRIES;
+}
+
+//*********************************************************************
+// Validate the tables
+void validateTables()
+{
+    // Validate the menu table index values
+    if (menuTableEntries != (menuTableIndexMax - 1))
+    {
+        Serial.printf("menuTableEntries: %d\r\n", menuTableEntries);
+        Serial.printf("menuTableIndexMax - 1: %d\r\n", menuTableIndexMax - 1);
+        r4aReportFatalError("Fix menuTableEntries to match MENU_TABLE_INDEX");
+    }
+
+#ifdef  USE_NTRIP
+    // Validate the NTRIP tables
+    log_v("r4aNtripClientValidateTables");
+    r4aNtripClientValidateTables();
+#endif  // USE_NTRIP
 }
 
 //*********************************************************************
