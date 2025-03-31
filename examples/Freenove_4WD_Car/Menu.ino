@@ -331,10 +331,13 @@ const R4A_MENU_ENTRY debugMenuTable[] =
 // GNSS menu
 const R4A_MENU_ENTRY gnssMenuTable[] =
 {
-    // Command  menuRoutine         menuParam   HelpRoutine     align   HelpText
-    {"l",  gnssMenuDisplayLocation, 0,          nullptr,        0,      "Display location"},
-    {"p",     gnssMenuComputePoint, 0,          nullptr,        0,      "Compute point and display point"},
-    {"x",       nullptr,         R4A_MENU_MAIN, nullptr,        0,      "Return to the main menu"},
+    // Command  menuRoutine             menuParam       HelpRoutine     align   HelpText
+#ifdef  USE_WAYPOINT_FOLLOWING
+    {"h",       menuWpfDisplayHeading,  0,              nullptr,        0,      "Display heading"},
+#endif  // USE_WAYPOINT_FOLLOWING
+    {"l",      gnssMenuDisplayLocation, 0,              nullptr,        0,      "Display location"},
+    {"p",       gnssMenuComputePoint,   0,              nullptr,        0,      "Compute point and display point"},
+    {"x",       nullptr,                R4A_MENU_MAIN,  nullptr,        0,      "Return to the main menu"},
 };
 #define GNSS_MENU_ENTRIES       sizeof(gnssMenuTable) / sizeof(gnssMenuTable[0])
 #endif  // USE_ZED_F9P

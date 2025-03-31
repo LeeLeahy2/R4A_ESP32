@@ -199,6 +199,65 @@ void wpfStop(R4A_ROBOT_CHALLENGE * object)
 }
 
 //*********************************************************************
+// Display the heading
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void menuWpfDisplayHeading(const R4A_MENU_ENTRY * menuEntry,
+                           const char * command,
+                           Print * display)
+{
+    double altitude;
+    String comment;
+    double deltaLatitude;
+    double deltaLongitude;
+    File file;
+    double horizontalAccuracy;
+    double horizontalAccuracyStdDev;
+    double latitude;
+    double longitude;
+    uint8_t satellitesInView;
+
+    // Determine if a waypoint was set
+    if (wpfData._latitude || wpfData._longitude)
+    {
+        latitude = wpfData._latitude;
+        longitude = wpfData._longitude;
+    }
+    else
+    {
+        // No, get the first waypoint
+        if (r4aEsp32WpReadPoint(&file,
+                                &latitude,
+                                &longitude,
+                                &altitude,
+                                &horizontalAccuracy,
+                                &horizontalAccuracyStdDev,
+                                &satellitesInView,
+                                &comment,
+                                display))
+
+        // Done with the file
+        file.close();
+    }
+
+    // Compute the direction from the current location to the waypoint
+    deltaLatitude = latitude - zedf9p._latitude;
+    deltaLongitude = longitude - zedf9p._longitude;
+
+    // Display the heading
+    display->printf("   Latitude         Longitude\r\n");
+    display->printf("--------------   --------------\r\n");
+    display->printf("%14.9f   %14.9f   Target Waypoint\r\n",
+                    latitude, longitude);
+    display->printf("%14.9f   %14.9f   Current Position\r\n",
+                    zedf9p._latitude, zedf9p._longitude);
+    display->printf("%14.9f   %14.9f   Heading\r\n",
+                    deltaLatitude, deltaLongitude);
+}
+
+//*********************************************************************
 // Start the waypoint following
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry
