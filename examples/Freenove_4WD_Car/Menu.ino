@@ -410,7 +410,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
 #ifdef  USE_WAYPOINT_FOLLOWING
 #ifdef  USE_ZED_F9P
-    {"wpf",     wpfStart,           0,              nullptr,    0,      "Waypoint following"},
+    {"wpf",     menuWpfStart,       0,              nullptr,    0,      "Waypoint following"},
 #endif  // USE_ZED_F9P
 #endif  // USE_WAYPOINT_FOLLOWING
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
