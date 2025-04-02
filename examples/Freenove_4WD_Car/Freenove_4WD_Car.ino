@@ -312,6 +312,10 @@ void setup()
                 ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
     digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
 
+    // Validate the tables
+    log_v("validateTables");
+    validateTables();
+
     // Delay to allow the hardware initialize
     delay(1000);
 
@@ -332,10 +336,6 @@ void setup()
     // Start WiFi if enabled
     log_v("Calling wifiBegin");
     r4aWifiBegin();
-
-    // Validate the tables
-    log_v("validateTables");
-    validateTables();
 
     // Initialize the NTP client
     if (ntpEnable)
