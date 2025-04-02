@@ -462,27 +462,38 @@ void loop()
 #endif  // USE_NTRIP
 
         // Notify the telnet server of WiFi changes
-        if (previousConnected != r4aWifiStationOnline)
+        if (telnetEnable)
         {
-            previousConnected = r4aWifiStationOnline;
-            if (r4aWifiStationOnline)
+            if (previousConnected != r4aWifiStationOnline)
             {
-                if (DEBUG_LOOP_CORE_1)
-                    callingRoutine("telnet.begin\r\n");
-                telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
-                Serial.printf("Telnet: %s:%d\r\n", WiFi.localIP().toString().c_str(),
-                              telnet.port());
+                previousConnected = r4aWifiStationOnline;
+                if (r4aWifiStationOnline)
+                {
+                    if (DEBUG_LOOP_CORE_1)
+                        callingRoutine("telnet.begin\r\n");
+                    telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
+                    Serial.printf("Telnet: %s:%d\r\n", WiFi.localIP().toString().c_str(),
+                                  telnet.port());
+                }
+                else
+                {
+                    if (DEBUG_LOOP_CORE_1)
+                        callingRoutine("telnet.end\r\n");
+                    telnet.end();
+                }
             }
-            else
-            {
-                if (DEBUG_LOOP_CORE_1)
-                    callingRoutine("telnet.end\r\n");
-                telnet.end();
-            }
+            if (DEBUG_LOOP_CORE_1)
+                callingRoutine("telnet.update");
+            telnet.update(r4aWifiStationOnline);
         }
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("telnet.update");
-        telnet.update(r4aWifiStationOnline);
+
+        // Check for telnet being disabled while the server is running
+        else if (previousConnected != r4aWifiStationOnline)
+        {
+            if (DEBUG_LOOP_CORE_1)
+                callingRoutine("telnet.end\r\n");
+            telnet.end();
+        }
 
         // Update the web server
         if (DEBUG_LOOP_CORE_1)
