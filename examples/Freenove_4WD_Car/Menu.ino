@@ -251,20 +251,6 @@ void wifiMenuRestart(const R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
-// Toggle WiFi boolean
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void wifiToggleBool(const R4A_MENU_ENTRY * menuEntry,
-                    const char * command,
-                    Print * display)
-{
-    r4aMenuBoolToggle(menuEntry, command, display);
-    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
-}
-
-//*********************************************************************
 // Display data before the waypoint menu header
 void wpMenuPre(Print * display)
 {
@@ -449,7 +435,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
     {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
     {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
-    {"wd",    wifiToggleBool, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
+    {"wd", r4aMenuBoolToggle, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
 #ifdef  USE_ZED_F9P
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
 #ifdef  USE_WAYPOINT_FOLLOWING
@@ -457,7 +443,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #endif  // USE_WAYPOINT_FOLLOWING
 #endif  // USE_ZED_F9P
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
-    {"wv",  wifiToggleBool, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
+    {"wv", r4aMenuBoolToggle, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
 };
 #define MAIN_MENU_ENTRIES       sizeof(mainMenuTable) / sizeof(mainMenuTable[0])
