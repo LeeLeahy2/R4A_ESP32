@@ -26,6 +26,24 @@
 // Telnet port number
 #define TELNET_PORT         23
 
+enum CHALLENGE_INDEX
+{
+    CHALLENGE_NONE = 0,
+    CHALLENGE_ALF,      // 1
+    CHALLENGE_BLF,      // 2
+    CHALLENGE_BLT,      // 3
+#ifdef  USE_OV2640
+    CHALLENGE_CLF,      // 4
+#endif  // USE_OV2640
+#ifdef  USE_WAYPOINT_FOLLOWING
+#ifdef  USE_ZED_F9P
+    CHALLENGE_WPF,      // 5
+#endif  // USE_ZED_F9P
+#endif  // USE_WAYPOINT_FOLLOWING
+    // Add new values before this line
+    CHALLENGE_MAX       // 6
+};
+
 //****************************************
 // GNSS - Global Navigation Satellite System
 //****************************************
@@ -47,10 +65,14 @@
 // Forward routine declarations
 //****************************************
 
+typedef void (*START_CHALLENGE)(Print * display);
+
 bool contextCreate(void ** contextData, NetworkClient * client);
-void wpfStart(const struct _R4A_MENU_ENTRY * menuEntry,
-              const char * command,
-              Print * display);
+void alfStart(Print * display);
+void blfStart(Print * display);
+void bltStart(Print * display);
+void clfStart(Print * display);
+void wpfStart(Print * display);
 
 //****************************************
 // OV2640 camera
@@ -214,6 +236,24 @@ void robotIdle(uint32_t currentMsec);
 void robotDisplayTime(uint32_t milliseconds);
 
 R4A_ROBOT robot;
+
+START_CHALLENGE challengeList[] =
+{
+    nullptr,
+    alfStart,   // 1
+    blfStart,   // 2
+    bltStart,   // 3
+#ifdef  USE_OV2640
+    clfStart,   // 4
+#endif  // USE_OV2640
+#ifdef  USE_WAYPOINT_FOLLOWING
+#ifdef  USE_ZED_F9P
+    wpfStart,   // 5
+#endif  // USE_ZED_F9P
+#endif  // USE_WAYPOINT_FOLLOWING
+    // Add new values before this line
+};
+const int challengeListEntries = sizeof(challengeList) / sizeof(challengeList[0]);
 
 //****************************************
 // Serial menu support
@@ -390,6 +430,20 @@ void setup()
     // Finished with the initialization
     log_v("setup complete");
     core1Initialized = true;
+
+    //****************************************
+    // Start the requested challenge
+    //****************************************
+
+    if (startIndex && (startIndex < CHALLENGE_MAX))
+    {
+        bool ignore;
+
+        ignore = ignoreBatteryCheck;
+        ignoreBatteryCheck = true;
+        challengeList[startIndex](&Serial);
+        ignoreBatteryCheck = ignore;
+    }
 
     //****************************************
     // Execute loop forever
@@ -690,6 +744,10 @@ void loopCore0()
 // Validate the tables
 void validateTables()
 {
+    // Validate the challenge entries
+    if (CHALLENGE_MAX != challengeListEntries)
+        r4aReportFatalError("CHALLENGE_MAX must equal challengeListEntries!");
+
     // Validate the menu table index values
     if (menuTableEntries != (menuTableIndexMax - 1))
     {

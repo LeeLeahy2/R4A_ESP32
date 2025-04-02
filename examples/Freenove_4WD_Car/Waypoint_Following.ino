@@ -260,12 +260,8 @@ void menuWpfDisplayHeading(const R4A_MENU_ENTRY * menuEntry,
 //*********************************************************************
 // Start the waypoint following
 // Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
 //   display: Device used for output
-void menuWpfStart(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
+void wpfStart(Print * display)
 {
     String filePath;
     String logFilePath;
@@ -380,6 +376,25 @@ void menuWpfStart(const struct _R4A_MENU_ENTRY * menuEntry,
                           display);
         }
     }
+}
+
+//*********************************************************************
+// Start the line following
+void wpfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    wpfStart(display);
+}
+
+//*********************************************************************
+// Start the waypoint following at boot
+void menuStartWpf(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    startIndex = CHALLENGE_WPF;
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }
 
 #endif  // USE_ZED_F9P

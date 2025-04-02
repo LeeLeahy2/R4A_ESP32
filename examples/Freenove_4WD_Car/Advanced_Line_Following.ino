@@ -30,12 +30,6 @@ void alfInit(R4A_ROBOT_CHALLENGE * object)
 void alfStart(R4A_ROBOT_CHALLENGE * object)
 {
     challengeStart();
-
-    // Set the reference voltage from the photo-resistor voltage divider
-    r4aEsp32VoltageGet(LIGHT_SENSOR_PIN,
-                       0,
-                       1,
-                       &lsAdcReference);
 }
 
 //*********************************************************************
@@ -48,9 +42,7 @@ void alfStop(R4A_ROBOT_CHALLENGE * object)
 
 //*********************************************************************
 // Start the line following
-void menuAlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
+void alfStart(Print * display)
 {
     static R4A_ROBOT_CHALLENGE advancedLineFollowing =
     {
@@ -77,4 +69,23 @@ void menuAlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
                       &advancedLineFollowing,
                       ROBOT_LINE_FOLLOW_DURATION_SEC,
                       display);
+}
+
+//*********************************************************************
+// Start the line following
+void alfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    alfStart(display);
+}
+
+//*********************************************************************
+// Start the line following at boot
+void menuStartAlf(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    startIndex = CHALLENGE_ALF;
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }

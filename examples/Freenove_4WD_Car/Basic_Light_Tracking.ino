@@ -73,9 +73,7 @@ void bltStop(R4A_ROBOT_CHALLENGE * object)
 
 //*********************************************************************
 // Start the light tracking
-void menuBltStart(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
+void bltStart(Print * display)
 {
     static R4A_ROBOT_CHALLENGE basicLightTracking =
     {
@@ -102,4 +100,23 @@ void menuBltStart(const struct _R4A_MENU_ENTRY * menuEntry,
                       &basicLightTracking,
                       ROBOT_LIGHT_TRACKING_DURATION_SEC,
                       display);
+}
+
+//*********************************************************************
+// Start the light following
+void bltStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    bltStart(display);
+}
+
+//*********************************************************************
+// Start the light tracking at boot
+void menuStartBlt(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    startIndex = CHALLENGE_BLT;
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }

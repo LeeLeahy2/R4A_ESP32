@@ -228,6 +228,16 @@ void robotMenuStop(const R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
+// Start the line following at boot
+void startNone(const struct _R4A_MENU_ENTRY * menuEntry,
+               const char * command,
+               Print * display)
+{
+    startIndex = CHALLENGE_NONE;
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
+}
+
+//*********************************************************************
 // Restart the WiFi station
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry
@@ -301,6 +311,7 @@ enum MENU_TABLE_INDEX
 #endif  // USE_NTRIP
     MTI_NVM,
     MTI_SERVO,
+    MTI_START,
     MTI_TELNET,
 #ifdef  USE_ZED_F9P
     MTI_WAY_POINT,
@@ -361,6 +372,26 @@ const R4A_MENU_ENTRY ledMenuTable[] =
 };
 #define LED_MENU_ENTRIES      sizeof(ledMenuTable) / sizeof(ledMenuTable[0])
 
+// Start menu
+const R4A_MENU_ENTRY startMenuTable[] =
+{
+    // Command  menuRoutine         menuParam               HelpRoutine         align   HelpText
+    {"alf",     menuStartAlf,       0,                      nullptr,            0,      "Start advanced line following at boot"},
+    {"blf",     menuStartBlt,       0,                      nullptr,            0,      "Start basic line following at boot"},
+    {"blt",     menuStartBlf,       0,                      nullptr,            0,      "Start basic light tracking at boot"},
+#ifdef  USE_OV2640
+    {"clf",     menuStartClf,       0,                      nullptr,            0,      "Start camera line following at boot"},
+#endif  // USE_OV2640
+    {"None",    startNone,          0,                      nullptr,            0,      "Don't start anything at boot"},
+#ifdef  USE_ZED_F9P
+#ifdef  USE_WAYPOINT_FOLLOWING
+    {"wpf",     startWpf,           0,                      nullptr,            0,      "Start waypoint following at boot"},
+#endif  // USE_WAYPOINT_FOLLOWING
+#endif  // USE_ZED_F9P
+    {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
+};
+#define START_MENU_ENTRIES      sizeof(startMenuTable) / sizeof(startMenuTable[0])
+
 // Telnet menu
 const R4A_MENU_ENTRY telnetMenuTable[] =
 {
@@ -396,12 +427,12 @@ const R4A_MENU_ENTRY wayPointMenuTable[] =
 const R4A_MENU_ENTRY mainMenuTable[] =
 {
     // Command  menuRoutine         menuParam       HelpRoutine align   HelpText
-    {"alf",     menuAlfStart,       0,              nullptr,    0,      "Advanced line following"},
-    {"blf",     menuBlfStart,       0,              nullptr,    0,      "Basic line following"},
-    {"blt",     menuBltStart,       0,              nullptr,    0,      "Basic light tracking"},
+    {"alf",     alfStartMenu,       0,              nullptr,    0,      "Advanced line following"},
+    {"blf",     blfStartMenu,       0,              nullptr,    0,      "Basic line following"},
+    {"blt",     bltStartMenu,       0,              nullptr,    0,      "Basic light tracking"},
 #ifdef  USE_OV2640
     {"c", r4aMenuBoolToggle, (intptr_t)&ov2640Enable, r4aMenuBoolHelp, 0, "Toggle OV2640 camera"},
-    {"clf",     menuClfStart,       0,              nullptr,    0,      "Camera line following"},
+    {"clf",     clfStartMenu,       0,              nullptr,    0,      "Camera line following"},
 #endif  // USE_OV2640
     {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
 #ifdef  USE_ZED_F9P
@@ -415,13 +446,14 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
+    {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
     {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
     {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
     {"wd",    wifiToggleBool, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
 #ifdef  USE_ZED_F9P
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
 #ifdef  USE_WAYPOINT_FOLLOWING
-    {"wpf",     menuWpfStart,       0,              nullptr,    0,      "Waypoint following"},
+    {"wpf",     wpfStartMenu,       0,              nullptr,    0,      "Waypoint following"},
 #endif  // USE_WAYPOINT_FOLLOWING
 #endif  // USE_ZED_F9P
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
@@ -447,6 +479,7 @@ const R4A_MENU_TABLE menuTable[] =
 #endif  // USE_NTRIP
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Servo Menu",      nullptr,  r4aPca9685ServoMenuTable, R4A_PCA9685_SERVO_MENU_ENTRIES},
+    {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
 #ifdef  USE_ZED_F9P
     {"Waypoint Menu",   wpMenuPre,      wayPointMenuTable,  WAYPOINT_MENU_ENTRIES},

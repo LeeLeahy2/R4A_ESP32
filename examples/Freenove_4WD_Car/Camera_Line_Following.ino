@@ -48,9 +48,7 @@ void clfStop(R4A_ROBOT_CHALLENGE * object)
 
 //*********************************************************************
 // Initialize the line following
-void menuClfStart(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
+void clfStart(Print * display)
 {
     static R4A_ROBOT_CHALLENGE cameraLineFollowing =
     {
@@ -77,6 +75,25 @@ void menuClfStart(const struct _R4A_MENU_ENTRY * menuEntry,
                       &cameraLineFollowing,
                       ROBOT_LINE_FOLLOW_DURATION_SEC,
                       display);
+}
+
+//*********************************************************************
+// Start the line following
+void clfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    clfStart(display);
+}
+
+//*********************************************************************
+// Start the line following at boot
+void menuStartClf(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    startIndex = CHALLENGE_CLF;
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }
 
 #endif  // USE_OV2640

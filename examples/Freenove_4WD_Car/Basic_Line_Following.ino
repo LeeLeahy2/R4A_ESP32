@@ -112,9 +112,7 @@ void blfStop(R4A_ROBOT_CHALLENGE * object)
 
 //*********************************************************************
 // Start the line following
-void menuBlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
+void blfStart(Print * display)
 {
     static R4A_ROBOT_CHALLENGE basicLineFollowing =
     {
@@ -141,4 +139,23 @@ void menuBlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
                       &basicLineFollowing,
                       ROBOT_LINE_FOLLOW_DURATION_SEC,
                       display);
+}
+
+//*********************************************************************
+// Start the line following
+void blfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    blfStart(display);
+}
+
+//*********************************************************************
+// Start the line following at boot
+void menuStartBlf(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    startIndex = CHALLENGE_BLF;
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }
