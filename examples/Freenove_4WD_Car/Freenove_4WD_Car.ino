@@ -338,8 +338,11 @@ void setup()
     validateTables();
 
     // Initialize the NTP client
-    log_v("Calling r4aNtpSetup");
-    r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
+    if (ntpEnable)
+    {
+        log_v("Calling r4aNtpSetup");
+        r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
+    }
 
     // Initialize the SPI controller
     log_v("r4aEsp32SpiBegin");
@@ -444,9 +447,12 @@ void loop()
     if (r4aWifiSsidPasswordEntries)
     {
         // Check for NTP updates
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("r4aNtpUpdate");
-        r4aNtpUpdate(r4aWifiStationOnline);
+        if (ntpEnable)
+        {
+            if (DEBUG_LOOP_CORE_1)
+                callingRoutine("r4aNtpUpdate");
+            r4aNtpUpdate(r4aWifiStationOnline);
+        }
 
 #ifdef  USE_NTRIP
         // Update the NTRIP client state

@@ -21,6 +21,12 @@ uint8_t clfTiltStartDegrees;
 const char * mdnsHostName;
 
 //****************************************
+// NTP
+//****************************************
+
+bool ntpEnable;
+
+//****************************************
 // NVM
 //****************************************
 
@@ -106,6 +112,10 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_INT32,  0, (uint64_t)0xffffffff,   &r4aMallocMaxBytes,         "MallocMax",    (uint64_t)128},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &r4aMallocDebug,            "MallocDebug",  false},
+
+    // NTP
+// Required    Type                  Minimum     Maximum        Address                     Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &ntpEnable,                 "NtpEnable",    true},
 
 #ifdef  USE_NTRIP
     // NTRIP parameters
