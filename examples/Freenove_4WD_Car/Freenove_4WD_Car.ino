@@ -263,7 +263,7 @@ R4A_TELNET_SERVER telnet(4,
 
 const R4A_SSID_PASSWORD r4aWifiSsidPassword[] =
 {
-    {&wifiSSID,  &wifiPassword},
+    {&wifiSSID1, &wifiPassword1},
     {&wifiSSID2, &wifiPassword2},
     {&wifiSSID3, &wifiPassword3},
     {&wifiSSID4, &wifiPassword4},
