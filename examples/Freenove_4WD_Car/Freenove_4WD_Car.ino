@@ -560,7 +560,7 @@ void loop()
 
     // Process the next image
 #ifdef  USE_OV2640
-    if (ov2640Present && ov2640Enable)
+    if (ov2640Present)
     {
         if (DEBUG_LOOP_CORE_1)
             callingRoutine("r4aOv2640Update");
@@ -625,9 +625,14 @@ void setupCore0(void *parameter)
 #ifdef USE_OV2640
     if (ov2640Present)
     {
-        log_v("Calling r4aOv2640Setup");
-        Serial.printf("Initializing the OV2640 camera\r\n");
-        r4aOv2640Setup(&ov2640, PIXFORMAT_RGB565);
+        if (ov2640Enable == false)
+            ov2640Present = false;
+        else
+        {
+            log_v("Calling r4aOv2640Setup");
+            Serial.printf("Initializing the OV2640 camera\r\n");
+            r4aOv2640Setup(&ov2640, PIXFORMAT_RGB565);
+        }
     }
 #endif  // USE_OV2640
 
