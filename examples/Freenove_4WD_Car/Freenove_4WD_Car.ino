@@ -510,9 +510,12 @@ void loop()
 
 #ifdef  USE_NTRIP
         // Update the NTRIP client state
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("r4aNtripClientUpdate\r\n");
-        r4aNtripClientUpdate(r4aWifiStationOnline, &Serial);
+        if (r4aNtripClientEnable)
+        {
+            if (DEBUG_LOOP_CORE_1)
+                callingRoutine("r4aNtripClientUpdate\r\n");
+            r4aNtripClientUpdate(r4aWifiStationOnline, &Serial);
+        }
 #endif  // USE_NTRIP
 
         // Notify the telnet server of WiFi changes
