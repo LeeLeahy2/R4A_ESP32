@@ -12,7 +12,7 @@ void alfChallenge(R4A_ROBOT_CHALLENGE * object)
     if ((millis() - lastDisplayMsec) >= (15 * 1000))
     {
         lastDisplayMsec = millis();
-        Serial.printf("Add your code to CLF::challenge()\r\n");
+        Serial.printf("Add your code to ALF::challenge()\r\n");
     }
 }
 

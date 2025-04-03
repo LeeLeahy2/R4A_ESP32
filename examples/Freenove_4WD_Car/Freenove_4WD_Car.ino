@@ -374,7 +374,7 @@ void setup()
     log_v("Core 0 task started");
 
     // Start WiFi if enabled
-    log_v("Calling wifiBegin");
+    log_v("Calling r4aWifiBegin");
     r4aWifiBegin();
 
     // Initialize the NTP client
@@ -590,7 +590,7 @@ void setupCore0(void *parameter)
     delay(100);
 
     // Setup and enumerate the I2C devices
-    log_v("Calling i2cBus.begin");
+    log_v("Calling r4aEsp32I2cBusBegin");
     r4aEsp32I2cBusBegin(&i2cBus,
                         I2C_SDA,
                         I2C_SCL,
@@ -598,7 +598,7 @@ void setupCore0(void *parameter)
     r4aI2cBus = &i2cBus;
 
     // Determine which devices are present
-    log_v("Calling i2cBus.isDevicePresent");
+    log_v("Calling r4aI2cBusIsDevicePresent");
     ov2640Present = r4aI2cBusIsDevicePresent(&i2cBus, OV2640_I2C_ADDRESS);
     vk16k33Present = r4aI2cBusIsDevicePresent(&i2cBus, VK16K33_I2C_ADDRESS);
     zedf9pPresent = r4aI2cBusIsDevicePresent(&i2cBus, ZEDF9P_I2C_ADDRESS);

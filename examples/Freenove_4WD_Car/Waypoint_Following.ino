@@ -68,7 +68,7 @@ void wpfChallenge(R4A_ROBOT_CHALLENGE * object)
     if ((millis() - lastDisplayMsec) >= (15 * 1000))
     {
         lastDisplayMsec = millis();
-        Serial.printf("Add your code to WLF::challenge()\r\n");
+        Serial.printf("Add your code to wpfChallenge()\r\n");
     }
 }
 

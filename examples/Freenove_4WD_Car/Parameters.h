@@ -97,6 +97,7 @@ const char * wifiPassword4;
 const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 {
     // Camera Line Following (CLF)
+// Required    Type                  Minimum     Maximum        Address                         Name            Default Value
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &clfPanStartDegrees,            "clfPanDeg",    10},
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &servoTiltStartDegrees,         "clfTiltDeg",   90},
 
