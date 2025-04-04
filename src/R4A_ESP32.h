@@ -18,6 +18,8 @@
 #include <esp_http_server.h>    // IDF built-in, needed for camera web server
 #include <esp_wifi.h>           // IDF built-in
 
+#include <BluetoothSerial.h>    // ESP32 built-in Library
+
 #include <R4A_Robot.h>          // Robots-For-All robot support
 #include <R4A_I2C.h>            // Robots-For-All I2C support
 #include "R4A_ESP32_GPIO.h"     // Robots-For-All ESP32 GPIO declarations
@@ -36,6 +38,39 @@ extern const int r4aGpioPortToIoMuxIndex[R4A_GPIO_MAX_PORTS];
 extern const char * const r4aIoMuxNames[R4A_GPIO_MAX_PORTS][8];
 extern const uint8_t r4aIoMuxIsGpio[R4A_GPIO_MAX_PORTS];
 extern const R4A_GPIO_MATRIX r4aGpioMatrixNames[256];
+
+//****************************************
+// Bluetooth
+//****************************************
+
+extern bool r4aBluetoothDebug;
+extern bool r4aBluetoothVerbose;
+extern bool r4aBluetoothEnable;
+extern BluetoothSerial * r4aBtSerial;
+
+// Declare the Bluetooth state transitions
+enum R4A_BLUETOOTH_STATE_TRANSITION
+{
+    R4A_BST_NONE = 0,
+    R4A_BST_CONNECTED,
+    R4A_BST_DISCONNECTED,
+};
+
+// Initialize the Bluetooth serial device
+// Inputs:
+//   name: Service name advertised by Bluetooth
+// Outputs:
+//   Returns true if the Bluetooth serial device was successfully initialized,
+//   and returns false upon failure.
+bool r4aBluetoothInit(const char * name);
+
+// Determine if the Bluetooth serial device is connected
+bool r4aBluetoothIsConnected();
+
+// Update the Bluetooth state
+// Outputs:
+//   Returns the state transitions
+R4A_BLUETOOTH_STATE_TRANSITION r4aBluetoothUpdate();
 
 //****************************************
 // ESP32 API
