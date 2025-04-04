@@ -67,7 +67,7 @@ bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display = nullptr)
 //****************************************
 
 bool btFailed;
-BluetoothSerial btSerial;
+bool idleDisplayed;
 uint32_t lastDisplayMsec;
 uint32_t startMsec;
 
@@ -126,7 +126,7 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
     default:
         // No line or stop circle detected
         r4aPca9685MotorBrakeAll();
-        r4aRobotStop(&robot, millis(), &btSerial);
+        r4aRobotStop(&robot, millis(), r4aBtSerial);
         break;
 
     //     RcL
@@ -178,35 +178,21 @@ void setup()
     log_v("Calling pca9685.begin");
     pca9685.begin();
 
-    // Initialize the bluetooth serial port
-    if (btSerial.begin(BLUETOOTH_NAME) == false)
-        r4aReportFatalError("Failed to establish Bluetooth serial port!");
+    // Initialize the Bluetooth serial device
+    if (r4aBluetoothInit(BLUETOOTH_NAME) == false)
+        r4aReportFatalError("Failed to initialize the Bluetooth serial device");
+    r4aBluetoothEnable = true;
+    r4aBluetoothDebug = true;
 
-    // Wait for a Bluetooth client
-    Serial.printf("Waiting for Bluetooth client connection to ");
-    btAddress();
-    btFailed = false;
-    while (btSerial.hasClient() == false)
-        delay(100);
-    Serial.printf("Bluetooth client connected\r\n");
-    btSerial.printf("%s\r\n", __FILE__);
 
     // Initialize the robot
-    btSerial.printf("Calling r4aRobotInit to initialize the robot\r\n");
-    Serial.printf("Start initial delay\r\n");
+    Serial.printf("Initialize the robot\r\n");
     r4aRobotInit(&robot,
                  xPortGetCoreID(),       // CPU core
                  ROBOT_START_DELAY_SEC,  // Challenge start delay
                  ROBOT_STOP_TO_IDLE_SEC, // Delay after running the challenge
-                 blfIdle,                // Idle routine
+                 robotIdle,              // Idle routine
                  blfDisplayTime);        // Time display routine
-
-    // Start the robot challenge
-    btSerial.printf("Calling r4aRobotStart to select the robot challenge\r\n");
-    r4aRobotStart(&robot,
-                  &basicLineFollowing,
-                  ROBOT_LINE_FOLLOW_DURATION_SEC,
-                  &btSerial);
 
     // Execute loop forever
 }
@@ -215,6 +201,28 @@ void setup()
 // Idle loop for core 1 of the application
 void loop()
 {
+    R4A_BLUETOOTH_STATE_TRANSITION btTransition;
+
+    // Connect to Bluetooth to start the robot
+    btTransition = r4aBluetoothUpdate();
+    if (btTransition == R4A_BST_CONNECTED)
+    {
+        // Start the robot challenge
+        btFailed = false;
+        r4aBtSerial->printf("%s\r\n", __FILE__);
+        r4aBtSerial->printf("Calling r4aRobotStart to select the robot challenge\r\n");
+        r4aRobotStart(&robot,
+                      &basicLineFollowing,
+                      ROBOT_LINE_FOLLOW_DURATION_SEC,
+                      r4aBtSerial);
+    }
+    else if (btTransition == R4A_BST_DISCONNECTED)
+    {
+        // Stop the robot
+        btFailed = true;
+        r4aRobotStop(&robot, millis(), &Serial);
+    }
+
     // Perform the robot challenge
     r4aRobotUpdate(&robot, millis());
 }
@@ -237,40 +245,10 @@ void blfDisplayTime(uint32_t deltaMsec)
     milliseconds -= seconds * R4A_MILLISECONDS_IN_A_SECOND;
     minutes = seconds / R4A_SECONDS_IN_A_MINUTE;
     seconds -= minutes * R4A_SECONDS_IN_A_MINUTE;
-    if (btSerial.hasClient())
-        btSerial.printf("%d:%02d.%d\r\n", minutes, seconds, milliseconds / 100);
+    if (r4aBluetoothIsConnected())
+        r4aBtSerial->printf("%d:%02d.%d\r\n", minutes, seconds, milliseconds / 100);
     else
-    {
         btFailed = true;
-        Serial.printf("Bluetooth disconnected!\r\n");
-    }
-}
-
-//*********************************************************************
-// Called by the update routine when the robot is not running a challenge
-// The initial delay routine calls this routine just before calling
-// the challenge routine for the first time.
-// Inputs:
-//   deltaMsec: Milliseconds to display
-void blfIdle(uint32_t mSecToStart)
-{
-    static bool displayed;
-    bool btFailed;
-
-    if (!displayed)
-    {
-        displayed = true;
-        Serial.printf("Idle\r\n");
-        if (btSerial.hasClient())
-            btSerial.printf("blfIdle\r\n");
-    }
-
-    // Check for Bluetooth connection
-    if ((btFailed == false) && (btSerial.hasClient() == false))
-    {
-        btFailed = true;
-        Serial.printf("Bluetooth disconnected!\r\n");
-    }
 }
 
 //*********************************************************************
@@ -281,13 +259,7 @@ void blfIdle(uint32_t mSecToStart)
 //   object: Address of a R4A_ROBOT_CHALLENGE data structure
 void blfInit(struct _R4A_ROBOT_CHALLENGE * object)
 {
-    if (btSerial.hasClient())
-        btSerial.printf("blfInit\r\n");
-    else
-    {
-        btFailed = true;
-        Serial.printf("Bluetooth disconnected!\r\n");
-    }
+    Serial.printf("blfInit\r\n");
 }
 
 //*********************************************************************
@@ -298,14 +270,11 @@ void blfInit(struct _R4A_ROBOT_CHALLENGE * object)
 //   object: Address of a R4A_ROBOT_CHALLENGE data structure
 void blfStart(struct _R4A_ROBOT_CHALLENGE * object)
 {
-    Serial.printf("Start\r\n");
-    if (btSerial.hasClient())
-        btSerial.printf("blfStart\r\n");
+    Serial.printf("blfStart\r\n");
+    if (r4aBluetoothIsConnected())
+        r4aBtSerial->printf("blfStart\r\n");
     else
-    {
         btFailed = true;
-        Serial.printf("Bluetooth disconnected!\r\n");
-    }
     startMsec = millis();
     lastDisplayMsec = 0;
 }
@@ -315,28 +284,40 @@ void blfStart(struct _R4A_ROBOT_CHALLENGE * object)
 // perform any other actions.
 void blfStop(R4A_ROBOT_CHALLENGE * object)
 {
-    if (btSerial.hasClient())
-        btSerial.printf("blfStop\r\n");
+    Serial.printf("blfStop\r\n");
+    if (r4aBluetoothIsConnected())
+        r4aBtSerial->printf("blfStop\r\n");
     else
-    {
         btFailed = true;
-        Serial.printf("Bluetooth disconnected!\r\n");
-    }
+
+    // Display idle state again
+    idleDisplayed = false;
 
     // Apply the brakes
     r4aPca9685MotorBrakeAll();
 }
 
 //*********************************************************************
-// Display the Bluetooth address
-void btAddress()
+// Called by the update routine when the robot is not running a challenge
+// The initial delay routine calls this routine just before calling
+// the challenge routine for the first time.
+// Inputs:
+//   deltaMsec: Milliseconds to display
+void robotIdle(uint32_t mSecToStart)
 {
-    uint8_t mac[6];
+    const char * const text = "Robot idle\r\n";
 
-    // Display the Bluetooth address
-    btSerial.getBtAddress(mac);
-    Serial.printf("Bluetooth: %s (%02x:%02x:%02x:%02x:%02x:%02x)\r\n",
-                  BLUETOOTH_NAME, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    if (!idleDisplayed)
+    {
+        idleDisplayed = true;
+        Serial.printf(text);
+        if (r4aBluetoothIsConnected())
+            r4aBtSerial->printf(text);
+    }
+
+    // Check for Bluetooth connection
+    if ((btFailed == false) && (r4aBluetoothIsConnected() == false))
+        btFailed = true;
 }
 
 //*********************************************************************
