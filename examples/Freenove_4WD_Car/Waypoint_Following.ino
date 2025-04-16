@@ -274,8 +274,8 @@ void wpfStart(Print * display)
         wpfInit,
         wpfStart,
         wpfStop,
-        "Waypoint Following",           // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+        "Waypoint Following",               // _name
+        ROBOT_WAYPOINT_FOLLOW_DURATION_SEC, // _duration
     };
 
     // Only start the robot if the battery is on
