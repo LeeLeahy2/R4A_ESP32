@@ -98,7 +98,6 @@ void bltStart(Print * display)
         // Start the robot challenge if the robot is not active
         r4aRobotStart(&robot,
                       &basicLightTracking,
-                      ROBOT_LIGHT_TRACKING_DURATION_SEC,
                       display);
 }
 

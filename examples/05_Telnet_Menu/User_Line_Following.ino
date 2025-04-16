@@ -69,6 +69,5 @@ void menuUlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
         // Start the robot challenge if the robot is not active
         r4aRobotStart(&robot,
                       &userLineFollowing,
-                      ROBOT_LINE_FOLLOW_DURATION_SEC,
                       display);
 }

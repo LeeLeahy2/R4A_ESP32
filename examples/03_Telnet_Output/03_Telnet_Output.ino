@@ -244,7 +244,6 @@ void setup()
     telnet.printf("Calling r4aRobotStart to select the robot challenge\r\n");
     r4aRobotStart(&robot,
                   &basicLineFollowing,
-                  ROBOT_LINE_FOLLOW_DURATION_SEC,
                   &telnet);
 
     // Execute loop forever

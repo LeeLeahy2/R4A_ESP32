@@ -8,7 +8,6 @@
 // Constants
 //****************************************
 
-#define BLF_DEBUG_MOTORS        0
 #define BLF_DEBUG_STATES        0
 
 #define BLF_SPEED_LV4   4000
@@ -137,7 +136,6 @@ void blfStart(Print * display)
         // Start the robot challenge if the robot is not active
         r4aRobotStart(&robot,
                       &basicLineFollowing,
-                      ROBOT_LINE_FOLLOW_DURATION_SEC,
                       display);
 }
 

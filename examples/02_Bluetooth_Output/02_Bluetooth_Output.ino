@@ -213,7 +213,6 @@ void loop()
         r4aBtSerial->printf("Calling r4aRobotStart to select the robot challenge\r\n");
         r4aRobotStart(&robot,
                       &basicLineFollowing,
-                      ROBOT_LINE_FOLLOW_DURATION_SEC,
                       r4aBtSerial);
     }
     else if (btTransition == R4A_BST_DISCONNECTED)
