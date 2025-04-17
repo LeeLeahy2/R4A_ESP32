@@ -337,9 +337,6 @@ void setup()
     log_v("Calling r4aMenuBegin");
     r4aMenuBegin(&serialMenu, menuTable, menuTableEntries);
 
-    // Enable web server debugging
-    r4aWebServerDebug = webServerDebug ? &Serial : nullptr;
-
     // Set the ADC reference voltage
     log_v("Calling r4aEsp32VoltageSetReference");
     r4aEsp32VoltageSetReference(ADC_REFERENCE_VOLTAGE);
@@ -383,6 +380,9 @@ void setup()
         log_v("Calling r4aNtpSetup");
         r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
     }
+
+    // Enable web server debugging
+    r4aWebServerDebug = webServerDebug ? &Serial : nullptr;
 
     // Initialize the SPI controller
     log_v("r4aEsp32SpiBegin");
