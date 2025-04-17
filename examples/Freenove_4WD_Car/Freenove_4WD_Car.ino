@@ -88,6 +88,25 @@ bool ov2640ProcessWebServerFrameBuffer(R4A_OV2640 * object,
 #endif  // USE_OV2640
 
 //****************************************
+// Battery macros
+//****************************************
+
+#define ADC_REFERENCE_VOLTAGE   3.48    // Volts
+
+#define DISPLAY_BATTERY_VOLTAGE(display)  \
+    r4aEsp32VoltageDisplay(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, display)
+
+#define READ_BATTERY_VOLTAGE(adcValue)  \
+    r4aEsp32VoltageGet(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, adcValue)
+
+//****************************************
+// CPU core management
+//****************************************
+
+volatile bool core0Initialized;
+volatile bool core1Initialized;
+
+//****************************************
 // I2C bus configuration
 //****************************************
 
@@ -147,25 +166,6 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 bool ov2640Present;
 bool vk16k33Present;
 bool zedf9pPresent;
-
-//****************************************
-// Battery macros
-//****************************************
-
-#define ADC_REFERENCE_VOLTAGE   3.48    // Volts
-
-#define DISPLAY_BATTERY_VOLTAGE(display)  \
-    r4aEsp32VoltageDisplay(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, display)
-
-#define READ_BATTERY_VOLTAGE(adcValue)  \
-    r4aEsp32VoltageGet(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, adcValue)
-
-//****************************************
-// CPU core management
-//****************************************
-
-volatile bool core0Initialized;
-volatile bool core1Initialized;
 
 //****************************************
 // Light Sensor
