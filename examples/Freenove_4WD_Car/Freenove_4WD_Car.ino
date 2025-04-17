@@ -325,6 +325,10 @@ void setup()
     // Display the core number
     log_v("setup() running on core %d\r\n", xPortGetCoreID());
 
+    // Validate the tables
+    log_v("validateTables");
+    validateTables();
+
     // Get the parameters
     log_v("Calling r4aEsp32NvmGetParameters");
     r4aEsp32NvmGetParameters(&parameterFilePath);
@@ -351,10 +355,6 @@ void setup()
     int blueLED = (batteryVoltage > 2.)
                 ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
     digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
-
-    // Validate the tables
-    log_v("validateTables");
-    validateTables();
 
     // Delay to allow the hardware initialize
     delay(1000);
