@@ -204,8 +204,6 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 // Entry point for the application
 void setup()
 {
-    BaseType_t status;
-
     // Initialize the USB serial port
     Serial.begin(115200);
     Serial.println();

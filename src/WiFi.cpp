@@ -220,6 +220,7 @@ static int r4aWifiFailedConnectionAttempts = 0; // Count the number of connectio
 static bool r4aWifiReconnectRequest; // Set true to request WiFi reconnection
 
 static R4A_WIFI r4aWiFi;
+static network_event_handle_t r4aWifiEventHandle;
 
 //****************************************
 // Globals - For other module direct access
@@ -321,6 +322,7 @@ bool r4aWifiConnect(unsigned long timeout, bool startAP)
     log_w("WiFi: Not using timeout parameter for connect!\r\n");
 
     // Enable WiFi station if necessary
+    started = false;
     if (r4aWifiStationRunning == false)
         started = r4aWifiStationOn( __FILE__, __LINE__);
     else if (startAP && !r4aWifiSoftApRunning)
@@ -349,7 +351,7 @@ void r4aWifiDisplayComponents(const char * text, R4A_WIFI_ACTION_t components)
 {
     R4A_WIFI_ACTION_t mask;
 
-    Serial.printf("%s: 0x%08x\r\n", text, components);
+    Serial.printf("%s: 0x%08lx\r\n", text, components);
     for (int index = r4aWifiStartNamesEntries - 1; index >= 0; index--)
     {
         mask = 1 << index;
@@ -380,7 +382,7 @@ void r4aWifiDisplayState()
         const char *wifiStatusString = r4aWifiPrintStatus(wifiStatus);
 
         // Display the WiFi state
-        Serial.printf("    SSID: %s\r\n", WiFi.STA.SSID());
+        Serial.printf("    SSID: %s\r\n", WiFi.STA.SSID().c_str());
         Serial.printf("    IP Address: %s\r\n", WiFi.STA.localIP().toString().c_str());
         Serial.printf("    Subnet Mask: %s\r\n", WiFi.STA.subnetMask().toString().c_str());
         Serial.printf("    Gateway Address: %s\r\n", WiFi.STA.gatewayIP().toString().c_str());
@@ -412,7 +414,6 @@ bool r4aWifiEnable(bool enableESPNow,
                    const char * fileName,
                    int lineNumber)
 {
-    int authIndex;
     R4A_WIFI_ACTION_t starting;
     bool status;
     R4A_WIFI_ACTION_t stopping;
@@ -504,7 +505,7 @@ bool r4aWifiEspNowOff(const char * fileName, uint32_t lineNumber)
 {
     // Display the call
     if (r4aWifiDebug)
-        Serial.printf("wifiEspNowOff called in %s at line %d\r\n",
+        Serial.printf("wifiEspNowOff called in %s at line %ld\r\n",
                       fileName, lineNumber);
 
     if (r4aWifiEspNowRunning)
@@ -523,7 +524,7 @@ bool r4aWifiEspNowOn(const char * fileName, uint32_t lineNumber)
 {
     // Display the call
     if (r4aWifiDebug)
-        Serial.printf("wifiEspNowOn called in %s at line %d\r\n",
+        Serial.printf("wifiEspNowOn called in %s at line %ld\r\n",
                       fileName, lineNumber);
 
     if (r4aWifiEspNowRunning == false)
@@ -549,14 +550,14 @@ void r4aWifiEspNowSetChannel(R4A_WIFI_CHANNEL_t channel)
 //   info: Additional data about the event
 void r4aWifiEventHandler(arduino_event_id_t event, arduino_event_info_t info)
 {
-    bool success;
-
     if (r4aWifiDebug)
         Serial.printf("event: %d (%s)\r\n", event, NetworkEvents::eventName(event));
 
     // Handle the event
     switch (event)
     {
+	default:
+		break;
 
     //------------------------------
     // Controller events
@@ -958,13 +959,16 @@ void r4aWifiSoftApEventHandler(arduino_event_id_t event, arduino_event_info_t in
     // Handle the event
     switch (event)
     {
+	default:
+		break;
+
     case ARDUINO_EVENT_WIFI_AP_STOP:
         // Mark the soft AP as offline
         if (r4aWifiDebug && r4aWifiSoftApOnline)
             Serial.printf("AP: Offline\r\n");
         r4aWiFi._started = r4aWiFi._started & ~WIFI_AP_ONLINE;
         if (r4aWifiDebug && r4aWifiVerbose)
-            Serial.printf("_started: 0x%08x\r\n", r4aWiFi._started);
+            Serial.printf("_started: 0x%08lx\r\n", r4aWiFi._started);
         break;
     }
 }
@@ -990,7 +994,7 @@ bool r4aWifiSoftApOff(const char * fileName, uint32_t lineNumber)
 {
     // Display the call
     if (r4aWifiDebug)
-        Serial.printf("wifiSoftApOff called in %s at line %d\r\n",
+        Serial.printf("wifiSoftApOff called in %s at line %ld\r\n",
                       fileName, lineNumber);
 
     return r4aWifiEnable(r4aWifiEspNowRunning, false, r4aWifiStationRunning, __FILE__, __LINE__);
@@ -1007,7 +1011,7 @@ bool r4aWifiSoftApOn(const char * fileName, uint32_t lineNumber)
 {
     // Display the call
     if (r4aWifiDebug)
-        Serial.printf("wifiSoftApOn called in %s at line %d\r\n",
+        Serial.printf("wifiSoftApOn called in %s at line %ld\r\n",
                       fileName, lineNumber);
 
     return r4aWifiEnable(r4aWifiEspNowRunning, true, r4aWifiStationRunning, __FILE__, __LINE__);
@@ -1259,10 +1263,8 @@ bool r4aWiFiStationEnabled()
 // Handle the WiFi station events
 void r4aWifiStationEventHandler(arduino_event_id_t event, arduino_event_info_t info)
 {
-    R4A_WIFI_CHANNEL_t channel;
     IPAddress ipAddress;
     char ssid[sizeof(info.wifi_sta_connected.ssid) + 1];
-    bool success;
 
     //------------------------------
     // WiFi Status Values:
@@ -1292,6 +1294,9 @@ void r4aWifiStationEventHandler(arduino_event_id_t event, arduino_event_info_t i
 
     switch (event)
     {
+	default:
+		break;
+
     case ARDUINO_EVENT_WIFI_STA_START:
         WiFi.STA.macAddress((uint8_t *)r4aWiFi._staMacAddress);
         if (r4aWifiDebug)
@@ -1439,7 +1444,7 @@ bool r4aWifiStationOff(const char * fileName, uint32_t lineNumber)
 {
     // Display the call
     if (r4aWifiDebug)
-        Serial.printf("wifiStationOff called in %s at line %d\r\n",
+        Serial.printf("wifiStationOff called in %s at line %ld\r\n",
                       fileName, lineNumber);
 
     return r4aWifiEnable(r4aWifiEspNowRunning, r4aWifiSoftApRunning, false, __FILE__, __LINE__);
@@ -1456,7 +1461,7 @@ bool r4aWifiStationOn(const char * fileName, uint32_t lineNumber)
 {
     // Display the call
     if (r4aWifiDebug)
-        Serial.printf("wifiStationOn called in %s at line %d\r\n",
+        Serial.printf("wifiStationOn called in %s at line %ld\r\n",
                       fileName, lineNumber);
 
     return r4aWifiEnable(r4aWifiEspNowRunning, r4aWifiSoftApRunning, true, __FILE__, __LINE__);
@@ -1531,11 +1536,11 @@ bool r4aWifiStationReconnectionRequest()
 int16_t r4aWifiStationScanForAPs(R4A_WIFI_CHANNEL_t channel)
 {
     int16_t apCount;
-    int16_t status;
 
     do
     {
         // Determine if the WiFi scan is already running
+        apCount = 0;
         if (r4aWiFi._scanRunning)
         {
             if (r4aWifiDebug)
@@ -1643,7 +1648,7 @@ R4A_WIFI_CHANNEL_t r4aWifiStationSelectAP(uint8_t apCount, bool list)
 
         // Display the list of APs
         if (r4aWifiDebug || list)
-            Serial.printf("%4d   %4d   %s   %s\r\n",
+            Serial.printf("%4ld   %4d   %s   %s\r\n",
                          WiFi.RSSI(ap),
                          channel,
                          (type < WIFI_AUTH_MAX) ? r4aWifiAuthorizationName[type] : "Unknown",
@@ -1686,19 +1691,14 @@ void r4aWifiStopAll()
 bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
 {
     const R4A_WIFI_ACTION_t allOnline = WIFI_AP_ONLINE | WIFI_EN_ESP_NOW_ONLINE | WIFI_STA_ONLINE;
-    int authIndex;
     R4A_WIFI_CHANNEL_t channel;
     bool defaultChannel;
-    R4A_WIFI_ACTION_t delta;
     R4A_WIFI_ACTION_t expected;
     R4A_WIFI_ACTION_t mask;
     R4A_WIFI_ACTION_t notStarted;
-    uint8_t primaryChannel;
     R4A_WIFI_ACTION_t restarting;
     bool restartWiFiStation;
-    wifi_second_chan_t secondaryChannel;
     R4A_WIFI_ACTION_t startingNow;
-    esp_err_t status;
     R4A_WIFI_ACTION_t stillRunning;
 
     // Determine the next actions
@@ -1709,8 +1709,8 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
     if (r4aWifiDebug && r4aWifiVerbose)
     {
         Serial.printf("WiFi: wifiStopStart called\r\n");
-        Serial.printf("stopping: 0x%08x\r\n", stopping);
-        Serial.printf("starting: 0x%08x\r\n", starting);
+        Serial.printf("stopping: 0x%08lx\r\n", stopping);
+        Serial.printf("starting: 0x%08lx\r\n", starting);
         r4aEsp32HeapDisplay();
     }
 
@@ -1820,11 +1820,11 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
     // Display the values
     if (r4aWifiDebug && r4aWifiVerbose)
     {
-        Serial.printf("0x%08x: _started\r\n", r4aWiFi._started);
-        Serial.printf("0x%08x: stopping\r\n", stopping);
-        Serial.printf("0x%08x: starting\r\n", starting);
-        Serial.printf("0x%08x: restarting\r\n", restarting);
-        Serial.printf("0x%08x: expected\r\n", expected);
+        Serial.printf("0x%08lx: _started\r\n", r4aWiFi._started);
+        Serial.printf("0x%08lx: stopping\r\n", stopping);
+        Serial.printf("0x%08lx: starting\r\n", starting);
+        Serial.printf("0x%08lx: restarting\r\n", restarting);
+        Serial.printf("0x%08lx: expected\r\n", expected);
     }
 
     // Don't start components that are already running and are not being
@@ -1898,6 +1898,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             if (!r4aWiFiEspNowStop())
             {
                 Serial.printf("ERROR: Failed to stop ESP-NOW!\r\n");
+                stillRunning = r4aWiFi._started;
                 break;
             }
             r4aWiFi._started = r4aWiFi._started & ~WIFI_EN_START_ESP_NOW;
@@ -1914,6 +1915,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             if (status != ESP_OK)
             {
                 Serial.printf("ERROR: Failed to stop WiFi promiscuous mode, status: %d\r\n", status);
+                stillRunning = r4aWiFi._started;
                 break;
             }
             if (r4aWifiDebug && r4aWifiVerbose)
@@ -1928,6 +1930,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Stop the long range radio protocols
         if (stopping & WIFI_EN_SET_PROTOCOLS)
         {
+            stillRunning = r4aWiFi._started;
             if (!r4aWifiSetWiFiProtocols(WIFI_IF_STA, true, false))
                 break;
             r4aWiFi._started = r4aWiFi._started & ~WIFI_EN_SET_PROTOCOLS;
@@ -1960,6 +1963,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Disconnect from the remote AP
         if (stopping & WIFI_STA_CONNECT_TO_REMOTE_AP)
         {
+            stillRunning = r4aWiFi._started;
             if (!r4aWifiStationDisconnect())
                 break;
             r4aWiFi._started = r4aWiFi._started & ~WIFI_STA_CONNECT_TO_REMOTE_AP;
@@ -1998,6 +2002,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             // Stop WiFi station if users are gone
             if (!(r4aWiFi._started & mask & (WIFI_EN_SET_MODE | WIFI_STA_SET_MODE)))
             {
+                stillRunning = r4aWiFi._started;
                 if (!r4aWifiSetWiFiMode(WIFI_MODE_STA, WIFI_MODE_STA))
                     break;
             }
@@ -2034,6 +2039,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
             r4aWiFi._started = r4aWiFi._started & ~WIFI_AP_SET_HOST_NAME;
 
         // Stop soft AP mode
+        stillRunning = r4aWiFi._started;
         if (stopping & WIFI_AP_SET_MODE)
         {
             if (!r4aWifiSetWiFiMode(WIFI_MODE_AP, WIFI_MODE_AP))
@@ -2064,7 +2070,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         {
             if (r4aWifiDebug)
                 Serial.printf("Stopping the WiFi event handler\r\n");
-            Network.removeEvent(r4aWifiEventHandler);
+            Network.removeEvent(r4aWifiEventHandle);
             r4aWiFi._started = r4aWiFi._started & ~WIFI_START_EVENT_HANDLER;
         }
 
@@ -2108,7 +2114,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
                     Serial.printf("Starting the WiFi event handler\r\n");
 
                 // Establish the WiFi event handler
-                Network.onEvent(r4aWifiEventHandler);
+                r4aWifiEventHandle = Network.onEvent(r4aWifiEventHandler);
             }
             r4aWiFi._started = r4aWiFi._started | WIFI_START_EVENT_HANDLER;
         }
@@ -2198,7 +2204,7 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
         // Finish the channel selection
         if (starting & WIFI_SELECT_CHANNEL)
         {
-            r4aWiFi._started = r4aWiFi._started | starting & WIFI_SELECT_CHANNEL;
+            r4aWiFi._started = r4aWiFi._started | (starting & WIFI_SELECT_CHANNEL);
             if (channel & (starting & WIFI_STA_START_SCAN))
             {
                 if (r4aWifiDebug && r4aWifiVerbose)
@@ -2507,8 +2513,8 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
     //****************************************
     if (r4aWifiDebug && r4aWifiVerbose)
     {
-        Serial.printf("0x%08x: stopping\r\n", stopping);
-        Serial.printf("0x%08x: stillRunning\r\n", stillRunning);
+        Serial.printf("0x%08lx: stopping\r\n", stopping);
+        Serial.printf("0x%08lx: stillRunning\r\n", stillRunning);
     }
 
     // Determine which components were not stopped
@@ -2522,8 +2528,8 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
 
     if (r4aWifiDebug && r4aWifiVerbose)
     {
-        Serial.printf("0x%08x: startingNow\r\n", startingNow);
-        Serial.printf("0x%08x: _started\r\n", r4aWiFi._started);
+        Serial.printf("0x%08lx: startingNow\r\n", startingNow);
+        Serial.printf("0x%08lx: _started\r\n", r4aWiFi._started);
     }
     startingNow &= ~r4aWiFi._started;
     if (r4aWifiDebug &&  startingNow)
@@ -2535,8 +2541,8 @@ bool r4aWifiStopStart(R4A_WIFI_ACTION_t stopping, R4A_WIFI_ACTION_t starting)
 
     if (r4aWifiDebug && r4aWifiVerbose)
     {
-        Serial.printf("0x%08x: startingNow\r\n", startingNow);
-        Serial.printf("0x%08x: _started\r\n", r4aWiFi._started);
+        Serial.printf("0x%08lx: startingNow\r\n", startingNow);
+        Serial.printf("0x%08lx: _started\r\n", r4aWiFi._started);
     }
 
     // Clear the items that were not started

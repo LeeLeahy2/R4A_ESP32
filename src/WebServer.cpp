@@ -47,10 +47,6 @@ esp_err_t r4aWebServerError (httpd_req_t *request,
     int index;
     const char * method;
     static char line[1000];
-    R4A_WEB_SERVER * object;
-
-    // Get the web server data structure
-    object = (R4A_WEB_SERVER *)request->user_ctx;
 
     // Get the method name
     method = nullptr;

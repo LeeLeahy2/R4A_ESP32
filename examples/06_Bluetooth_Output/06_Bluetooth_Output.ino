@@ -156,8 +156,6 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 // Entry point for the application
 void setup()
 {
-    BaseType_t status;
-
     // Initialize the USB serial port
     Serial.begin(115200);
     Serial.println();
@@ -238,7 +236,7 @@ void blfDisplayTime(uint32_t deltaMsec)
     minutes = seconds / R4A_SECONDS_IN_A_MINUTE;
     seconds -= minutes * R4A_SECONDS_IN_A_MINUTE;
     if (btSerial->hasClient())
-        btSerial->printf("%d:%02d.%d\r\n", minutes, seconds, milliseconds / 100);
+        btSerial->printf("%ld:%02ld.%ld\r\n", minutes, seconds, milliseconds / 100);
     else
         btFailed = true;
 }

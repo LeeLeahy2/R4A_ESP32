@@ -42,10 +42,32 @@ void operator delete(void * ptr) noexcept
 }
 
 //*********************************************************************
+// Replace the delete function, see https://en.cppreference.com/w/cpp/memory/new/operator_delete
+// Inputs:
+//   ptr: Address of the buffer to free
+//   size: Number of bytes to free
+void operator delete(void * ptr, size_t size) noexcept
+{
+    // Display the free operation
+    r4aFree(ptr, "object");
+}
+
+//*********************************************************************
 // Replace the delete[] function, see https://en.cppreference.com/w/cpp/memory/new/operator_delete
 // Inputs:
 //   ptr: Address of the array to free
 void operator delete[](void * ptr) noexcept
+{
+    // Display the free operation
+    r4aFree(ptr, "array");
+}
+
+//*********************************************************************
+// Replace the delete[] function, see https://en.cppreference.com/w/cpp/memory/new/operator_delete
+// Inputs:
+//   ptr: Address of the array to free
+//   size: Number of bytes to free
+void operator delete[](void * ptr, size_t size) noexcept
 {
     // Display the free operation
     r4aFree(ptr, "array");
@@ -60,7 +82,7 @@ void operator delete[](void * ptr) noexcept
 //   Returns the buffer address when successful or nullptr if failure
 void* operator new(std::size_t numberOfBytes, const char * text)
 {
-    r4aMalloc(numberOfBytes, text);
+    return r4aMalloc(numberOfBytes, text);
 }
 
 //*********************************************************************
@@ -123,7 +145,7 @@ void * r4aDmaMalloc(size_t numberOfBytes, const char * text)
                           buffer, r4aMemoryLocation(buffer), text,
                           numberOfBytes, numberOfBytes);
         else
-            Serial.printf("%Error: Failed to allocate DMA buffer, %s\r\n", text);
+            Serial.printf("Error: Failed to allocate DMA buffer, %s\r\n", text);
     }
     return buffer;
 }
@@ -169,7 +191,7 @@ void * r4aMalloc(size_t numberOfBytes, const char * text)
                           buffer, r4aMemoryLocation(buffer), text,
                           numberOfBytes, numberOfBytes);
         else
-            Serial.printf("%Error: Failed to allocate buffer, %s\r\n", text);
+            Serial.printf("Error: Failed to allocate buffer, %s\r\n", text);
     }
     return buffer;
 }
@@ -196,4 +218,5 @@ const char * r4aMemoryLocation(void * addr)
         return "EEPROM";
     if (r4aEsp32IsAddressInROM(addr))
         return "ROM";
+    return "Unknown";
 }

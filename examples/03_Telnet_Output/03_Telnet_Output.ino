@@ -187,8 +187,6 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 // Entry point for the application
 void setup()
 {
-    BaseType_t status;
-
     // Initialize the USB serial port
     Serial.begin(115200);
     Serial.println();
@@ -305,7 +303,7 @@ void blfDisplayTime(uint32_t deltaMsec)
     minutes = seconds / R4A_SECONDS_IN_A_MINUTE;
     seconds -= minutes * R4A_SECONDS_IN_A_MINUTE;
     if (telnet.hasClient())
-        telnet.printf("%d:%02d.%d\r\n", minutes, seconds, milliseconds / 100);
+        telnet.printf("%ld:%02ld.%ld\r\n", minutes, seconds, milliseconds / 100);
     else if (!telnetFailed)
     {
         telnetFailed = true;

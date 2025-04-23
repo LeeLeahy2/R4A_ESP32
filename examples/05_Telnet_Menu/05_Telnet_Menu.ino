@@ -248,8 +248,6 @@ const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword)
 // Entry point for the application
 void setup()
 {
-    BaseType_t status;
-
     // Initialize the USB serial port
     Serial.begin(115200);
     Serial.println();
