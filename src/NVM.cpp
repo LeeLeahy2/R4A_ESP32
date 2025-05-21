@@ -1686,14 +1686,17 @@ bool r4aEsp32NvmParseParameters(const R4A_ESP32_NVM_PARAMETER * parameterTable,
 
         // Parse the value
         value.u64 = 0;
-        if (!r4aEsp32NvmParseValue(parameter, valueString, &value, display))
+        if (type != R4A_ESP32_NVM_PT_NULLPTR)
         {
-            delta = valueString - nvmData;
-            if (display)
-                display->printf("ERROR: Invalid %s value string at offset %d (0x%x)!\r\n",
-                                name, delta, delta);
-            validParameters = false;
-            break;
+            if (!r4aEsp32NvmParseValue(parameter, valueString, &value, display))
+            {
+                delta = valueString - nvmData;
+                if (display)
+                    display->printf("ERROR: Invalid %s value string at offset %d (0x%x)!\r\n",
+                                    name, delta, delta);
+                validParameters = false;
+                break;
+            }
         }
 
         // Set the value
