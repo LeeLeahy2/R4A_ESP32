@@ -176,9 +176,20 @@ void r4aFree(void * buffer, const char * text)
 void * r4aMalloc(size_t numberOfBytes, const char * text)
 {
     void * buffer;
+    static bool psramCheckDone;
+    static bool psramAvailable;
+
+    // Check for PSRAM
+    if (psramCheckDone == false)
+    {
+        psramCheckDone = true;
+        log_v("Checking for PSRAM");
+        psramAvailable = psramFound();
+        log_v("PSRAM: %s", psramAvailable ? "Available" : "NOT available");
+    }
 
     // Attempt to allocate the buffer
-    if (r4aMallocMaxBytes < numberOfBytes)
+    if ((r4aMallocMaxBytes < numberOfBytes) && psramAvailable)
         buffer = ps_malloc(numberOfBytes);
     else
         buffer = malloc(numberOfBytes);
