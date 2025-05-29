@@ -1251,8 +1251,12 @@ bool r4aWiFiStationEnabled()
 
     // Verify that at least one SSID is set
     for (authIndex = 0; authIndex < r4aWifiSsidPasswordEntries; authIndex++)
-        if (strlen(*r4aWifiSsidPassword[authIndex].ssid))
+        if (r4aWifiSsidPassword[authIndex].ssid
+            && *r4aWifiSsidPassword[authIndex].ssid
+            && strlen(*r4aWifiSsidPassword[authIndex].ssid))
+        {
             break;
+        }
     enabled = (authIndex < r4aWifiSsidPasswordEntries);
     if (!enabled)
         Serial.printf("ERROR: No valid SSID in settings\r\n");
