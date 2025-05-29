@@ -226,6 +226,9 @@ void r4aEsp32NvmSetParameterValue(const R4A_ESP32_NVM_PARAMETER * parameter,
     void * dataAddress;
     R4A_ESP32_NVM_VALUE value;
 
+    // Display the call
+    log_v("r4aEsp32NvmSetParameterValue(%p, %lld(0x%016llx))", (void *)parameter, data, data);
+
     // Determine the parameter type
     value.u64 = data;
     switch (parameter->type)
@@ -329,6 +332,9 @@ bool r4aEsp32NvmWriteParameterValue(File &parameterFile,
     char valueString[32];
     bool valid;
     R4A_ESP32_NVM_VALUE value;
+
+    // Display the call
+    log_v("r4aEsp32NvmWriteParameterValue(%p, %p, %p, %d)", (void *)&parameterFile, (void *)parameter, (void *)display, debug);
 
     // Determine the parameter type
     type = parameter->type;
@@ -481,6 +487,9 @@ void r4aEsp32NvmDisplayParameter(const R4A_ESP32_NVM_PARAMETER * parameter,
 {
     R4A_ESP32_NVM_VALUE value;
 
+    // Display the call
+    log_v("r4aEsp32NvmDisplayParameter(%p, %p)", (void *)parameter, (void *)display);
+
     // Determine the parameter type
     switch (parameter->type)
     {
@@ -590,6 +599,9 @@ void r4aEsp32NvmDisplayParameters(const R4A_ESP32_NVM_PARAMETER * parameterTable
     uint16_t * index;
     int j;
     uint16_t temp;
+
+    // Display the call
+    log_v("r4aEsp32NvmDisplayParameters(%p, %d, %p)", (void *)parameterTable, parameterCount, (void *)display);
 
     // Allocate the parameter index table
     index = (uint16_t *)r4aMalloc(parameterCount * sizeof(*index), "Parameter index table (index)");
@@ -755,6 +767,9 @@ void r4aEsp32NvmGetDefaultParameters(const R4A_ESP32_NVM_PARAMETER * parameterTa
     const R4A_ESP32_NVM_PARAMETER * parameter;
     R4A_ESP32_NVM_VALUE value;
 
+    // Display the call
+    log_v("r4aEsp32NvmGetDefaultParameters(%p, %d)", (void *)parameterTable, parameterCount);
+
     // Walk the list of parameters
     for (int index = 0; index < parameterCount; index++)
     {
@@ -813,15 +828,20 @@ bool r4aEsp32NvmGetParameters(const char ** filePath,
         }
 
         // Start the file system
+        log_v("Starting the little file system");
         if (!LittleFS.begin(true)) // Format LittleFS upon failure
         {
             if (display)
                  display->println("Warning: LittleFS not available, using default parameters");
+            else
+                 Serial.println("Warning: LittleFS not available, using default parameters");
         }
 
         // Read the parameters from the file
         else
         {
+            log_v("LittleFS total bytes: %d\r\n", LittleFS.totalBytes());
+            log_v("LittleFS used bytes: %d\r\n", LittleFS.usedBytes());
             if (r4aEsp32NvmReadParameters(*filePath,
                                           nvmParameters,
                                           nvmParameterCount,
@@ -1543,6 +1563,9 @@ const R4A_ESP32_NVM_PARAMETER * r4aEsp32NvmParameterLookup(const R4A_ESP32_NVM_P
     int index;
     const R4A_ESP32_NVM_PARAMETER * parameter;
 
+    // Display the call
+    log_v("r4aEsp32NvmParameterLookup(%p, %d, %p, %p)", (void *)parameterTable, parameterCount, address, (void *)display);
+
     // Look up the parameter
     parameter = nullptr;
     for (index = 0; index < parameterCount; index++)
@@ -1565,6 +1588,9 @@ const R4A_ESP32_NVM_PARAMETER * r4aEsp32NvmParameterLookup(const R4A_ESP32_NVM_P
 {
     int index;
     const R4A_ESP32_NVM_PARAMETER * parameter;
+
+    // Display the call
+    log_v("r4aEsp32NvmParameterLookup(%p %d, %p, %p)", (void *)parameterTable, parameterCount, (const void *)name, (void *)display);
 
     // Look up the parameter
     parameter = nullptr;
@@ -1771,6 +1797,9 @@ bool r4aEsp32NvmReadParameters(const char * filePath,
     uint8_t * nvmData;
     bool status;
 
+    // Display the call
+    log_v("r4aEsp32NvmReadParameters(%p, %p %d, %p)", (void *) filePath, (void *)parameterTable, parameterCount, (void *)display);
+
     // Allocate the available parameter bitmap
     int parameterBytes = (parameterCount + 7) >> 3;
     uint8_t availableParameters[parameterBytes];
@@ -1865,16 +1894,23 @@ bool r4aEsp32NvmWriteParameters(const char * filePath,
 {
     bool success;
 
+    // Display the call
+    log_v("r4aEsp32NvmWriteParameters(%p, %p %d, %p, %d)", (void *) filePath, (void *)parameterTable, parameterCount, (void *)display, debug);
+
     // Attempt to open the file
     success = false;
+    log_v("Opening the parameter file %s for write", (void *) filePath);
     File parameterFile = LittleFS.open(filePath, "w");
     if (!parameterFile)
     {
         if (display)
             display->printf("ERROR: Failed to create file %s!\r\n", filePath);
+        else
+            Serial.printf("ERROR: Failed to create file %s!\r\n", filePath);
     }
     else
     {
+        log_v("Parameter file %s opened successfully", (void *) filePath);
         if (display)
             display->printf("Saving parameters to %s\r\n", filePath);
 
