@@ -217,6 +217,27 @@ R4A_ESP32_I2C_BUS i2cBus(0, i2cBusDeviceTable, i2cBusDeviceTableEntries);   \
     R4A_PCF8574 pcf8574(&i2cBus, PCF8574_I2C_ADDRESS);
 
 //****************************************
+// LED Matrix
+//****************************************
+
+// Fonts
+extern const uint8_t * r4a5x7Numbers[];
+extern const uint8_t * r4a5x7UcAtoF[];
+extern const uint8_t * r4a5x7LcAtoF[];
+extern const uint8_t r4a5x7Font_dp;
+extern const uint8_t r4a5x7Font_l;
+extern const uint8_t r4a5x7Font_t[5];
+
+extern const int r4aLedMatrixColumnMap[];
+
+// Display a character on the LED matrix
+// Inputs:
+//   vk16k33: Address of a R4A_VK16K33 data structure
+//   xColumn: Column number to modify, zero on left
+//   data: Data to write into the column, bit zero on top, bit 7 on bottom
+void r4aLedMatrixDisplayChar(R4A_VK16K33 * vk16k33, int xColumn, char data);
+
+//****************************************
 // Line sensors
 //****************************************
 

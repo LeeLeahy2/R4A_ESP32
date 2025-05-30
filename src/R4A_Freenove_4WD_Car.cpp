@@ -8,6 +8,16 @@
 **********************************************************************/
 
 #include "R4A_Freenove_4WD_Car.h"
+#include "Font_5x7.h"           // Font for the LED matrix display
+
+//****************************************
+// Constants
+//****************************************
+
+const int r4aLedMatrixColumnMap[] =
+{
+    0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
+};
 
 //*********************************************************************
 // Get the backup light color
@@ -316,4 +326,70 @@ void R4A_Freenove_4WD_Car::ledsUpdate(uint32_t currentMsec)
 
     // Update the LED colors
     r4aLEDUpdate(true);
+}
+
+//*********************************************************************
+// Display a character on the LED matrix
+void r4aLedMatrixDisplayChar(R4A_VK16K33 * vk16k33, int xColumn, char data)
+{
+    int columnCount;
+    const uint8_t * font;
+
+    // Get the font data
+    font = nullptr;
+    columnCount = 5;
+    switch (data)
+    {
+    default:
+        break;
+    case '.':
+        columnCount = 1;
+        font = &r4a5x7Font_dp;
+        break;
+
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+        font = r4a5x7Numbers[data - '0'];
+        break;
+
+    case 'A':
+    case 'B':
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'F':
+        font = r4a5x7UcAtoF[data - 'A'];
+        break;
+
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+        font = r4a5x7LcAtoF[data - 'a'];
+        break;
+
+    case 'l':
+        columnCount = 1;
+        font = &r4a5x7Font_l;
+        break;
+
+    case 't':
+        font = r4a5x7Font_t;
+        break;
+    }
+
+    // Set the pixels in the columns
+    if (font)
+        for (int column = xColumn; column < (xColumn + columnCount); column++)
+            r4aVk16k33WriteColumn(vk16k33, r4aLedMatrixColumnMap[column], *font++);
 }
