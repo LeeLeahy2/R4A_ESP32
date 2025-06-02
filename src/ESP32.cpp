@@ -15,6 +15,17 @@ static uint8_t r4aEsp32GpioPinMode[256];
 static float r4aEsp32VoltageReference;
 
 //*********************************************************************
+// Allocate DMA buffer
+// Inputs:
+//   length: Number of data bytes to allocate
+// Outputs:
+//   Returns the buffer address if successful and nullptr otherwise
+uint8_t * r4aEsp32AllocateDmaBuffer(int length)
+{
+    return (uint8_t *)heap_caps_malloc(length, MALLOC_CAP_DMA);
+}
+
+//*********************************************************************
 // Display the name of a zero terminated string and it's value.
 // Inputs:
 //   name: Name of the string variable
@@ -30,17 +41,6 @@ void r4aEsp32DisplayCharPointer(const char * name,
                     value ? ", (" : "",
                     value ? value : "",
                     value ? ")"   : "");
-}
-
-//*********************************************************************
-// Allocate DMA buffer
-// Inputs:
-//   length: Number of data bytes to allocate
-// Outputs:
-//   Returns the buffer address if successful and nullptr otherwise
-uint8_t * r4aEsp32AllocateDmaBuffer(int length)
-{
-    return (uint8_t *)heap_caps_malloc(length, MALLOC_CAP_DMA);
 }
 
 //*********************************************************************
@@ -141,6 +141,33 @@ bool r4aEsp32IsAddressInSRAM1(void * addr)
 bool r4aEsp32IsAddressInSRAM2(void * addr)
 {
     return ((addr >= (void *)0x3ffae000) && (addr <= (void *)0x3ffdffff));
+}
+
+//*********************************************************************
+// Display the heap
+void r4aEsp32MenuDisplayHeap(const struct _R4A_MENU_ENTRY * menuEntry,
+                             const char * command,
+                             Print * display)
+{
+    r4aEsp32HeapDisplay(display);
+}
+
+//*********************************************************************
+// Display the partitions
+void r4aEsp32MenuDisplayPartitions(const struct _R4A_MENU_ENTRY * menuEntry,
+                                   const char * command,
+                                   Print * display)
+{
+    r4aEsp32PartitionTableDisplay(display);
+}
+
+//*********************************************************************
+// Reset the system
+void r4aEsp32MenuSystemReset(const struct _R4A_MENU_ENTRY * menuEntry,
+                             const char * command,
+                             Print * display)
+{
+    r4aEsp32SystemReset();
 }
 
 //*********************************************************************
@@ -302,31 +329,4 @@ float r4aEsp32VoltageGet(int adcPin, float offset, float multiplier, int16_t * a
 void r4aEsp32VoltageSetReference(float maximumVoltage)
 {
     r4aEsp32VoltageReference = maximumVoltage;
-}
-
-//*********************************************************************
-// Display the heap
-void r4aEsp32MenuDisplayHeap(const struct _R4A_MENU_ENTRY * menuEntry,
-                             const char * command,
-                             Print * display)
-{
-    r4aEsp32HeapDisplay(display);
-}
-
-//*********************************************************************
-// Display the partitions
-void r4aEsp32MenuDisplayPartitions(const struct _R4A_MENU_ENTRY * menuEntry,
-                                   const char * command,
-                                   Print * display)
-{
-    r4aEsp32PartitionTableDisplay(display);
-}
-
-//*********************************************************************
-// Reset the system
-void r4aEsp32MenuSystemReset(const struct _R4A_MENU_ENTRY * menuEntry,
-                             const char * command,
-                             Print * display)
-{
-    r4aEsp32SystemReset();
 }
