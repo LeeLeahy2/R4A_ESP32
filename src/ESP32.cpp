@@ -6,6 +6,9 @@
 **********************************************************************/
 
 #include "R4A_ESP32.h"
+#include <esp_clk_tree.h>       // IDF built-in
+#include <hal/clk_tree_hal.h>   // IDF built-in
+#include <hal/clk_tree_ll.h>    // IDF built-in
 
 //****************************************
 // Locals
@@ -23,6 +26,59 @@ static float r4aEsp32VoltageReference;
 uint8_t * r4aEsp32AllocateDmaBuffer(int length)
 {
     return (uint8_t *)heap_caps_malloc(length, MALLOC_CAP_DMA);
+}
+
+//*********************************************************************
+// Display the ESP32 clocks
+void r4aEsp32ClockDisplay(Print * display)
+{
+    uint32_t frequency;
+    esp_clk_tree_src_freq_precision_t precision;
+
+    precision = ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED;
+
+    display->printf("ESP32 Clocks:\r\n");
+    esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_XTAL, precision, &frequency);
+    display->printf("    Crystal:  %3ld MHz\r\n", frequency / R4A_FREQ_MHz);
+
+    frequency = clk_hal_soc_root_get_freq_mhz(clk_ll_cpu_get_src());
+    display->printf("    Root:     %3ld MHz\r\n", frequency);
+
+    esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_CPU, precision, &frequency);
+    display->printf("    CPU:      %3ld MHz\r\n", frequency / R4A_FREQ_MHz);
+
+    esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_APLL, precision, &frequency);
+    display->printf("    APLL:     %3ld MHz\r\n", frequency  / R4A_FREQ_MHz);
+
+    display->printf("    APB:      %3ld MHz\r\n", r4aEsp32ClockGetApb() / R4A_FREQ_MHz);
+    display->printf("    REF_TICK: %3ld MHz\r\n", r4aEsp32ClockGetRefTick() / R4A_FREQ_MHz);
+
+    esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_RTC_SLOW, precision, &frequency);
+    display->printf("    RTC_SLOW: %3ld KHz\r\n", frequency  / R4A_FREQ_KHz);
+}
+
+//*********************************************************************
+// Get the APB_CLK
+uint32_t r4aEsp32ClockGetApb()
+{
+    uint32_t frequency;
+    esp_clk_tree_src_freq_precision_t precision;
+
+    precision = ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED;
+    esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_APB, precision, &frequency);
+    return frequency;
+}
+
+//*********************************************************************
+// Get the REF_TICK
+uint32_t r4aEsp32ClockGetRefTick()
+{
+    uint32_t frequency;
+    esp_clk_tree_src_freq_precision_t precision;
+
+    precision = ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED;
+    esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_REF_TICK, precision, &frequency);
+    return frequency;
 }
 
 //*********************************************************************

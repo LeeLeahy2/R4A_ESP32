@@ -83,6 +83,21 @@ R4A_BLUETOOTH_STATE_TRANSITION r4aBluetoothUpdate();
 //   Returns the buffer address if successful and nullptr otherwise
 uint8_t * r4aEsp32AllocateDmaBuffer(int length);
 
+// Display the ESP32 clocks
+// Inputs:
+//   display: Device used for output
+void r4aEsp32ClockDisplay(Print * display = &Serial);
+
+// Get the APB_CLK frequency in Hz
+// Outputs:
+//   Returns the frequency in Hz
+uint32_t r4aEsp32ClockGetApb();
+
+// Get the REF_TICK frequency in Hz
+// Outputs:
+//   Returns the frequency in Hz
+uint32_t r4aEsp32ClockGetRefTick();
+
 // Display the name of a zero terminated string and it's value.
 // Inputs:
 //   name: Name of the string variable
