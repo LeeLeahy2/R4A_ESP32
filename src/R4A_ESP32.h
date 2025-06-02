@@ -14,9 +14,9 @@
 #include <LittleFS.h>           // Built-in, load and store files in flash
 
 #include <esp_camera.h>         // IDF built-in, needed for OV2640 camera
-#include <esp32-hal-spi.h>      // IDF built-in
 #include <esp_http_server.h>    // IDF built-in, needed for camera web server
 #include <esp_wifi.h>           // IDF built-in
+#include <esp32-hal-spi.h>      // IDF built-in
 
 #include <BluetoothSerial.h>    // ESP32 built-in Library
 
