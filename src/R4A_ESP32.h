@@ -260,6 +260,22 @@ void r4aEsp32GpioDisplayIoMuxRegisters(Print * display = &Serial);
 //   display: Device used for output
 void r4aEsp32GpioDisplayRegisters(Print * display = &Serial);
 
+// Enable or disable the pull-down resistor
+// Inputs:
+//   gpioNumber: Number of the GPIO port
+//   enable: Set true to enable the pull-down resistor and false to disable
+// Outputs:
+//   Returns true if successful and false upon failure
+bool r4aEsp32GpioPullDown(int gpioNumber, bool enable);
+
+// Enable or disable the pullup resistor
+// Inputs:
+//   gpioNumber: Number of the GPIO port
+//   enable: Set true to enable the pullup resistor and false to disable
+// Outputs:
+//   Returns true if successful and false upon failure
+bool r4aEsp32GpioPullUp(int gpioNumber, bool enable);
+
 //****************************************
 // Heap support
 //****************************************

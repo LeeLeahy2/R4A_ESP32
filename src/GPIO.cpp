@@ -501,3 +501,48 @@ void r4aEsp32GpioDisplayIoMuxRegisters(Print * display)
         }
     }
 }
+
+//*********************************************************************
+// Enable or disable the pull-down resistor
+bool r4aEsp32GpioPullDown(int gpioNumber, bool enable)
+{
+    uint32_t * ioMux;
+    int muxIndex;
+
+    // Verify that an IOMUX register exists for this port
+    muxIndex = r4aGpioPortToIoMuxIndex[gpioNumber];
+    if (muxIndex < 0)
+        // This port does not have an IOMUX register
+        return false;
+
+    // Update the pull-down state for this port
+    ioMux = (uint32_t *)r4aIoMux;
+    if (enable)
+        ioMux[muxIndex] |= IO_MUX_MCU_WPD;
+    else
+        ioMux[muxIndex] &= ~IO_MUX_MCU_WPD;
+    return true;
+}
+
+//*********************************************************************
+// Enable or disable the pullup resistor
+bool r4aEsp32GpioPullUp(int gpioNumber, bool enable)
+{
+    uint32_t * ioMux;
+    int muxIndex;
+
+    // Verify that an IOMUX register exists for this port
+    muxIndex = r4aGpioPortToIoMuxIndex[gpioNumber];
+    if (muxIndex < 0)
+        // This port does not have an IOMUX register
+        return false;
+
+    // Update the pullup state for this port
+    ioMux = (uint32_t *)r4aIoMux;
+    if (enable)
+        ioMux[muxIndex] |= IO_MUX_MCU_WPU;
+    else
+        ioMux[muxIndex] &= ~IO_MUX_MCU_WPU;
+    return true;
+}
+
