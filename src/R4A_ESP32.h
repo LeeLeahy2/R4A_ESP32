@@ -346,7 +346,7 @@ TwoWire * r4aEsp32I2cBusGetTwoWire(R4A_I2C_BUS * i2cBus);
 // Read data from an I2C peripheral
 // Inputs:
 //   i2cBus: Address of a R4A_I2C_BUS data structure
-//   deviceAddress: Device address on the I2C bus (0 - 0x7f)
+//   i2cAddress: Device address on the I2C bus
 //   cmdBuffer: Address of the buffer containing the command bytes, may be nullptr
 //   cmdByteCount: Number of bytes to send from the command buffer
 //   dataBuffer: Address of the buffer to receive the data bytes, may be nullptr
@@ -356,7 +356,7 @@ TwoWire * r4aEsp32I2cBusGetTwoWire(R4A_I2C_BUS * i2cBus);
 // Outputs:
 //   Returns the number of bytes read
 size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
-                          uint8_t deviceI2cAddress,
+                          R4A_I2C_ADDRESS_t i2cAddress,
                           const uint8_t * cmdBuffer, // Does not include I2C address
                           size_t cmdByteCount,
                           uint8_t * readBuffer,
@@ -367,7 +367,7 @@ size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
 // Send data to an I2C peripheral, entered with the I2C bus lock held
 // Inputs:
 //   i2cBus: Address of a R4A_I2C_BUS data structure
-//   deviceAddress: Device address on the I2C bus (0 - 0x7f)
+//   i2cAddress: Device address on the I2C bus
 //   cmdBuffer: Address of the buffer containing the command bytes, may be nullptr
 //   cmdByteCount: Number of bytes to send from the command buffer
 //   dataBuffer: Address of the buffer containing the data bytes, may be nullptr
@@ -377,7 +377,7 @@ size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
 // Outputs:
 //   Returns true upon success, false otherwise
 bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * i2cBus,
-                                 uint8_t deviceI2cAddress,
+                                 R4A_I2C_ADDRESS_t i2cAddress,
                                  const uint8_t * cmdBuffer,
                                  size_t cmdByteCount,
                                  const uint8_t * dataBuffer,
@@ -841,10 +841,10 @@ typedef struct _R4A_OV2640
     R4A_OV2640_PROCESS_FRAME_BUFFER _processFrameBuffer;
     R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER _processWebServerFrameBuffer;
 
-    uint32_t _clockHz;        // Input clock frequency for the OV2640
-    R4A_I2C_BUS * _i2cBus;    // I2C bus to access the OV2640
-    uint8_t  _i2cAddress;     // Address of the OV2640
-    const R4A_OV2640_PINS * _pins; // ESP32 GPIO pins for the 0V2640 camera
+    uint32_t _clockHz;              // Input clock frequency for the OV2640
+    R4A_I2C_BUS * _i2cBus;          // I2C bus to access the OV2640
+    R4A_I2C_ADDRESS_t _i2cAddress;  // Address of the OV2640
+    const R4A_OV2640_PINS * _pins;  // ESP32 GPIO pins for the 0V2640 camera
 } R4A_OV2640;
 
 // Display a group of registers

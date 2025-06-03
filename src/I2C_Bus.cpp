@@ -36,7 +36,7 @@ void r4aEsp32I2cBusBegin(R4A_I2C_BUS * i2cBus,
 // Read data from an I2C peripheral
 // Return the number of bytes read
 size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
-                          uint8_t deviceI2cAddress,
+                          R4A_I2C_ADDRESS_t i2cAddress,
                           const uint8_t * cmdBuffer, // Does not include I2C address
                           size_t cmdByteCount,
                           uint8_t * readBuffer,
@@ -61,7 +61,7 @@ size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
         if (cmdByteCount)
         {
             if (!r4aEsp32I2cBusWriteWithLock(i2cBus,
-                                             deviceI2cAddress,
+                                             i2cAddress,
                                              cmdBuffer,   // Register address or other data
                                              cmdByteCount,
                                              nullptr,
@@ -72,7 +72,7 @@ size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
         }
 
         // Read the data from the I2C device into the I2C RX buffer
-        bytesRead = i2cBus->_twoWire->requestFrom(deviceI2cAddress, readByteCount);
+        bytesRead = i2cBus->_twoWire->requestFrom(i2cAddress, readByteCount);
         i2cBus->_twoWire->endTransmission(releaseI2cBus);
 
         // Move the data into the read buffer
@@ -98,7 +98,7 @@ size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
 // Send data to an I2C peripheral
 // Return true upon success, false otherwise
 bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * i2cBus,
-                                 uint8_t deviceI2cAddress,
+                                 R4A_I2C_ADDRESS_t i2cAddress,
                                  const uint8_t * cmdBuffer,
                                  size_t cmdByteCount,
                                  const uint8_t * dataBuffer,
@@ -121,7 +121,7 @@ bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * i2cBus,
         if (display)
         {
             display->println("I2C Transaction");
-            display->printf("    deviceI2cAddress: 0x%02x\r\n", deviceI2cAddress);
+            display->printf("    i2cAddress: 0x%02x\r\n", i2cAddress);
             display->printf("    cmdBuffer: %p\r\n", cmdBuffer);
             display->printf("    cmdByteCount: %d\r\n", cmdByteCount);
             display->printf("    dataBuffer: %p\r\n", dataBuffer);
@@ -133,7 +133,7 @@ bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * i2cBus,
         }
 
         // Address the I2C device
-        i2cBus->_twoWire->beginTransmission(deviceI2cAddress);
+        i2cBus->_twoWire->beginTransmission(i2cAddress);
 
         // Send the command to the device
         if (cmdByteCount)
