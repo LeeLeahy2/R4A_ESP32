@@ -409,56 +409,66 @@ void setup()
 // Idle loop for core 1 of the application
 void loop()
 {
+    static int previousMinutes = -1;
     static time_t previousSeconds;
     time_t seconds;
 
-    // Update the WiFi status
-    r4aWifiUpdate();
-
-    // Determine if WiFi station mode is configured
-    if (r4aWifiSsidPasswordEntries)
+    do
     {
+        // Update the WiFi status
+        r4aWifiUpdate();
+
+        // Process serial commands
+        r4aSerialMenu(&serialMenu);
+
+        // Determine if WiFi station mode is configured
+        if (r4aWifiSsidPasswordEntries == 0)
+            break;
+
         // Check for NTP updates
         r4aNtpUpdate(r4aWifiStationOnline);
 
         // Display the current time
         seconds = r4aNtpGetEpochTime();
-        if (vk16k33Present && (seconds != previousSeconds))
-        {
-            int hours = hourFormat12(seconds);
-            int minutes = minute(seconds);
-            int value;
+        if ((!vk16k33Present) || (seconds == previousSeconds))
+            break;
+        previousSeconds = seconds;
 
-            // Clear the display
-            r4aVk16k33BufferClear(&vk16k33);
+        // Parse the time
+        int hours = hourFormat12(seconds);
+        int minutes = minute(seconds);
+        int value;
+        if (minutes == previousMinutes)
+            break;
+        previousMinutes = minutes;
 
-            // Display the hours
-            value = hours / 10;
-            if (value)
-                displayDigit(0, value);
-            else
-                displayDigit(0, SPACE_INDEX);
-            value = hours - (value * 10);
-            displayDigit(1, value);
 
-            // Display the colon
-            r4aVk16k33PixelSet(&vk16k33,
-                               segmentMap[SEGMENT_COLON].column,
-                               segmentMap[SEGMENT_COLON].row);
+        // Clear the display
+        r4aVk16k33BufferClear(&vk16k33);
 
-            // Display the minutes
-            value = minutes / 10;
-            displayDigit(2, value);
-            value = minutes - (value * 10);
-            displayDigit(3, value);
+        // Display the hours
+        value = hours / 10;
+        if (value)
+            displayDigit(0, value);
+        else
+            displayDigit(0, SPACE_INDEX);
+        value = hours - (value * 10);
+        displayDigit(1, value);
 
-            // Pass the buffer to the display
-            r4aVk16k33DisplayPixels(&vk16k33);
-        }
-    }
+        // Display the colon
+        r4aVk16k33PixelSet(&vk16k33,
+                           segmentMap[SEGMENT_COLON].column,
+                           segmentMap[SEGMENT_COLON].row);
 
-    // Process serial commands
-    r4aSerialMenu(&serialMenu);
+        // Display the minutes
+        value = minutes / 10;
+        displayDigit(2, value);
+        value = minutes - (value * 10);
+        displayDigit(3, value);
+
+        // Pass the buffer to the display
+        r4aVk16k33DisplayPixels(&vk16k33);
+    } while (0);
 }
 
 //*********************************************************************
