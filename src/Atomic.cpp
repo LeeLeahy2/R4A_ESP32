@@ -74,7 +74,7 @@ int32_t r4aAtomicXor32(int32_t * obj, int32_t value, int moBefore)
 
 //*********************************************************************
 // Take out a lock
-void r4aLockAcquire(volatile int * lock, int moBefore, int moAfter)
+void r4aLockAcquire(volatile int32_t * lock, int moBefore, int moAfter)
 {
     uint32_t expected;
 
@@ -93,7 +93,7 @@ void r4aLockAcquire(volatile int * lock, int moBefore, int moAfter)
 
 //*********************************************************************
 // Release a lock
-void r4aLockRelease(volatile int * lock, int moBefore)
+void r4aLockRelease(volatile int32_t * lock, int moBefore)
 {
     __atomic_store_4(lock, 0, moBefore);
 }
