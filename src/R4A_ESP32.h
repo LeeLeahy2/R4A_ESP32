@@ -354,15 +354,15 @@ TwoWire * r4aEsp32I2cBusGetTwoWire(R4A_I2C_BUS * i2cBus);
 //   display: Device used for debug output
 //   releaseI2cBus: A value of true releases the I2C bus after the transaction
 // Outputs:
-//   Returns the number of bytes read
-size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
-                          R4A_I2C_ADDRESS_t i2cAddress,
-                          const uint8_t * cmdBuffer, // Does not include I2C address
-                          size_t cmdByteCount,
-                          uint8_t * readBuffer,
-                          size_t readByteCount,
-                          Print * display = nullptr,
-                          bool releaseI2cBus = true);
+//   Returns true upon success, false otherwise
+bool r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
+                        R4A_I2C_ADDRESS_t i2cAddress,
+                        const uint8_t * cmdBuffer, // Does not include I2C address
+                        size_t cmdByteCount,
+                        uint8_t * readBuffer,
+                        size_t readByteCount,
+                        Print * display = nullptr,
+                        bool releaseI2cBus = true);
 
 // Send data to an I2C peripheral, entered with the I2C bus lock held
 // Inputs:

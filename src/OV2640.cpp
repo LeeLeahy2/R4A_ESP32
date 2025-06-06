@@ -39,7 +39,7 @@ void r4aOv2640DisplayRegisters(R4A_OV2640 * object,
                                data,
                                bytesToRead,
                                display,
-                               true) != bytesToRead)
+                               true) == false)
     {
         display->printf("ERROR: Failed to read register 0x%02x\r\n", firstRegister);
         return;

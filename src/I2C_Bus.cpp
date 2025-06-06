@@ -34,15 +34,14 @@ void r4aEsp32I2cBusBegin(R4A_I2C_BUS * i2cBus,
 
 //*********************************************************************
 // Read data from an I2C peripheral
-// Return the number of bytes read
-size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
-                          R4A_I2C_ADDRESS_t i2cAddress,
-                          const uint8_t * cmdBuffer, // Does not include I2C address
-                          size_t cmdByteCount,
-                          uint8_t * readBuffer,
-                          size_t readByteCount,
-                          Print * display,
-                          bool releaseI2cBus)
+bool r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
+                        R4A_I2C_ADDRESS_t i2cAddress,
+                        const uint8_t * cmdBuffer, // Does not include I2C address
+                        size_t cmdByteCount,
+                        uint8_t * readBuffer,
+                        size_t readByteCount,
+                        Print * display,
+                        bool releaseI2cBus)
 {
     size_t bytesRead;
 
@@ -91,7 +90,7 @@ size_t r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
     r4aLockRelease(&i2cBus->_lock);
 
     // Return the number of bytes read
-    return bytesRead;
+    return (bytesRead == readByteCount);
 }
 
 //*********************************************************************
