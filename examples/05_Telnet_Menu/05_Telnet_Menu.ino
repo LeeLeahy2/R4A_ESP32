@@ -254,18 +254,18 @@ void setup()
 
     // Setup and enumerate the I2C devices
     log_d("Calling i2cBus.begin");
-    r4aEsp32I2cBusBegin(&i2cBus,
+    r4aEsp32I2cBusBegin(&esp32I2cBus,
                         I2C_SDA,
                         I2C_SCL,
                         R4A_I2C_FAST_MODE_HZ);
-    r4aI2cBus = &i2cBus;
+    r4aI2cBus = &esp32I2cBus._i2cBus;
 
     // Delay to allow the hardware initialize
     delay(1000);
 
     // Determine if the LED controller is available
     log_v("Calling r4aI2cBusIsDevicePresent");
-    vk16k33Present = r4aI2cBusIsDevicePresent(&i2cBus, VK16K33_I2C_ADDRESS);
+    vk16k33Present = r4aI2cBusIsDevicePresent(&esp32I2cBus._i2cBus, VK16K33_I2C_ADDRESS);
 
     // Initialize the PCA9685
     log_d("Calling pca9685.begin");

@@ -323,14 +323,21 @@ typedef struct _R4A_TAG_NAME_T
 // ESP32 I2C Bus support
 //****************************************
 
+typedef struct _R4A_ESP32_I2C_BUS
+{
+    R4A_I2C_BUS _i2cBus;
+    TwoWire * _twoWire;     // API for the I2C bus
+    volatile int32_t _lock; // Lock to synchronize access to the I2C bus
+} R4A_ESP32_I2C_BUS;
+
 // Initialize the I2C bus
 // Inputs:
-//   i2cBus: Address of a R4A_I2C_BUS data structure
+//   esp32I2cBus: Address of a R4A_ESP32_I2C_BUS data structure
 //   sdaPin: Number of the pin used for the SDA signal
 //   sclPin: Number of the pin used for the SCL signal
 //   clockHz: Clock speed for the I2C bus in Hertz
 //   display: Device used for output
-void r4aEsp32I2cBusBegin(R4A_I2C_BUS * i2cBus,
+void r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                          int sdaPin,
                          int sclPin,
                          int clockHz,
@@ -343,31 +350,10 @@ void r4aEsp32I2cBusBegin(R4A_I2C_BUS * i2cBus,
 //   Returns the TwoWire object address
 TwoWire * r4aEsp32I2cBusGetTwoWire(R4A_I2C_BUS * i2cBus);
 
-// Read data from an I2C peripheral
-// Inputs:
-//   i2cBus: Address of a R4A_I2C_BUS data structure
-//   i2cAddress: Device address on the I2C bus
-//   cmdBuffer: Address of the buffer containing the command bytes, may be nullptr
-//   cmdByteCount: Number of bytes to send from the command buffer
-//   dataBuffer: Address of the buffer to receive the data bytes, may be nullptr
-//   dataByteCount: Size in bytes of the data buffer, maximum receive bytes
-//   display: Device used for debug output
-//   releaseI2cBus: A value of true releases the I2C bus after the transaction
-// Outputs:
-//   Returns true upon success, false otherwise
-bool r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
-                        R4A_I2C_ADDRESS_t i2cAddress,
-                        const uint8_t * cmdBuffer, // Does not include I2C address
-                        size_t cmdByteCount,
-                        uint8_t * readBuffer,
-                        size_t readByteCount,
-                        Print * display = nullptr,
-                        bool releaseI2cBus = true);
-
 // Send data to an I2C peripheral, entered with the I2C bus lock held
 // Inputs:
-//   i2cBus: Address of a R4A_I2C_BUS data structure
-//   i2cAddress: Device address on the I2C bus
+//   object: Address of a R4A_I2C_BUS data structure
+//   deviceAddress: Device address on the I2C bus (0 - 0x7f)
 //   cmdBuffer: Address of the buffer containing the command bytes, may be nullptr
 //   cmdByteCount: Number of bytes to send from the command buffer
 //   dataBuffer: Address of the buffer containing the data bytes, may be nullptr
@@ -376,8 +362,8 @@ bool r4aEsp32I2cBusRead(R4A_I2C_BUS * i2cBus,
 //   releaseI2cBus: A value of true releases the I2C bus after the transaction
 // Outputs:
 //   Returns true upon success, false otherwise
-bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * i2cBus,
-                                 R4A_I2C_ADDRESS_t i2cAddress,
+bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * object,
+                                 uint8_t deviceI2cAddress,
                                  const uint8_t * cmdBuffer,
                                  size_t cmdByteCount,
                                  const uint8_t * dataBuffer,

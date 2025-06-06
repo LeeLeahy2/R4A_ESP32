@@ -90,22 +90,22 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 };
 
 // Specify the R4A ESP32 I2C layer parameters
-R4A_I2C_BUS i2cBus =
+R4A_ESP32_I2C_BUS esp32I2cBus =
 {
-    &Wire,              // _i2cBus, ESP32 controller code
-    i2cBusDeviceTable,  // _deviceTable
-    sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
+    {   // R4A_I2C_BUS
+        i2cBusDeviceTable,  // _deviceTable
+        sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
+        {0,},               // _present
+        false,              // _enumerated
+    },
+    &Wire,              // _i2cBus
     0,                  // _lock
-    {0,},               // _present
-    r4aEsp32I2cBusWriteWithLock, // _writeWithLock
-    r4aEsp32I2cBusRead, // _read
-    false,              // _enumerated
 };
 
 R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 
 // Connect the R4A I2C layer to the ESP32 I2C controller code
-R4A_PCA9685 pca9685(&i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * 1000 * 1000);
+R4A_PCA9685 pca9685(&esp32I2cBus._i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * 1000 * 1000);
 
     // Connect the motors to the PWM controller (PCA9685)
     R4A_PCA9685_MOTOR motorBackLeft(&pca9685, 8, 9);
@@ -114,7 +114,7 @@ R4A_PCA9685 pca9685(&i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * 1000 * 1000);
     R4A_PCA9685_MOTOR motorFrontLeft(&pca9685, 14, 15);
 
 // Connect the GPIO controller (PCF8574) to the R4A I2C layer
-R4A_PCF8574 pcf8574(&i2cBus, PCF8574_I2C_ADDRESS);
+R4A_PCF8574 pcf8574(&esp32I2cBus._i2cBus, PCF8574_I2C_ADDRESS);
 
 //****************************************
 // Forward routine declarations
@@ -214,11 +214,11 @@ void setup()
 
     // Initialize the I2C bus for line sensors and motor control
     log_v("Calling i2cBus.begin");
-    r4aEsp32I2cBusBegin(&i2cBus,
+    r4aEsp32I2cBusBegin(&esp32I2cBus,
                         I2C_SDA,
                         I2C_SCL,
                         R4A_I2C_FAST_MODE_HZ);
-    r4aI2cBus = &i2cBus;
+    r4aI2cBus = &esp32I2cBus._i2cBus;
 
     // Initialize the PCA9685 for motor control
     log_v("Calling pca9685.begin");

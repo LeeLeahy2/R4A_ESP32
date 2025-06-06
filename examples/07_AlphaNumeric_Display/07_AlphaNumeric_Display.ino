@@ -330,30 +330,30 @@ const uint16_t fontNumbers[] =
 //****************************************
 
 #if     USE_SPARKFUN_THING_PLUS_ESP32_WROOM
-const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
-{
-    {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
-};
+    const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
+    {
+        {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
+    };
 
-R4A_I2C_BUS i2cBus =
-{
-    &Wire,              // _i2cBus
-    i2cBusDeviceTable,  // _deviceTable
-    sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
-    0,                  // _lock
-    {0,},               // _present
-    r4aEsp32I2cBusWriteWithLock, // _writeWithLock
-    r4aEsp32I2cBusRead, // _read
-    false,              // _enumerated
-};
+    R4A_ESP32_I2C_BUS esp32I2cBus =
+    {
+        {   // R4A_I2C_BUS
+            i2cBusDeviceTable,  // _deviceTable
+            sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
+            {0,},               // _present
+            true,               // _enumerated
+        },
+        &Wire,              // _i2cBus
+        0,                  // _lock
+    };
 
-R4A_VK16K33 vk16k33 = {&i2cBus,
-                       VK16K33_I2C_ADDRESS,
-                       ledMatrixColumnMap,
-                       ledMatrixRowPixelMap,
-                       16,
-                       8,
-                       0};
+    R4A_VK16K33 vk16k33 = {&esp32I2cBus._i2cBus,
+                           VK16K33_I2C_ADDRESS,
+                           ledMatrixColumnMap,
+                           ledMatrixRowPixelMap,
+                           16,
+                           8,
+                           0};
 #else   // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
     USE_I2C_DEVICE_TABLE;
     USE_I2C_BUS_TABLE;
@@ -393,6 +393,8 @@ const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword)
 // Entry point for the application
 void setup()
 {
+    R4A_I2C_BUS * i2cBus;
+
     // Initialize the USB serial port
     Serial.begin(115200);
     Serial.println();
@@ -406,24 +408,20 @@ void setup()
     log_v("Calling r4aMenuBegin");
     r4aMenuBegin(&serialMenu, menuTable, menuTableEntries);
 
-    // Initialize the I2C bus and DON'T do enumeration
-    log_v("Calling i2cBus.begin");
-    r4aEsp32I2cBusBegin(&i2cBus,
+    // Initialize the I2C bus
+    log_v("Calling r4aEsp32I2cBusBegin");
+    r4aEsp32I2cBusBegin(&esp32I2cBus,
                         I2C_SDA,
                         I2C_SCL,
-                        R4A_I2C_FAST_MODE_HZ,
-                        nullptr);
-    r4aI2cBus = &i2cBus;
+                        R4A_I2C_FAST_MODE_HZ);
+    i2cBus = &esp32I2cBus._i2cBus;
 
     // Delay to allow the hardware initialize
-    delay(1000);
-
-    // Enumerate the I2C bus
-    r4aI2cBusEnumerate(&i2cBus);
+    delay(100);
 
     // Determine if the LED controller is available
     log_v("Calling vk16k33Setup");
-    vk16k33Present = r4aI2cBusIsDevicePresent(&i2cBus, VK16K33_I2C_ADDRESS);
+    vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
 
     // Initialize the VK16K33 LED controller
     if (vk16k33Present)
@@ -481,7 +479,6 @@ void loop()
         if (minutes == previousMinutes)
             break;
         previousMinutes = minutes;
-
 
         // Clear the display
         r4aVk16k33BufferClear(&vk16k33);

@@ -143,11 +143,11 @@ void setup()
 
     // Initialize the I2C bus for line sensors and motor control
     log_v("Calling i2cBus.begin");
-    r4aEsp32I2cBusBegin(&i2cBus,
+    r4aEsp32I2cBusBegin(&esp32I2cBus,
                         I2C_SDA,
                         I2C_SCL,
                         R4A_I2C_FAST_MODE_HZ);
-    r4aI2cBus = &i2cBus;
+    r4aI2cBus = &esp32I2cBus._i2cBus;
 
     // Initialize the PCA9685 for motor control
     log_v("Calling pca9685.begin");

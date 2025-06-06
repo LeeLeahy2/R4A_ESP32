@@ -140,28 +140,28 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
     {ZEDF9P_I2C_ADDRESS,   "u-blox ZED F9P GNSS receiver"}
 };
 
-R4A_I2C_BUS i2cBus =
+R4A_ESP32_I2C_BUS esp32I2cBus =
 {
+    {   // R4A_I2C_BUS
+        i2cBusDeviceTable,  // _deviceTable
+        sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
+        {0,},               // _present
+        false,              // _enumerated
+    },
     &Wire,              // _i2cBus
-    i2cBusDeviceTable,  // _deviceTable
-    sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
     0,                  // _lock
-    {0,},               // _present
-    r4aEsp32I2cBusWriteWithLock, // _writeWithLock
-    r4aEsp32I2cBusRead, // _read
-    false,              // _enumerated
 };
 
 R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 
-    R4A_PCA9685 pca9685(&i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * 1000 * 1000);
+    R4A_PCA9685 pca9685(&esp32I2cBus._i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * R4A_FREQ_MHz);
         R4A_PCA9685_SERVO servoPan(&pca9685, 0, 0, 180);
         R4A_PCA9685_SERVO servoTilt(&pca9685, 1, 2, 150);
         R4A_PCA9685_MOTOR motorBackLeft(&pca9685, 8, 9);
         R4A_PCA9685_MOTOR motorBackRight(&pca9685, 11, 10);
         R4A_PCA9685_MOTOR motorFrontRight(&pca9685, 13, 12);
         R4A_PCA9685_MOTOR motorFrontLeft(&pca9685, 14, 15);
-    R4A_PCF8574 pcf8574(&i2cBus, PCF8574_I2C_ADDRESS);
+    R4A_PCF8574 pcf8574(&esp32I2cBus._i2cBus, PCF8574_I2C_ADDRESS);
 #ifdef  USE_OV2640
     R4A_OV2640 ov2640 =
     {
@@ -174,7 +174,7 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
     };
 #endif  // USE_OV2640
     // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)
-    R4A_VK16K33 vk16k33 = {&i2cBus,
+    R4A_VK16K33 vk16k33 = {&esp32I2cBus._i2cBus,
                            VK16K33_I2C_ADDRESS,
                            ledMatrixColumnMap,
                            ledMatrixRowPixelMap,
@@ -182,7 +182,7 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
                            8,
                            15};
 #ifdef  USE_ZED_F9P
-    R4A_ZED_F9P zedf9p(&i2cBus, ZEDF9P_I2C_ADDRESS);
+    R4A_ZED_F9P zedf9p(&esp32I2cBus._i2cBus, ZEDF9P_I2C_ADDRESS);
 #endif  // USE_ZED_F9P
 
 bool ov2640Present;
@@ -608,25 +608,27 @@ void loop()
 // Setup for core 0
 void setupCore0(void *parameter)
 {
+    R4A_I2C_BUS * i2cBus;
+
     // Display the core number
     log_v("setupCore0() running on core %d", xPortGetCoreID());
+
+    // Initialize the I2C bus
+    log_v("Calling r4aEsp32I2cBusBegin");
+    r4aEsp32I2cBusBegin(&esp32I2cBus,
+                        I2C_SDA,
+                        I2C_SCL,
+                        R4A_I2C_FAST_MODE_HZ);
+    i2cBus = &esp32I2cBus._i2cBus;
 
     // Allow I2C devices time to power up
     delay(100);
 
-    // Setup and enumerate the I2C devices
-    log_v("Calling r4aEsp32I2cBusBegin");
-    r4aEsp32I2cBusBegin(&i2cBus,
-                        I2C_SDA,
-                        I2C_SCL,
-                        R4A_I2C_FAST_MODE_HZ);
-    r4aI2cBus = &i2cBus;
-
     // Determine which devices are present
     log_v("Calling r4aI2cBusIsDevicePresent");
-    ov2640Present = r4aI2cBusIsDevicePresent(&i2cBus, OV2640_I2C_ADDRESS);
-    vk16k33Present = r4aI2cBusIsDevicePresent(&i2cBus, VK16K33_I2C_ADDRESS);
-    zedf9pPresent = r4aI2cBusIsDevicePresent(&i2cBus, ZEDF9P_I2C_ADDRESS);
+    ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
+    vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
+    zedf9pPresent = r4aI2cBusIsDevicePresent(i2cBus, ZEDF9P_I2C_ADDRESS);
 
     // Initialize the PCA9685
     log_v("Calling pca9685.begin");

@@ -55,20 +55,20 @@ const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
         {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
     };
 
-    R4A_I2C_BUS i2cBus =
+    R4A_ESP32_I2C_BUS esp32I2cBus =
     {
+        {   // R4A_I2C_BUS
+            i2cBusDeviceTable,  // _deviceTable
+            sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
+            {0,},               // _present
+            true,               // _enumerated
+        },
         &Wire,              // _i2cBus
-        i2cBusDeviceTable,  // _deviceTable
-        sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
         0,                  // _lock
-        {0,},               // _present
-        r4aEsp32I2cBusWriteWithLock, // _writeWithLock
-        r4aEsp32I2cBusRead, // _read
-        false,              // _enumerated
     };
 
     // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)
-    R4A_VK16K33 vk16k33 = {&i2cBus,
+    R4A_VK16K33 vk16k33 = {&esp32I2cBus._i2cBus,
                            VK16K33_I2C_ADDRESS,
                            ledMatrixColumnMap,
                            ledMatrixRowPixelMap,
@@ -114,6 +114,8 @@ const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword)
 // Entry point for the application
 void setup()
 {
+    R4A_I2C_BUS * i2cBus;
+
     // Initialize the USB serial port
     Serial.begin(115200);
     Serial.println();
@@ -129,18 +131,18 @@ void setup()
 
     // Initialize the I2C bus
     log_v("Calling r4aEsp32I2cBusBegin");
-    r4aEsp32I2cBusBegin(&i2cBus,
+    r4aEsp32I2cBusBegin(&esp32I2cBus,
                         I2C_SDA,
                         I2C_SCL,
                         R4A_I2C_FAST_MODE_HZ);
-    r4aI2cBus = &i2cBus;
+    i2cBus = &esp32I2cBus._i2cBus;
 
     // Delay to allow the hardware initialize
     delay(100);
 
     // Determine if the LED controller is available
     log_v("Calling r4aI2cBusIsDevicePresent");
-    vk16k33Present = r4aI2cBusIsDevicePresent(&i2cBus, VK16K33_I2C_ADDRESS);
+    vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
 
     // Initialize the VK16K33 LED controller
     if (vk16k33Present)
