@@ -356,27 +356,6 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
 //   Returns the TwoWire object address
 TwoWire * r4aEsp32I2cBusGetTwoWire(R4A_I2C_BUS * i2cBus);
 
-// Send data to an I2C peripheral, entered with the I2C bus lock held
-// Inputs:
-//   object: Address of a R4A_I2C_BUS data structure
-//   deviceAddress: Device address on the I2C bus (0 - 0x7f)
-//   cmdBuffer: Address of the buffer containing the command bytes, may be nullptr
-//   cmdByteCount: Number of bytes to send from the command buffer
-//   dataBuffer: Address of the buffer containing the data bytes, may be nullptr
-//   dataByteCount: Number of bytes to send from the data buffer
-//   display: Device used for debug output
-//   releaseI2cBus: A value of true releases the I2C bus after the transaction
-// Outputs:
-//   Returns true upon success, false otherwise
-bool r4aEsp32I2cBusWriteWithLock(R4A_I2C_BUS * object,
-                                 uint8_t deviceI2cAddress,
-                                 const uint8_t * cmdBuffer,
-                                 size_t cmdByteCount,
-                                 const uint8_t * dataBuffer,
-                                 size_t dataByteCount,
-                                 Print * display = nullptr,
-                                 bool releaseI2cBus = true);
-
 //****************************************
 // Memory API
 //****************************************

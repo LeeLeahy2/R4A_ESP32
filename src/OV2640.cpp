@@ -24,29 +24,40 @@ void r4aOv2640DisplayRegisters(R4A_OV2640 * object,
 {
     uint8_t data[256];
 
-    // Validate the bytesToRead value
-    if (bytesToRead > sizeof(data))
+    do
     {
-        display->printf("ERROR: bytesToRead > %d!\r\n", sizeof(bytesToRead));
-        return;
-    }
+        // Validate the bytesToRead value
+        if (bytesToRead > sizeof(data))
+        {
+            display->printf("ERROR: bytesToRead > %d!\r\n", sizeof(bytesToRead));
+            break;
+        }
 
-    // Read the bytes from the camera
-    if (r4aI2cBusRead(object->_i2cBus,
-                      object->_i2cAddress,
-                      &firstRegister,
-                      sizeof(firstRegister),
-                      data,
-                      bytesToRead,
-                      display,
-                      true) == false)
-    {
-        display->printf("ERROR: Failed to read register 0x%02x\r\n", firstRegister);
-        return;
-    }
+        // Send the first register number to the camera
+        if (r4aI2cBusWrite(object->_i2cBus,
+                           object->_i2cAddress,
+                           &firstRegister,
+                           sizeof(firstRegister),
+                           display) == false)
+        {
+            display->printf("ERROR: Failed to write first register 0x%02x\r\n", firstRegister);
+            break;
+        }
 
-    // Display the bytes
-    r4aDumpBuffer(firstRegister, data, bytesToRead, display);
+        // Read the bytes from the camera
+        if (r4aI2cBusRead(object->_i2cBus,
+                          object->_i2cAddress,
+                          data,
+                          bytesToRead,
+                          display) == false)
+        {
+            display->printf("ERROR: Failed to read register 0x%02x\r\n", firstRegister);
+            break;
+        }
+
+        // Display the bytes
+        r4aDumpBuffer(firstRegister, data, bytesToRead, display);
+    } while (0);
 }
 
 //*********************************************************************
