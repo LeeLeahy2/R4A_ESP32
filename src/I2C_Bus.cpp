@@ -13,6 +13,7 @@ void r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                          int sdaPin,
                          int sclPin,
                          int clockHz,
+                         bool enumerate,
                          Print * display)
 {
     R4A_I2C_BUS * i2cBus;
@@ -31,7 +32,7 @@ void r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
     delay(10);
 
     // Enumerate the I2C devices
-    if (display)
+    if (enumerate)
         r4aI2cBusEnumerate(i2cBus, display);
 }
 
