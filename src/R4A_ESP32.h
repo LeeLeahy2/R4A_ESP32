@@ -337,13 +337,17 @@ typedef struct _R4A_ESP32_I2C_BUS
 //   sclPin: Number of the pin used for the SCL signal
 //   clockHz: Clock speed for the I2C bus in Hertz
 //   enumerate: Set true to enumerate the bus or false to skip enumeration
-//   display: Device used for output
-void r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
+//   display: Device used for enumeration output
+//   debug: Device used for I2C soft reset output
+// Outputs:
+//   Returns true if successful and false upon failure
+bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                          int sdaPin,
                          int sclPin,
                          int clockHz,
                          bool enumerate = true,
-                         Print * display = &Serial);
+                         Print * display = &Serial,
+                         Print * debug = nullptr);
 
 // Get the TwoWire pointer
 // Inputs:
