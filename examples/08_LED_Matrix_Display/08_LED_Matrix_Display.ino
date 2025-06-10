@@ -184,7 +184,7 @@ void displayFont()
             index = 0;
 
         // Clear the display
-        r4aVk16k33ClearBuffer(&vk16k33);
+        r4aVk16k33BufferClear(&vk16k33);
 
         // Display a pixel in each of the columns at (x, 0)
         if (previousIndex < 16)     // 0 - 15
@@ -288,7 +288,7 @@ void displayTime()
             int value;
 
             // Clear the display
-            r4aVk16k33ClearBuffer(&vk16k33);
+            r4aVk16k33BufferClear(&vk16k33);
 
             // Display the hours
             value = hours / 10;

@@ -418,7 +418,7 @@ void loop()
             int value;
 
             // Clear the display
-            r4aVk16k33ClearBuffer(&vk16k33);
+            r4aVk16k33BufferClear(&vk16k33);
 
             // Display the hours
             value = hours / 10;
