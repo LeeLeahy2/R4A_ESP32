@@ -5,7 +5,6 @@
 **********************************************************************/
 
 #ifdef  USE_WAYPOINT_FOLLOWING
-#ifdef  USE_ZED_F9P
 
 //****************************************
 // Types
@@ -396,5 +395,4 @@ void menuStartWpf(const struct _R4A_MENU_ENTRY * menuEntry,
     r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }
 
-#endif  // USE_ZED_F9P
 #endif  // USE_WAYPOINT_FOLLOWING
