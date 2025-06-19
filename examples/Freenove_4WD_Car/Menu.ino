@@ -371,7 +371,7 @@ const R4A_MENU_ENTRY startMenuTable[] =
     {"None",    startNone,          0,                      nullptr,            0,      "Don't start anything at boot"},
 #ifdef  USE_ZED_F9P
 #ifdef  USE_WAYPOINT_FOLLOWING
-    {"wpf",     startWpf,           0,                      nullptr,            0,      "Start waypoint following at boot"},
+    {"wpf",     menuStartWpf,       0,                      nullptr,            0,      "Start waypoint following at boot"},
 #endif  // USE_WAYPOINT_FOLLOWING
 #endif  // USE_ZED_F9P
     {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
