@@ -181,6 +181,12 @@ class R4A_Freenove_4WD_Car
 #define ESP32_WROVER_BLUE_LED_ON        1
 
 //****************************************
+// LED Matrix
+//****************************************
+
+extern const uint8_t r4aLedMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS];
+
+//****************************************
 // I2C bus configuration
 //****************************************
 
@@ -217,6 +223,7 @@ R4A_I2C_BUS i2cBus(0, i2cBusDeviceTable, i2cBusDeviceTableEntries);   \
     R4A_PCF8574 pcf8574(&i2cBus, PCF8574_I2C_ADDRESS);          \
     R4A_VK16K33 vk16k33 = {&i2cBus,                             \
                            VK16K33_I2C_ADDRESS,                 \
+                           r4aLedMatrixColumnMap,               \
                            16,                                  \
                            8,                                   \
                            15};
@@ -224,8 +231,6 @@ R4A_I2C_BUS i2cBus(0, i2cBusDeviceTable, i2cBusDeviceTableEntries);   \
 //****************************************
 // LED Matrix
 //****************************************
-
-extern const int r4aLedMatrixColumnMap[];
 
 // Display a character on the LED matrix
 // Inputs:

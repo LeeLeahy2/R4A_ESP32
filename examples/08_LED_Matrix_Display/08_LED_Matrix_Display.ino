@@ -28,8 +28,6 @@
 //****************************************
 
 #if     USE_SPARKFUN_THING_PLUS_ESP32_WROOM
-    extern const uint8_t r4aLedMatrixColumnMap[];
-
     // Display a character on the LED matrix
     // Inputs:
     //   vk16k33: Address of a R4A_VK16K33 data structure
@@ -37,6 +35,15 @@
     //   data: Data to write into the column, bit zero on top, bit 7 on bottom
     void r4aLedMatrixDisplayChar(R4A_VK16K33 * vk16k33, int xColumn, char data);
 #endif  // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
+
+//****************************************
+// Constants
+//****************************************
+
+const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
+{
+    0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
+};
 
 //****************************************
 // I2C bus configuration
@@ -63,6 +70,7 @@
     // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)
     R4A_VK16K33 vk16k33 = {&i2cBus,
                            VK16K33_I2C_ADDRESS,
+                           ledMatrixColumnMap,
                            16,
                            8,
                            15};
@@ -191,7 +199,7 @@ void displayFont()
         {
             value = previousIndex;
             Serial.printf("Column: %d\r\n", value);
-            r4aVk16k33PixelSet(&vk16k33, r4aLedMatrixColumnMap[value], 0);
+            r4aVk16k33PixelSet(&vk16k33, ledMatrixColumnMap[value], 0);
             if (value == 15)
                 Serial.printf("Press any key to display the pixel rows (0, y)\r\n");
         }
@@ -201,7 +209,7 @@ void displayFont()
         {
             value = previousIndex - 16;
             Serial.printf("Row: %d\r\n", value);
-            r4aVk16k33PixelSet(&vk16k33, r4aLedMatrixColumnMap[0], value);
+            r4aVk16k33PixelSet(&vk16k33, ledMatrixColumnMap[0], value);
             if (value == 7)
                 Serial.printf("Press any key to display the numbers\r\n");
         }

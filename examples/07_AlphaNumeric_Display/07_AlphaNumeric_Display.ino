@@ -103,6 +103,11 @@ const ALPHANUMERIC_DISPLAY_SEGMENT_MAP segmentMap[] =
 
 #define LIGHT(x)        (1 << x)
 
+const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
+{
+    0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
+};
+
 //****************************************
 // Font
 //****************************************
@@ -299,6 +304,7 @@ R4A_I2C_BUS i2cBus =
 
 R4A_VK16K33 vk16k33 = {&i2cBus,
                        VK16K33_I2C_ADDRESS,
+                       ledMatrixColumnMap,
                        16,
                        8,
                        0};
