@@ -366,7 +366,7 @@ void r4aLedMatrixDisplayChar(R4A_VK16K33 * vk16k33, int xColumn, char data)
     case 'D':
     case 'E':
     case 'F':
-        font = r4a5x7UcAtoF[data - 'A'];
+        font = r4a5x7UcAtoH[data - 'A'];
         break;
 
     case 'a':
@@ -375,7 +375,7 @@ void r4aLedMatrixDisplayChar(R4A_VK16K33 * vk16k33, int xColumn, char data)
     case 'd':
     case 'e':
     case 'f':
-        font = r4a5x7LcAtoF[data - 'a'];
+        font = r4a5x7LcAtoH[data - 'a'];
         break;
 
     case 'l':

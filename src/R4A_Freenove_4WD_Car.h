@@ -225,14 +225,6 @@ R4A_I2C_BUS i2cBus(0, i2cBusDeviceTable, i2cBusDeviceTableEntries);   \
 // LED Matrix
 //****************************************
 
-// Fonts
-extern const uint8_t * r4a5x7Numbers[];
-extern const uint8_t * r4a5x7UcAtoF[];
-extern const uint8_t * r4a5x7LcAtoF[];
-extern const uint8_t r4a5x7Font_dp;
-extern const uint8_t r4a5x7Font_l;
-extern const uint8_t r4a5x7Font_t[5];
-
 extern const int r4aLedMatrixColumnMap[];
 
 // Display a character on the LED matrix
