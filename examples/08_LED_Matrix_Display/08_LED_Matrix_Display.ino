@@ -24,19 +24,6 @@
 #include "Parameters.h"
 
 //****************************************
-// External routines and data
-//****************************************
-
-#if     USE_SPARKFUN_THING_PLUS_ESP32_WROOM
-    // Display a character on the LED matrix
-    // Inputs:
-    //   vk16k33: Address of a R4A_VK16K33 data structure
-    //   xColumn: Column number to modify, zero on left
-    //   data: Data to write into the column, bit zero on top, bit 7 on bottom
-    void r4aLedMatrixDisplayChar(R4A_VK16K33 * vk16k33, int xColumn, char data);
-#endif  // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
-
-//****************************************
 // Constants
 //****************************************
 
@@ -224,7 +211,7 @@ void displayFont()
         {
             value = previousIndex - 24 + '0';
             Serial.printf("Character: %c\r\n", value);
-            r4aLedMatrixDisplayChar(&vk16k33, 6, value);
+            r4aVk16k33DisplayChar(&vk16k33, 6, value);
             if (value == '9')
                 Serial.printf("Press any key to display the letters\r\n");
         }
@@ -234,7 +221,7 @@ void displayFont()
         {
             value = previousIndex - 34 + 'A';
             Serial.printf("Character: %c\r\n", value);
-            r4aLedMatrixDisplayChar(&vk16k33, 6, value);
+            r4aVk16k33DisplayChar(&vk16k33, 6, value);
         }
 
         // Display the lower case letters
@@ -242,21 +229,21 @@ void displayFont()
         {
             value = previousIndex - 40 + 'a';
             Serial.printf("Character: %c\r\n", value);
-            r4aLedMatrixDisplayChar(&vk16k33, 6, value);
+            r4aVk16k33DisplayChar(&vk16k33, 6, value);
         }
 
         // Display the lower case letter L
         else if (previousIndex == 46)
         {
             Serial.printf("Character: l\r\n");
-            r4aLedMatrixDisplayChar(&vk16k33, 6, 'l');
+            r4aVk16k33DisplayChar(&vk16k33, 6, 'l');
         }
 
         // Display the lower case letter T
         else if (previousIndex == 47)
         {
             Serial.printf("Character: t\r\n");
-            r4aLedMatrixDisplayChar(&vk16k33, 6, 't');
+            r4aVk16k33DisplayChar(&vk16k33, 6, 't');
             Serial.printf("Press any key to display the period\r\n");
         }
 
@@ -264,7 +251,7 @@ void displayFont()
         else if (previousIndex == 48)
         {
             Serial.printf("Character: .\r\n");
-            r4aLedMatrixDisplayChar(&vk16k33, 6, '.');
+            r4aVk16k33DisplayChar(&vk16k33, 6, '.');
             Serial.printf("Press any key to display the pixel columns (x,0)\r\n");
         }
 
@@ -336,5 +323,5 @@ void displayDigit(int column, int value)
         value = 'l';
 
     // Display the value
-    r4aLedMatrixDisplayChar(&vk16k33, column, value);
+    r4aVk16k33DisplayChar(&vk16k33, column, value);
 }

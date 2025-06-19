@@ -231,17 +231,6 @@ R4A_I2C_BUS i2cBus(0, i2cBusDeviceTable, i2cBusDeviceTableEntries);   \
                            15};
 
 //****************************************
-// LED Matrix
-//****************************************
-
-// Display a character on the LED matrix
-// Inputs:
-//   vk16k33: Address of a R4A_VK16K33 data structure
-//   xColumn: Column number to modify, zero on left
-//   data: Data to write into the column, bit zero on top, bit 7 on bottom
-void r4aLedMatrixDisplayChar(R4A_VK16K33 * vk16k33, int xColumn, char data);
-
-//****************************************
 // Line sensors
 //****************************************
 
