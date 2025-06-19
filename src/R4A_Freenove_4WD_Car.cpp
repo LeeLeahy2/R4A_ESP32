@@ -19,6 +19,11 @@ const uint8_t r4aLedMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
     0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
 };
 
+const uint8_t r4aLedMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
+{
+    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
+};
+
 //*********************************************************************
 // Get the backup light color
 uint32_t R4A_Freenove_4WD_Car::backupLightColorGet()

@@ -185,6 +185,7 @@ class R4A_Freenove_4WD_Car
 //****************************************
 
 extern const uint8_t r4aLedMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS];
+extern const uint8_t r4aLedMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS];
 
 //****************************************
 // I2C bus configuration
@@ -224,6 +225,7 @@ R4A_I2C_BUS i2cBus(0, i2cBusDeviceTable, i2cBusDeviceTableEntries);   \
     R4A_VK16K33 vk16k33 = {&i2cBus,                             \
                            VK16K33_I2C_ADDRESS,                 \
                            r4aLedMatrixColumnMap,               \
+                           r4aLedMatrixRowPixelMap,             \
                            16,                                  \
                            8,                                   \
                            15};

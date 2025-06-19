@@ -108,6 +108,11 @@ const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
     0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
 };
 
+const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
+{
+    0, 1, 2, 3, 4, 5, 6, 7
+};
+
 //****************************************
 // Font
 //****************************************
@@ -305,6 +310,7 @@ R4A_I2C_BUS i2cBus =
 R4A_VK16K33 vk16k33 = {&i2cBus,
                        VK16K33_I2C_ADDRESS,
                        ledMatrixColumnMap,
+                       ledMatrixRowPixelMap,
                        16,
                        8,
                        0};

@@ -45,6 +45,11 @@ const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
     0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
 };
 
+const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
+{
+    0, 1, 2, 3, 4, 5, 6, 7
+};
+
 //****************************************
 // I2C bus configuration
 //****************************************
@@ -71,6 +76,7 @@ const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
     R4A_VK16K33 vk16k33 = {&i2cBus,
                            VK16K33_I2C_ADDRESS,
                            ledMatrixColumnMap,
+                           ledMatrixRowPixelMap,
                            16,
                            8,
                            15};
@@ -125,13 +131,12 @@ void setup()
     log_v("Calling r4aMenuBegin");
     r4aMenuBegin(&serialMenu, menuTable, menuTableEntries);
 
-    // Initialize the I2C bus and DON'T do enumeration
-    log_v("Calling i2cBus.begin");
+    // Initialize the I2C bus
+    log_v("Calling r4aEsp32I2cBusBegin");
     r4aEsp32I2cBusBegin(&i2cBus,
                         I2C_SDA,
                         I2C_SCL,
-                        R4A_I2C_FAST_MODE_HZ,
-                        nullptr);
+                        R4A_I2C_FAST_MODE_HZ);
     r4aI2cBus = &i2cBus;
 
     // Delay to allow the hardware initialize
