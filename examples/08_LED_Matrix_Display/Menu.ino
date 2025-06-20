@@ -22,6 +22,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"I2C",     nullptr,            MTI_I2C,        nullptr,    0,      "Enter the I2C menu"},
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
+    {"time",    r4aMenuBoolToggle,  (intptr_t)&timeDisplay,   r4aMenuBoolHelp,    0,      "Toggle between time and font"},                //  8
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
 };
 #define MAIN_MENU_ENTRIES       sizeof(mainMenuTable) / sizeof(mainMenuTable[0])

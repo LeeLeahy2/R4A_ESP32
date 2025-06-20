@@ -8,6 +8,12 @@
 #define __PARAMETERS_H__
 
 //****************************************
+// LED Matrix
+//****************************************
+
+bool timeDisplay;
+
+//****************************************
 // mDNS
 //****************************************
 
@@ -39,6 +45,9 @@ const char * wifiPassword4;
 
 const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 {
+    // LED Matrix parameters
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &timeDisplay,               "TimeDisplay",  true},
+
     // Memory parameters
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_INT32,  0, (uint64_t)0xffffffff,   &r4aMallocMaxBytes,         "MallocMax",    (uint64_t)128},

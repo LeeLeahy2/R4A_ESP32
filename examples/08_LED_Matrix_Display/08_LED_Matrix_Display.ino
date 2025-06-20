@@ -5,7 +5,6 @@
   Display data on the Freenove 4WD Car 16x8 LED matrix
 **********************************************************************/
 
-#define DISPLAY_FONT        0
 #define FLIP_X_FLIP_Y           0
 #define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0
 
@@ -167,12 +166,10 @@ void setup()
     r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
 
     // Remove any input from the FIFO
-    if (DISPLAY_FONT)
-    {
-        while (Serial.available())
-            Serial.read();
+    while (Serial.available())
+        Serial.read();
+    if (timeDisplay == false)
         Serial.printf("Press any key to display the pixel columns (x,0)\r\n");
-    }
 
     // Execute loop forever
 }
@@ -181,7 +178,7 @@ void setup()
 // Idle loop for core 1 of the application
 void loop()
 {
-    if (DISPLAY_FONT  || serialMenu._menu)
+    if (timeDisplay || serialMenu._menu)
     {
         if (vk16k33Present)
             displayTime();
