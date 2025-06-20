@@ -82,6 +82,7 @@ const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
 #endif  // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
 
 R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
+bool vk16k33Present;
 
 //****************************************
 // Menus
@@ -138,12 +139,24 @@ void setup()
     // Delay to allow the hardware initialize
     delay(1000);
 
-    // Enumerate the I2C bus
-    r4aI2cBusEnumerate(&i2cBus);
+    // Determine if the LED controller is available
+    log_v("Calling r4aI2cBusIsDevicePresent");
+    vk16k33Present = r4aI2cBusIsDevicePresent(&i2cBus, VK16K33_I2C_ADDRESS);
 
     // Initialize the VK16K33 LED controller
-    log_v("Calling r4aVk16k33Setup");
-    r4aVk16k33Setup(&vk16k33);
+    if (vk16k33Present)
+    {
+        log_v("Calling r4aVk16k33Setup");
+        r4aVk16k33Setup(&vk16k33);
+
+        log_v("Calling r4aVk16k33BufferFill");
+        r4aVk16k33BufferFill(&vk16k33, 0xff);
+
+        log_v("Calling r4aVk16k33DisplayPixels");
+        r4aVk16k33DisplayPixels(&vk16k33);
+    }
+    else
+        Serial.printf("VK16K33 LED controller not detected on the I2C bus!\r\n");
 
     // Start WiFi if enabled
     log_v("Calling r4aWifiBegin");
@@ -168,10 +181,16 @@ void setup()
 // Idle loop for core 1 of the application
 void loop()
 {
-    if (DISPLAY_FONT)
+    if (DISPLAY_FONT  || serialMenu._menu)
+    {
+        if (vk16k33Present)
+            displayTime();
+
+        // Process serial commands
+        r4aSerialMenu(&serialMenu);
+    }
+    else if (vk16k33Present)
         displayFont();
-    else
-        displayTime();
 }
 
 //*********************************************************************
@@ -316,9 +335,6 @@ void displayTime()
             r4aVk16k33DisplayPixels(&vk16k33);
         }
     }
-
-    // Process serial commands
-    r4aSerialMenu(&serialMenu);
 }
 
 //*********************************************************************
