@@ -290,6 +290,7 @@ void displayFont()
 // Display the time on the LED matrix
 void displayTime()
 {
+    static time_t previousMinutes;
     static time_t previousSeconds;
     time_t seconds;
 
@@ -311,25 +312,29 @@ void displayTime()
             int hours = hourFormat12(seconds);
             int minutes = minute(seconds);
             int value;
+            if (minutes != previousMinutes)
+            {
+                previousMinutes = minutes;
 
-            // Clear the display
-            r4aVk16k33BufferClear(&vk16k33);
+                // Clear the display
+                r4aVk16k33BufferClear(&vk16k33);
 
-            // Display the hours
-            value = hours / 10;
-            if (value)
-                displayDigit(0, value);
-            value = hours - (value * 10);
-            displayDigit(1, value);
+                // Display the hours
+                value = hours / 10;
+                if (value)
+                    displayDigit(0, value);
+                value = hours - (value * 10);
+                displayDigit(1, value);
 
-            // Display the minutes
-            value = minutes / 10;
-            displayDigit(6, value);
-            value = minutes - (value * 10);
-            displayDigit(11, value);
+                // Display the minutes
+                value = minutes / 10;
+                displayDigit(6, value);
+                value = minutes - (value * 10);
+                displayDigit(11, value);
 
-            // Pass the buffer to the display
-            r4aVk16k33DisplayPixels(&vk16k33);
+                // Pass the buffer to the display
+                r4aVk16k33DisplayPixels(&vk16k33);
+            }
         }
     }
 }
