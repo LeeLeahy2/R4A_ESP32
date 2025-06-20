@@ -6,7 +6,20 @@
   connected to a SparkFun SparkFun Thing Plus - ESP32 WROOM (USB-C)
 **********************************************************************/
 
-#include <R4A_ESP32.h>
+#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0
+
+#if     USE_SPARKFUN_THING_PLUS_ESP32_WROOM
+    // SparkFun Thing Plus ESP32 WROOM: https://www.sparkfun.com/sparkfun-thing-plus-esp32-wroom-usb-c.html
+    #include <R4A_ESP32.h>
+
+    #define I2C_SCL                 22
+    #define I2C_SDA                 21
+
+    #define VK16K33_I2C_ADDRESS     0x71
+#else   // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
+    #include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
+#endif  // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
+
 #include "Parameters.h"
 
 //****************************************
@@ -84,7 +97,7 @@ const ALPHANUMERIC_DISPLAY_SEGMENT_MAP segmentMap[] =
     {8,4},  // l
     {10,4}, // m
     {12,4}, // n
-    {1,0},  // color
+    {1,0},  // colon
     {3,0}   // period
 };
 
@@ -266,6 +279,7 @@ const uint16_t fontNumbers[] =
 // I2C bus configuration
 //****************************************
 
+#if     USE_SPARKFUN_THING_PLUS_ESP32_WROOM
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
     {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
@@ -283,9 +297,17 @@ R4A_I2C_BUS i2cBus =
     false,              // _enumerated
 };
 
-R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
+R4A_VK16K33 vk16k33 = {&i2cBus,
+                       VK16K33_I2C_ADDRESS,
+                       16,
+                       8,
+                       0};
+#else   // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
+    USE_I2C_DEVICE_TABLE;
+    USE_I2C_BUS_TABLE;
+#endif  // USE_SPARKFUN_THING_PLUS_ESP32_WROOM
 
-R4A_VK16K33 vk16k33 = {&i2cBus, VK16K33_I2C_ADDRESS, 16, 8, 0};
+R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 bool vk16k33Present;
 
 //****************************************

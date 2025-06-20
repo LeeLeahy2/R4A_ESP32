@@ -13,8 +13,8 @@ SHELL=/bin/bash
 ##########
 
 SKETCH=07_AlphaNumeric_Display
-ESP32_CHIP=esp32
-#ESP32_CHIP=esp32wrover
+#ESP32_CHIP=esp32
+ESP32_CHIP=esp32wrover
 PARTITION_FILE_NAME=huge_app
 
 ESP_CORE_VERSION=3.2.0
