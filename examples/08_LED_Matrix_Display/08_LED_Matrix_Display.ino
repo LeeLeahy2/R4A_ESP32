@@ -6,6 +6,7 @@
 **********************************************************************/
 
 #define DISPLAY_FONT        0
+#define FLIP_X_FLIP_Y           0
 #define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0
 
 #if     USE_SPARKFUN_THING_PLUS_ESP32_WROOM
@@ -29,12 +30,20 @@
 
 const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
 {
+#if FLIP_X_FLIP_Y
+    15, 13, 11, 9, 7, 5, 3, 1, 14, 12, 10, 8, 6, 4, 2, 0
+#else   // FLIP_X_FLIP_Y
     0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
+#endif  // FLIP_X_FLIP_Y
 };
 
 const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
 {
+#if FLIP_X_FLIP_Y
+    7, 6, 5, 4, 3, 2, 1, 0
+#else   // FLIP_X_FLIP_Y
     0, 1, 2, 3, 4, 5, 6, 7
+#endif  // FLIP_X_FLIP_Y
 };
 
 //****************************************
@@ -191,7 +200,7 @@ void displayFont()
         {
             value = previousIndex;
             Serial.printf("Column: %d\r\n", value);
-            r4aVk16k33PixelSet(&vk16k33, ledMatrixColumnMap[value], 0);
+            r4aVk16k33PixelSet(&vk16k33, ledMatrixColumnMap[value], ledMatrixRowPixelMap[0]);
             if (value == 15)
                 Serial.printf("Press any key to display the pixel rows (0, y)\r\n");
         }
@@ -201,7 +210,7 @@ void displayFont()
         {
             value = previousIndex - 16;
             Serial.printf("Row: %d\r\n", value);
-            r4aVk16k33PixelSet(&vk16k33, ledMatrixColumnMap[0], value);
+            r4aVk16k33PixelSet(&vk16k33, ledMatrixColumnMap[0], ledMatrixRowPixelMap[value]);
             if (value == 7)
                 Serial.printf("Press any key to display the numbers\r\n");
         }

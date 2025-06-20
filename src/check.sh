@@ -68,6 +68,7 @@ cd ../08_LED_Matrix_Display
 make clean
 make
 make clean
+sed -i 's|#define FLIP_X_FLIP_Y           0|#define FLIP_X_FLIP_Y           1|' 08_LED_Matrix_Display.ino
 sed -i 's|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     1|' 08_LED_Matrix_Display.ino
 sed -i 's|#ESP32_CHIP=esp32|ESP32_CHIP=esp32|' makefile
 sed -i 's|ESP32_CHIP=esp32wrover|#ESP32_CHIP=esp32wrover|' makefile
