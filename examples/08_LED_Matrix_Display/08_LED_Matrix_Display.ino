@@ -136,7 +136,7 @@ void setup()
     r4aI2cBus = &i2cBus;
 
     // Delay to allow the hardware initialize
-    delay(1000);
+    delay(100);
 
     // Determine if the LED controller is available
     log_v("Calling r4aI2cBusIsDevicePresent");
@@ -200,13 +200,17 @@ void displayFont()
 
     if (Serial.available())
     {
+        // Wait for input
         while (Serial.available())
             Serial.read();
 
         // Increment and wrap the index
         index += 1;
-        if (index == 49)
+        if (index >= 54)
+        {
             index = 0;
+            timeDisplay = false;
+        }
 
         // Clear the display
         r4aVk16k33BufferClear(&vk16k33);
@@ -242,7 +246,7 @@ void displayFont()
         }
 
         // Display the upper case letters
-        else if (previousIndex < 40)    // 34 - 39
+        else if (previousIndex < 42)    // 34 - 41
         {
             value = previousIndex - 34 + 'A';
             Serial.printf("Character: %c\r\n", value);
@@ -250,22 +254,22 @@ void displayFont()
         }
 
         // Display the lower case letters
-        else if (previousIndex < 46)    // 40 - 45
+        else if (previousIndex < 50)    // 42 - 49
         {
-            value = previousIndex - 40 + 'a';
+            value = previousIndex - 42 + 'a';
             Serial.printf("Character: %c\r\n", value);
             r4aVk16k33DisplayChar(&vk16k33, 6, value);
         }
 
         // Display the lower case letter L
-        else if (previousIndex == 46)
+        else if (previousIndex == 50)
         {
             Serial.printf("Character: l\r\n");
             r4aVk16k33DisplayChar(&vk16k33, 6, 'l');
         }
 
         // Display the lower case letter T
-        else if (previousIndex == 47)
+        else if (previousIndex == 51)
         {
             Serial.printf("Character: t\r\n");
             r4aVk16k33DisplayChar(&vk16k33, 6, 't');
@@ -273,12 +277,16 @@ void displayFont()
         }
 
         // Display the period
-        else if (previousIndex == 48)
+        else if (previousIndex == 52)
         {
             Serial.printf("Character: .\r\n");
             r4aVk16k33DisplayChar(&vk16k33, 6, '.');
             Serial.printf("Press any key to display the pixel columns (x,0)\r\n");
         }
+
+        // Display the period
+        else if (previousIndex == 53)
+            timeDisplay = true;
 
         // Display the pixels
         r4aVk16k33DisplayPixels(&vk16k33);
