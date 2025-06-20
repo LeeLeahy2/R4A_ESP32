@@ -22,33 +22,10 @@
 // I2C bus configuration
 //****************************************
 
-const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
-{
-    {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"},
-    {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"},
-    {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
-};
-
-R4A_I2C_BUS i2cBus =
-{
-    &Wire,              // _i2cBus
-    i2cBusDeviceTable,  // _deviceTable
-    sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
-    0,                  // _lock
-    {0,},               // _present
-    r4aEsp32I2cBusWriteWithLock, // _writeWithLock
-    r4aEsp32I2cBusRead, // _read
-    false,              // _enumerated
-};
+USE_I2C_DEVICE_TABLE;
+USE_I2C_BUS_TABLE;
 
 R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
-
-R4A_PCA9685 pca9685(&i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * 1000 * 1000);
-    R4A_PCA9685_MOTOR motorBackLeft(&pca9685, 8, 9);
-    R4A_PCA9685_MOTOR motorBackRight(&pca9685, 11, 10);
-    R4A_PCA9685_MOTOR motorFrontRight(&pca9685, 13, 12);
-    R4A_PCA9685_MOTOR motorFrontLeft(&pca9685, 14, 15);
-R4A_PCF8574 pcf8574(&i2cBus, PCF8574_I2C_ADDRESS);
 
 //****************************************
 // Forward routine declarations

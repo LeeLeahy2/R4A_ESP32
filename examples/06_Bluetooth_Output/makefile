@@ -160,11 +160,11 @@ core-update:
 # Robot Firmware
 ##########
 
-DEBUG_LEVEL=verbose
+#DEBUG_LEVEL=verbose
 #DEBUG_LEVEL=debug
 #DEBUG_LEVEL=warn
 #DEBUG_LEVEL=error
-#DEBUG_LEVEL=none
+DEBUG_LEVEL=none
 
 $(BIN_FILE):	$(SKETCH).ino   *.ino   makefile
 	@$(CLEAR)
