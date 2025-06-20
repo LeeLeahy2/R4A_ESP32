@@ -330,6 +330,9 @@ R4A_MENU serialMenu;
 const R4A_SSID_PASSWORD r4aWifiSsidPassword[] =
 {
     {&wifiSSID1, &wifiPassword1},
+    {&wifiSSID2, &wifiPassword2},
+    {&wifiSSID3, &wifiPassword3},
+    {&wifiSSID4, &wifiPassword4},
 };
 const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword)
                                      / sizeof(r4aWifiSsidPassword[0]);

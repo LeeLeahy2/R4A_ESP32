@@ -27,6 +27,12 @@ const char * parameterFilePath;
 // Public access point SSID and password
 const char * wifiSSID1;
 const char * wifiPassword1;
+const char * wifiSSID2;
+const char * wifiPassword2;
+const char * wifiSSID3;
+const char * wifiPassword3;
+const char * wifiSSID4;
+const char * wifiPassword4;
 
 //****************************************
 // NVM Parameters
@@ -57,6 +63,12 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 
     {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiSSID1,                 "WifiSsid1",    R4A_ESP32_NVM_STRING("Your SSID here")},
     {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiPassword1,             "WifiPass1",    R4A_ESP32_NVM_STRING("Your password here")},
+    {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiSSID2,                 "WifiSsid2",    R4A_ESP32_NVM_STRING("Your SSID here")},
+    {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiPassword2,             "WifiPass2",    R4A_ESP32_NVM_STRING("Your password here")},
+    {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiSSID3,                 "WifiSsid3",    R4A_ESP32_NVM_STRING("Your SSID here")},
+    {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiPassword3,             "WifiPass3",    R4A_ESP32_NVM_STRING("Your password here")},
+    {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiSSID4,                 "WifiSsid4",    R4A_ESP32_NVM_STRING("Your SSID here")},
+    {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &wifiPassword4,             "WifiPass4",    R4A_ESP32_NVM_STRING("Your password here")},
 };
 const int nvmParameterCount = sizeof(nvmParameters) / sizeof(nvmParameters[0]);
 
