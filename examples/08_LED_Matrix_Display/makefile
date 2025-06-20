@@ -13,6 +13,7 @@ SHELL=/bin/bash
 ##########
 
 SKETCH=08_LED_Matrix_Display
+#ESP32_CHIP=esp32
 ESP32_CHIP=esp32wrover
 PARTITION_FILE_NAME=huge_app
 
