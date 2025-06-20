@@ -6,6 +6,7 @@
   connected to a SparkFun SparkFun Thing Plus - ESP32 WROOM (USB-C)
 **********************************************************************/
 
+#define FLIP_X_FLIP_Y           0
 #define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0
 
 #if     USE_SPARKFUN_THING_PLUS_ESP32_WROOM
@@ -83,6 +84,35 @@ typedef struct _ALPHANUMERIC_DISPLAY_SEGMENT_MAP
 
 const ALPHANUMERIC_DISPLAY_SEGMENT_MAP segmentMap[] =
 {
+#if FLIP_X_FLIP_Y
+    {6,0},  // a --> d
+    {8,0},  // b --> e
+    {10,0}, // c --> f
+    {0,0},  // d --> a
+    {2,0},  // e --> b
+    {4,0},  // f --> c
+    {0,4},  // g --> h
+    {12,0}, // h --> g
+    {8,4},  // i --> l
+    {10,4}, // j --> m
+    {12,4}, // k --> n
+    {2,4},  // l --> i
+    {4,4},  // m --> j
+    {6,4},  // n --> k
+    {1,0},  // colon
+    {3,0}   // period
+    //
+    //      aaaaaaaaa
+    //      fi  j  kb
+    //      f i j k b
+    //      f  ijk  b
+    //       ggg hhh    Display
+    //      e  nml  c   0 1 colon 2 period 3
+    //      e n m l c
+    //      en  m  lc
+    //      ddddddddd
+    //
+#else   // FLIP_X_FLIP_Y
     {0,0},  // a
     {2,0},  // b
     {4,0},  // c
@@ -99,6 +129,7 @@ const ALPHANUMERIC_DISPLAY_SEGMENT_MAP segmentMap[] =
     {12,4}, // n
     {1,0},  // colon
     {3,0}   // period
+#endif  // FLIP_X_FLIP_Y
 };
 
 #define LIGHT(x)        (1 << x)
@@ -111,6 +142,15 @@ const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
 const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
 {
     0, 1, 2, 3, 4, 5, 6, 7
+};
+
+const uint8_t ledDigitMap[4] =
+{
+#if FLIP_X_FLIP_Y
+    3, 2, 1, 0
+#else   // FLIP_X_FLIP_Y
+    0, 1, 2, 3
+#endif  // FLIP_X_FLIP_Y
 };
 
 //****************************************
@@ -490,7 +530,7 @@ void displayDigit(int digit, int value)
             // Display the segment
             r4aVk16k33PixelSet(&vk16k33,
                                segmentMap[index].column,
-                               segmentMap[index].row + digit);
+                               segmentMap[index].row + ledDigitMap[digit]);
         }
     }
 }
