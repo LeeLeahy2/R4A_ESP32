@@ -11,11 +11,6 @@
 #define BLF_DEBUG_MOTORS        0
 #define BLF_DEBUG_STATES        0
 
-#define BLF_SPEED_LV4   4000
-#define BLF_SPEED_LV3   3000
-#define BLF_SPEED_LV2   2500
-#define BLF_SPEED_LV1   1500
-
 //****************************************
 // Locals
 //****************************************
@@ -23,16 +18,6 @@
 int blfTimeBefore = 0;  //Record each non-blocking time
 int blfTimeCount = 0;   //Record the number of non-blocking times
 int blfTimeFlag = 0;    //Record the blink time
-
-//****************************************
-// Constants
-//****************************************
-
-#define BLT_SPEED_FAST      1500
-#define BLT_SPEED_MEDIUM    1200
-#define BLT_SPEED_SLOW      1000
-
-#define BLT_TURN_THRESHOLD  100
 
 //*********************************************************************
 // The robotRunning routine calls this routine to actually perform
@@ -67,21 +52,21 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
     case 0b010:
     case 0b101:
         // Robot over center of line
-        robotMotorSetSpeeds(BLF_SPEED_LV1,  BLF_SPEED_LV1); // Move Forward
+        robotMotorSetSpeeds(blfSpeedSlow,  blfSpeedSlow); // Move Forward
         break;
 
     //     RcL
     case 0b001:
     case 0b011:
         // Robot over left sensor, need to turn left
-        robotMotorSetSpeeds(-BLF_SPEED_LV3, BLF_SPEED_LV4); // Turn left
+        robotMotorSetSpeeds(-blfSpeedMedium, blfSpeedFast); // Turn left
         break;
 
     //     RcL
     case 0b100:
     case 0b110:
         // Robot over right sensor, need to turn right
-        robotMotorSetSpeeds(BLF_SPEED_LV4, -BLF_SPEED_LV3); // Turn right
+        robotMotorSetSpeeds(blfSpeedFast, -blfSpeedMedium); // Turn right
         break;
     }
 }

@@ -8,6 +8,14 @@
 #define __PARAMETERS_H__
 
 //****************************************
+// Basic Line Following (BLF)
+//****************************************
+
+int16_t blfSpeedSlow;
+int16_t blfSpeedMedium;
+int16_t blfSpeedFast;
+
+//****************************************
 // Camera Line Following (CLF)
 //****************************************
 
@@ -96,6 +104,12 @@ const char * wifiPassword4;
 
 const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 {
+    // Basic Line Following (BLF)
+// Required    Type                  Minimum          Maximum   Address             Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedFast,      "blfFast",      4000},
+    {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedMedium,    "blfMedium",    3000},
+    {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedSlow,      "blfSlow",      1500},
+
     // Camera Line Following (CLF)
 // Required    Type                  Minimum     Maximum        Address                         Name            Default Value
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &clfPanStartDegrees,            "clfPanDeg",    10},
