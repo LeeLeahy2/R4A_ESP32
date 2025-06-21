@@ -38,8 +38,11 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                             debug);
     if (status == false)
     {
-        if (debug)
-            debug->printf("ERROR: Failed to reset the I2C bus!\r\n");
+        const char * errorMessage = "ERROR: Failed to reset the I2C bus!\r\n";
+        if (display)
+            display->printf(errorMessage);
+        else if (debug)
+            debug->printf(errorMessage);
     }
     else
     {
