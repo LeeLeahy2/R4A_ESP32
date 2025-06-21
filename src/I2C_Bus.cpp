@@ -105,6 +105,7 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
 {
     size_t bytesRead;
     R4A_ESP32_I2C_BUS  * esp32I2cBus;
+    uint8_t status;
 
     do
     {
@@ -125,7 +126,7 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
 
         // Read the data from the I2C device into the I2C RX buffer
         bytesRead = esp32I2cBus->_twoWire->requestFrom(i2cAddress, readByteCount);
-        esp32I2cBus->_twoWire->endTransmission();
+        status = esp32I2cBus->_twoWire->endTransmission();
 
         // Move the data into the read buffer
         for (size_t index = 0; index < bytesRead; index++)
@@ -143,7 +144,7 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
     r4aLockRelease(&esp32I2cBus->_lock);
 
     // Return the number of bytes read
-    return (bytesRead == readByteCount);
+    return (status == ESP_OK) && (bytesRead == readByteCount);
 }
 
 //*********************************************************************
@@ -157,9 +158,12 @@ bool r4aI2cBusWrite(R4A_I2C_BUS * i2cBus,
 {
     size_t bytesWritten;
     R4A_ESP32_I2C_BUS  * esp32I2cBus;
+    uint8_t status;
 
     do
     {
+        status = 1;
+
         // Get access to the ESP32 specific data
         esp32I2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
 
@@ -188,7 +192,7 @@ bool r4aI2cBusWrite(R4A_I2C_BUS * i2cBus,
             bytesWritten = esp32I2cBus->_twoWire->write(dataBuffer, dataByteCount);
 
         // Done sending data to the I2C device
-        esp32I2cBus->_twoWire->endTransmission();
+        status = esp32I2cBus->_twoWire->endTransmission();
 
         // Release the lock
         r4aLockRelease(&esp32I2cBus->_lock);
@@ -199,5 +203,5 @@ bool r4aI2cBusWrite(R4A_I2C_BUS * i2cBus,
         display->printf("    bytesWritten: %d\r\n", bytesWritten);
 
     // Return the write status
-    return (bytesWritten == dataByteCount);
+    return (status == ESP_OK) && (bytesWritten == dataByteCount);
 }
