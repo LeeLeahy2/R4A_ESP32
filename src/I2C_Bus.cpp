@@ -44,15 +44,14 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
         else if (debug)
             debug->printf(errorMessage);
     }
+
+    // Delay while the I2C devices reset
     else
-    {
-        // Delay while the I2C devices reset
         delay(10);
 
-        // Enumerate the I2C devices
-        if (enumerate)
-            r4aI2cBusEnumerate(i2cBus, display);
-    }
+    // Enumerate the I2C devices
+    if (enumerate)
+        r4aI2cBusEnumerate(i2cBus, display);
     return status;
 }
 
