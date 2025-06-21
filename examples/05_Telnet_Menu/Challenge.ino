@@ -5,6 +5,19 @@
 **********************************************************************/
 
 //*********************************************************************
+// Called upon fatal error
+// Inputs:
+//   errorMessage: Zero terminated string of characters containing the
+//                 error mesage to be displayed
+void challengeHalt(const char * errorMessage)
+{
+    challengeStop();
+    if (vk16k33Present)
+        r4aVk16k33DisplayHalt(&vk16k33);
+    r4aReportFatalError(errorMessage);
+}
+
+//*********************************************************************
 // Called when the robot starts
 void challengeInit()
 {

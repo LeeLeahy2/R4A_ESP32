@@ -107,6 +107,20 @@ volatile bool core0Initialized;
 volatile bool core1Initialized;
 
 //****************************************
+// Constants
+//****************************************
+
+const uint8_t ledMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
+{
+    0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15
+};
+
+const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
+{
+    0, 1, 2, 3, 4, 5, 6, 7
+};
+
+//****************************************
 // I2C bus configuration
 //****************************************
 
@@ -159,6 +173,14 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
         &r4aOV2640Pins,         // _pins
     };
 #endif  // USE_OV2640
+    // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)
+    R4A_VK16K33 vk16k33 = {&i2cBus,
+                           VK16K33_I2C_ADDRESS,
+                           ledMatrixColumnMap,
+                           ledMatrixRowPixelMap,
+                           16,
+                           8,
+                           15};
 #ifdef  USE_ZED_F9P
     R4A_ZED_F9P zedf9p(&i2cBus, ZEDF9P_I2C_ADDRESS);
 #endif  // USE_ZED_F9P

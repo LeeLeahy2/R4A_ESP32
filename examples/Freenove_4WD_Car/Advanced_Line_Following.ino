@@ -8,12 +8,7 @@
 // Do the line following
 void alfChallenge(R4A_ROBOT_CHALLENGE * object)
 {
-    static uint32_t lastDisplayMsec;
-    if ((millis() - lastDisplayMsec) >= (15 * 1000))
-    {
-        lastDisplayMsec = millis();
-        Serial.printf("Add your code to ALF::challenge()\r\n");
-    }
+    challengeHalt("Code missing in alfChallenge, reads sensors and make decisions to drive motors!");
 }
 
 //*********************************************************************

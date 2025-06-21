@@ -124,6 +124,8 @@ USE_I2C_BUS_TABLE;
 
 R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 
+bool vk16k33Present;
+
 //****************************************
 // Battery macros
 //****************************************
@@ -250,9 +252,6 @@ void setup()
                 ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
     digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
 
-    // Delay to allow the hardware initialize
-    delay(1000);
-
     // Setup and enumerate the I2C devices
     log_d("Calling i2cBus.begin");
     r4aEsp32I2cBusBegin(&i2cBus,
@@ -260,6 +259,13 @@ void setup()
                         I2C_SCL,
                         R4A_I2C_FAST_MODE_HZ);
     r4aI2cBus = &i2cBus;
+
+    // Delay to allow the hardware initialize
+    delay(1000);
+
+    // Determine if the LED controller is available
+    log_v("Calling r4aI2cBusIsDevicePresent");
+    vk16k33Present = r4aI2cBusIsDevicePresent(&i2cBus, VK16K33_I2C_ADDRESS);
 
     // Initialize the PCA9685
     log_d("Calling pca9685.begin");
