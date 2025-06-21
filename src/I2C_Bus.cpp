@@ -26,6 +26,9 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
     esp32I2cBus->_twoWire->begin(sdaPin, sclPin);
     esp32I2cBus->_twoWire->setClock(clockHz);
 
+    // Delay to let the signals stablize
+    delay(10);
+
     // Reset the devices on the I2C bus
     data = R4A_I2C_SWRST;
     status = r4aI2cBusWrite(i2cBus,
