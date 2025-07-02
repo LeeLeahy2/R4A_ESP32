@@ -55,10 +55,11 @@ cd ../07_AlphaNumeric_Display
 make clean
 make
 make clean
-sed -i 's|#define FLIP_X_FLIP_Y           0|#define FLIP_X_FLIP_Y           1|' 07_AlphaNumeric_Display.ino
-sed -i 's|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     1|' 07_AlphaNumeric_Display.ino
-sed -i 's|#ESP32_CHIP=esp32|ESP32_CHIP=esp32|' makefile
-sed -i 's|ESP32_CHIP=esp32wrover|#ESP32_CHIP=esp32wrover|' makefile
+sed 's|#define FLIP_X_FLIP_Y           0|#define FLIP_X_FLIP_Y           1|'  07_AlphaNumeric_Display.ino  >  temp.txt
+sed 's|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     1|'  temp.txt  >  07_AlphaNumeric_Display.ino
+sed 's|#ESP32_CHIP=esp32|ESP32_CHIP=esp32|' makefile  >  temp.txt
+sed 's|ESP32_CHIP=esp32wrover|#ESP32_CHIP=esp32wrover|'  temp.txt  >  makefile
+rm  temp.txt
 make clean
 make
 make clean
@@ -68,10 +69,11 @@ cd ../08_LED_Matrix_Display
 make clean
 make
 make clean
-sed -i 's|#define FLIP_X_FLIP_Y           0|#define FLIP_X_FLIP_Y           1|' 08_LED_Matrix_Display.ino
-sed -i 's|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     1|' 08_LED_Matrix_Display.ino
-sed -i 's|#ESP32_CHIP=esp32|ESP32_CHIP=esp32|' makefile
-sed -i 's|ESP32_CHIP=esp32wrover|#ESP32_CHIP=esp32wrover|' makefile
+sed 's|#define FLIP_X_FLIP_Y           0|#define FLIP_X_FLIP_Y           1|'  08_LED_Matrix_Display.ino   >   temp.txt
+sed 's|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     1|'  temp.txt  >  08_LED_Matrix_Display.ino
+sed 's|#ESP32_CHIP=esp32|ESP32_CHIP=esp32|' makefile  >  temp.txt
+sed 's|ESP32_CHIP=esp32wrover|#ESP32_CHIP=esp32wrover|'  temp.txt > makefile
+rm  temp.txt
 make clean
 make
 make clean
@@ -85,7 +87,9 @@ make clean
 make
 
 # NTRIP
-sed -i 's|//#define USE_NTRIP|#define USE_NTRIP|' Freenove_4WD_Car.ino
+cp  Freenove_4WD_Car.ino  temp.txt
+sed 's|//#define USE_NTRIP|#define USE_NTRIP|'  temp.txt  >  Freenove_4WD_Car.ino
+rm  temp.txt
 make
 git reset --hard --quiet HEAD
 
@@ -95,15 +99,19 @@ git reset --hard --quiet HEAD
 #git reset --hard --quiet HEAD
 
 # ZED F9P
-sed -i 's|//#define USE_ZED_F9P|#define USE_ZED_F9P|' Freenove_4WD_Car.ino
+cp  Freenove_4WD_Car.ino  temp.txt
+sed 's|//#define USE_ZED_F9P|#define USE_ZED_F9P|'  temp.txt  >  Freenove_4WD_Car.ino
+rm  temp.txt
 make
 git reset --hard --quiet HEAD
 
 # Waypoint Following (everything)
-sed -i 's|//#define USE_NTRIP|#define USE_NTRIP|' Freenove_4WD_Car.ino
-#sed -i 's|//#define USE_OV2640|#define USE_OV2640|' Freenove_4WD_Car.ino
-sed -i 's|//#define USE_WAYPOINT_FOLLOWING|#define USE_WAYPOINT_FOLLOWING|' Freenove_4WD_Car.ino
-sed -i 's|//#define USE_ZED_F9P|#define USE_ZED_F9P|' Freenove_4WD_Car.ino
+sed 's|//#define USE_NTRIP|#define USE_NTRIP|'  Freenove_4WD_Car.ino  >  temp.txt
+cp  temp.txt  Freenove_4WD_Car.ino
+#sed -i 's|//#define USE_OV2640|#define USE_OV2640|'  temp.txt  >  Freenove_4WD_Car.ino
+sed 's|//#define USE_WAYPOINT_FOLLOWING|#define USE_WAYPOINT_FOLLOWING|'  Freenove_4WD_Car.ino  >  temp.txt
+sed 's|//#define USE_ZED_F9P|#define USE_ZED_F9P|'  temp.txt  >  Freenove_4WD_Car.ino
+rm  temp.txt
 make
 git reset --hard --quiet  HEAD
 make clean
