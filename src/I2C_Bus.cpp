@@ -97,6 +97,7 @@ TwoWire * r4aI2cBusGetTwoWire(R4A_I2C_BUS * i2cBus)
 {
     R4A_ESP32_I2C_BUS * espI2cBus;
 
+    espI2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
     return espI2cBus->_twoWire;
 }
 

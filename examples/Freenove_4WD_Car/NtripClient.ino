@@ -41,13 +41,11 @@ uint8_t r4aNtripClientI2cTransactionSize()
 
 //*********************************************************************
 // Push data to the GNSS
-int r4aNtripClientPushRawData(uint8_t * buffer,
-                              int bytesToPush,
-                              Print * display)
+int r4aNtripClientPushRawData(uint8_t * buffer, int bytesToPush)
 {
 #ifdef  USE_ZED_F9P
     if (zedf9pPresent)
-        return zedf9p.pushRawData(buffer, bytesToPush, display);
+        return zedf9p.pushRawData(buffer, bytesToPush);
 #endif  // USE_ZED_F9P
     return bytesToPush;
 }
