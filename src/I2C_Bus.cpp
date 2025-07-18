@@ -7,6 +7,8 @@
 
 #include "R4A_ESP32.h"
 
+#define I2C_TIMEOUT_MSEC                500
+
 //*********************************************************************
 // Initialize the I2C bus
 bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
@@ -19,40 +21,54 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
 {
     uint8_t data;
     R4A_I2C_BUS * i2cBus;
-    bool status;
+    esp_err_t status;
+    bool success;
 
-    // Connect the pins to the I2C controller
-    i2cBus = &esp32I2cBus->_i2cBus;
-    esp32I2cBus->_twoWire->begin(sdaPin, sclPin);
-    esp32I2cBus->_twoWire->setClock(clockHz);
-
-    // Delay to let the signals stablize
-    delay(10);
-
-    // Reset the devices on the I2C bus
-    data = R4A_I2C_SWRST;
-    status = r4aI2cBusWrite(i2cBus,
-                            R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS,
-                            &data,
-                            sizeof(data),
-                            debug);
-    if (status == false)
+    do
     {
-        const char * errorMessage = "ERROR: Failed to reset the I2C bus!\r\n";
-        if (display)
-            display->printf(errorMessage);
-        else if (debug)
-            debug->printf(errorMessage);
-    }
+        success = false;
 
-    // Delay while the I2C devices reset
-    else
+        // Connect the pins to the I2C controller
+        i2cBus = &esp32I2cBus->_i2cBus;
+        status = i2cInit(esp32I2cBus->_busNumber, sdaPin, sclPin, clockHz);
+        if (status != ESP_OK)
+        {
+            const char * errorMessage = "ERROR: Failed to initialize I2C bus %d!\r\n";
+            if (display)
+                display->printf(errorMessage, esp32I2cBus->_busNumber);
+            else if (debug)
+                debug->printf(errorMessage, esp32I2cBus->_busNumber);
+            break;
+        }
+
+        // Delay to let the signals stablize
         delay(10);
 
-    // Enumerate the I2C devices
-    if (enumerate)
-        r4aI2cBusEnumerate(i2cBus, display);
-    return status;
+        // Reset the devices on the I2C bus
+        data = R4A_I2C_SWRST;
+        success = r4aI2cBusWrite(i2cBus,
+                                 R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS,
+                                 &data,
+                                 sizeof(data),
+                                 debug);
+        if (success == false)
+        {
+            const char * errorMessage = "ERROR: Failed to reset the I2C bus!\r\n";
+            if (display)
+                display->printf(errorMessage);
+            else if (debug)
+                debug->printf(errorMessage);
+            break;
+        }
+
+        // Delay while the I2C devices reset
+        delay(10);
+
+        // Enumerate the I2C devices
+        if (enumerate)
+            r4aI2cBusEnumerate(i2cBus, display);
+    } while (0);
+    return success;
 }
 
 //*********************************************************************
@@ -61,25 +77,20 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
 bool r4aI2cBusEnumerateDevice(R4A_I2C_BUS * i2cBus, R4A_I2C_ADDRESS_t i2cAddress)
 {
     R4A_ESP32_I2C_BUS  * esp32I2cBus;
-    int status;
+    esp_err_t status;
 
     // Get access to the ESP32 specific data
     esp32I2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
 
-    // Single thread the I2C requests
-    r4aLockAcquire(&esp32I2cBus->_lock);
-
     // Check for an I2C device
-    esp32I2cBus->_twoWire->beginTransmission(i2cAddress);
-    status = esp32I2cBus->_twoWire->endTransmission();
-
-    // Release the lock
-    r4aLockRelease(&esp32I2cBus->_lock);
+    status = i2cWrite(esp32I2cBus->_busNumber,
+                      i2cAddress,
+                      nullptr,
+                      0,
+                      I2C_TIMEOUT_MSEC);
 
     // Return the I2C device found status
-    if (status == 0)
-        return true;
-    return false;
+    return (status == ESP_OK);
 }
 
 //*********************************************************************
@@ -93,43 +104,37 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
 {
     size_t bytesRead;
     R4A_ESP32_I2C_BUS  * esp32I2cBus;
+    esp_err_t status;
 
     do
     {
         // Get access to the ESP32 specific data
         esp32I2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
 
-        // Single thread the I2C requests
-        r4aLockAcquire(&esp32I2cBus->_lock);
-
-        // Empty the I2C RX buffer
-        esp32I2cBus->_twoWire->flush();
-
-        // Address the I2C device
-        esp32I2cBus->_twoWire->beginTransmission(i2cAddress);
+        // Assume read failure
+        bytesRead = 0;
 
         // Read the data from the I2C device into the I2C RX buffer
-        bytesRead = esp32I2cBus->_twoWire->requestFrom(i2cAddress, readByteCount);
-
-        // Move the data into the read buffer
-        for (size_t index = 0; index < bytesRead; index++)
-            readBuffer[index] = esp32I2cBus->_twoWire->read();
+        status = i2cRead(esp32I2cBus->_busNumber,
+                         i2cAddress,
+                         readBuffer,
+                         readByteCount,
+                         I2C_TIMEOUT_MSEC,
+                         &bytesRead);
 
         // Display the I2C transaction results
         if (display)
         {
-            display->printf("    bytesRead: %d\r\n", bytesRead);
-            r4aDumpBuffer((intptr_t)readBuffer, readBuffer, bytesRead, display);
+            display->printf("    status: %d, %s\r\n", status, esp_err_to_name(status));
+            display->printf("    bytesRead: %d (0x%0x)\r\n", bytesRead, bytesRead);
+            r4aDumpBuffer((intptr_t)readBuffer, readBuffer, readByteCount, display);
         }
     } while (0);
-
-    // Release the lock
-    r4aLockRelease(&esp32I2cBus->_lock);
 
     // Return the number of bytes read
     if (bytesReadAddr)
         *bytesReadAddr = bytesRead;
-    return (bytesRead == readByteCount);
+    return (status == ESP_OK) && (bytesRead == readByteCount);
 }
 
 //*********************************************************************
@@ -143,11 +148,11 @@ bool r4aI2cBusWrite(R4A_I2C_BUS * i2cBus,
 {
     size_t bytesWritten;
     R4A_ESP32_I2C_BUS  * esp32I2cBus;
-    uint8_t status;
+    esp_err_t status;
 
     do
     {
-        status = 1;
+        status = ESP_OK;
 
         // Get access to the ESP32 specific data
         esp32I2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
@@ -166,34 +171,28 @@ bool r4aI2cBusWrite(R4A_I2C_BUS * i2cBus,
                 r4aDumpBuffer((intptr_t)dataBuffer, dataBuffer, dataByteCount, display);
         }
 
-        // Single thread the I2C requests
-        r4aLockAcquire(&esp32I2cBus->_lock);
-
-        // Address the I2C device
-        esp32I2cBus->_twoWire->beginTransmission(i2cAddress);
-
         // Send the data to the device
+
         if (dataByteCount)
-            bytesWritten = esp32I2cBus->_twoWire->write(dataBuffer, dataByteCount);
+            status = i2cWrite(esp32I2cBus->_busNumber,
+                              i2cAddress,
+                              dataBuffer,
+                              dataByteCount,
+                              I2C_TIMEOUT_MSEC);
 
-        // Done sending data to the I2C device
-        status = esp32I2cBus->_twoWire->endTransmission();
-
-        // Release the lock
-        r4aLockRelease(&esp32I2cBus->_lock);
     } while (0);
 
     // Display the I2C transaction results
     if (display)
-        display->printf("    bytesWritten: %d\r\n", bytesWritten);
+        display->printf("    status: %d, %s\r\n", status, esp_err_to_name(status));
 
     // Return the write status
-    return (status == ESP_OK) && (bytesWritten == dataByteCount);
+    return (status == ESP_OK);
 }
 
 //*********************************************************************
 // Send data, restart, read data from an I2C peripheral
-// Return true upon success, false otherwise
+// Return true upon success and false upon failure
 bool r4aI2cBusWriteRead(R4A_I2C_BUS * i2cBus,
                         R4A_I2C_ADDRESS_t i2cAddress,
                         const uint8_t * dataBuffer,
@@ -204,83 +203,38 @@ bool r4aI2cBusWriteRead(R4A_I2C_BUS * i2cBus,
                         Print * display)
 {
     size_t bytesRead;
-    size_t bytesWritten;
     R4A_ESP32_I2C_BUS  * esp32I2cBus;
-    uint8_t status;
+    esp_err_t status;
 
     do
     {
-        status = 1;
-
         // Get access to the ESP32 specific data
         esp32I2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
 
-        // Display the I2C transaction request
-        if (display)
-        {
-            display->println("I2C Transaction");
-            display->printf("    i2cAddress: 0x%02x\r\n", i2cAddress);
-            display->printf("    dataBuffer: %p\r\n", dataBuffer);
-            display->printf("    dataByteCount: %d\r\n", dataByteCount);
-            if (dataByteCount)
-                r4aDumpBuffer((intptr_t)dataBuffer, dataBuffer, dataByteCount, display);
-        }
-
-        // Single thread the I2C requests
-        r4aLockAcquire(&esp32I2cBus->_lock);
-
-        // Address the I2C device
-        esp32I2cBus->_twoWire->beginTransmission(i2cAddress);
-
-        // Assume write failure
-        bytesWritten = 0;
-
-        // Send the data to the device
-        if (dataByteCount)
-            bytesWritten = esp32I2cBus->_twoWire->write(dataBuffer, dataByteCount);
-
-        // Done sending data to the I2C device
-        if (bytesWritten != dataByteCount)
-        {
-            status = esp32I2cBus->_twoWire->endTransmission();
-            break;
-        }
-
-        // Issue a restart
-        status = esp32I2cBus->_twoWire->endTransmission(false);
-        if (status != ESP_OK)
-        {
-            if (display)
-                display->printf("ERROR: I2C write failed, %d, %s\r\n", status, esp_err_to_name(status));
-            break;
-        }
+        // Assume read failure
+        bytesRead = 0;
 
         // Read the data from the I2C device into the I2C RX buffer
-        bytesRead = esp32I2cBus->_twoWire->requestFrom(i2cAddress, readByteCount);
-
-        // Move the data into the read buffer
-        for (size_t index = 0; index < bytesRead; index++)
-            readBuffer[index] = esp32I2cBus->_twoWire->read();
-
-        // Release the lock
-        r4aLockRelease(&esp32I2cBus->_lock);
-
-        // Save the received data length
-        if (bytesReadAddr)
-            *bytesReadAddr = bytesRead;
+        status = i2cWriteReadNonStop(esp32I2cBus->_busNumber,
+                         i2cAddress,
+                         dataBuffer,
+                         dataByteCount,
+                         readBuffer,
+                         readByteCount,
+                         I2C_TIMEOUT_MSEC,
+                         &bytesRead);
 
         // Display the I2C transaction results
         if (display)
         {
-            display->printf("    bytesRead: %d\r\n", bytesRead);
-            r4aDumpBuffer((intptr_t)readBuffer, readBuffer, bytesRead, display);
+            display->printf("    status: %d, %s\r\n", status, esp_err_to_name(status));
+            display->printf("    bytesRead: %d (0x%0x)\r\n", bytesRead, bytesRead);
+            r4aDumpBuffer((intptr_t)readBuffer, readBuffer, readByteCount, display);
         }
     } while (0);
 
-    // Display the I2C transaction results
-    if (display)
-        display->printf("    bytesWritten: %d\r\n", bytesWritten);
-
-    // Return the write status
-    return (status == ESP_OK) && (bytesWritten == dataByteCount);
+    // Return the number of bytes read
+    if (bytesReadAddr)
+        *bytesReadAddr = bytesRead;
+    return (status == ESP_OK) && (bytesRead == readByteCount);
 }

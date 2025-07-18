@@ -221,8 +221,7 @@ R4A_ESP32_I2C_BUS esp32I2cBus =                 \
         {0,},               /* _present */      \
         false,              /* _enumerated */   \
     },                                          \
-    &Wire,              /* _i2cBus */           \
-    0,                  /* _lock */             \
+    0,                      /* _busNumber */    \
 };                                              \
     R4A_PCA9685 pca9685(&esp32I2cBus._i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * 1000 * 1000);   \
         R4A_PCA9685_SERVO servoPan(&pca9685, 0, 0, 180);        \

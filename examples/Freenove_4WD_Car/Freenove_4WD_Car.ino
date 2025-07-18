@@ -152,8 +152,7 @@ R4A_ESP32_I2C_BUS esp32I2cBus =
         {0,},               // _present
         false,              // _enumerated
     },
-    &Wire,              // _i2cBus
-    0,                  // _lock
+    0,                  // _busNumber
 };
 
 R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system

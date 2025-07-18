@@ -16,6 +16,7 @@
 #include <esp_camera.h>         // IDF built-in, needed for OV2640 camera
 #include <esp_http_server.h>    // IDF built-in, needed for camera web server
 #include <esp_wifi.h>           // IDF built-in
+#include <esp32-hal-i2c.h>      // Built-in
 #include <esp32-hal-spi.h>      // IDF built-in
 
 #include <BluetoothSerial.h>    // ESP32 built-in Library
@@ -326,8 +327,7 @@ typedef struct _R4A_TAG_NAME_T
 typedef struct _R4A_ESP32_I2C_BUS
 {
     R4A_I2C_BUS _i2cBus;
-    TwoWire * _twoWire;     // API for the I2C bus
-    volatile int32_t _lock; // Lock to synchronize access to the I2C bus
+    uint8_t _busNumber;     // Number of the I2C bus
 } R4A_ESP32_I2C_BUS;
 
 // Initialize the I2C bus

@@ -63,8 +63,7 @@ const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
             {0,},               // _present
             true,               // _enumerated
         },
-        &Wire,              // _i2cBus
-        0,                  // _lock
+        0,                      // _busNumber
     };
 
     // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)

@@ -343,8 +343,7 @@ const uint16_t fontNumbers[] =
             {0,},               // _present
             true,               // _enumerated
         },
-        &Wire,              // _i2cBus
-        0,                  // _lock
+        0,                      // _busNumber
     };
 
     R4A_VK16K33 vk16k33 = {&esp32I2cBus._i2cBus,
