@@ -12,6 +12,7 @@
 
 //#define USE_NTRIP
 //#define USE_OV2640
+//#define USE_SPARKFUN_SEN_13582
 //#define USE_WAYPOINT_FOLLOWING
 //#define USE_ZED_F9P
 
@@ -56,6 +57,7 @@ enum CHALLENGE_INDEX
 //****************************************
 
 #include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
+#include <R4A_SparkFun.h>           // SparkFun Electronics boards
 
 #define DOWNLOAD_AREA       "/nvm/"
 
@@ -126,18 +128,20 @@ const uint8_t ledMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
 
 // I2C addresses
 #define AK09916_I2C_ADDRESS     0x0c
+#define SX1509_I2C_ADDRESS      0x3e
 #define ICM20948_I2C_ADDRESS    0x69
 #define ZEDF9P_I2C_ADDRESS      0x42
 
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
-    {AK09916_I2C_ADDRESS,  "AK09916 3-axis Electronic Compass"},
-    {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"},
-    {OV2640_I2C_ADDRESS,   "OV2640 Camera"},
-    {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"},
-    {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"},
-    {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},
-    {ZEDF9P_I2C_ADDRESS,   "u-blox ZED F9P GNSS receiver"}
+    {AK09916_I2C_ADDRESS,  "AK09916 3-axis Electronic Compass"},    // 0x0c
+    {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"}, // 0x69
+    {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70
+    {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
+    {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
+    {SX1509_I2C_ADDRESS,   "SX1509 Level Shifting GPIO Expander"}, // 0x3e
+    {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"}, // 0x71
+    {ZEDF9P_I2C_ADDRESS,   "u-blox ZED F9P GNSS receiver"} // 0x42
 };
 
 R4A_ESP32_I2C_BUS esp32I2cBus =
@@ -173,6 +177,13 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
         &r4aOV2640Pins,         // _pins
     };
 #endif  // USE_OV2640
+#ifdef  USE_SPARKFUN_SEN_13582
+    R4A_SX1509 sx1509 =
+    {
+        &esp32I2cBus._i2cBus,
+        SX1509_I2C_ADDRESS
+    };
+#endif  // USE_SPARKFUN_SEN_13582
     // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)
     R4A_VK16K33 vk16k33 = {&esp32I2cBus._i2cBus,
                            VK16K33_I2C_ADDRESS,
@@ -186,6 +197,7 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 #endif  // USE_ZED_F9P
 
 bool ov2640Present;
+bool sx1509Present;
 bool vk16k33Present;
 bool zedf9pPresent;
 
@@ -627,6 +639,7 @@ void setupCore0(void *parameter)
     // Determine which devices are present
     log_v("Calling r4aI2cBusIsDevicePresent");
     ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
+    sx1509Present = r4aI2cBusIsDevicePresent(i2cBus, SX1509_I2C_ADDRESS);
     vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
     zedf9pPresent = r4aI2cBusIsDevicePresent(i2cBus, ZEDF9P_I2C_ADDRESS);
 
@@ -644,6 +657,15 @@ void setupCore0(void *parameter)
     // Initialize the PCF8574
     log_v("Calling pcf8574.write");
     pcf8574.write(0xff);
+
+    // Initialize the SX1509
+#ifdef USE_SPARKFUN_SEN_13582
+    if (sx1509Present)
+    {
+        if (r4aSfeSen13582Begin(&sx1509) == false)
+            r4aReportFatalError("Failed to initialize the SX1509!");
+    }
+#endif  // USE_SPARKFUN_SEN_13582
 
     // Initialize the camera
 #ifdef USE_OV2640

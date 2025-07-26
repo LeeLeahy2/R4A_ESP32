@@ -98,6 +98,13 @@ git reset --hard --quiet HEAD
 #make
 #git reset --hard --quiet HEAD
 
+# SparkFun SEN-13582
+cp  Freenove_4WD_Car.ino  temp.txt
+sed 's|//#define USE_SPARKFUN_SEN_13582|#define USE_SPARKFUN_SEN_13582|'  temp.txt  >  Freenove_4WD_Car.ino
+rm  temp.txt
+make
+git reset --hard --quiet HEAD
+
 # ZED F9P
 cp  Freenove_4WD_Car.ino  temp.txt
 sed 's|//#define USE_ZED_F9P|#define USE_ZED_F9P|'  temp.txt  >  Freenove_4WD_Car.ino
@@ -109,8 +116,10 @@ git reset --hard --quiet HEAD
 sed 's|//#define USE_NTRIP|#define USE_NTRIP|'  Freenove_4WD_Car.ino  >  temp.txt
 cp  temp.txt  Freenove_4WD_Car.ino
 #sed -i 's|//#define USE_OV2640|#define USE_OV2640|'  temp.txt  >  Freenove_4WD_Car.ino
-sed 's|//#define USE_WAYPOINT_FOLLOWING|#define USE_WAYPOINT_FOLLOWING|'  Freenove_4WD_Car.ino  >  temp.txt
-sed 's|//#define USE_ZED_F9P|#define USE_ZED_F9P|'  temp.txt  >  Freenove_4WD_Car.ino
+sed 's|//#define USE_SPARKFUN_SEN_13582|#define USE_SPARKFUN_SEN_13582|'  Freenove_4WD_Car.ino  >  temp.txt
+sed 's|//#define USE_WAYPOINT_FOLLOWING|#define USE_WAYPOINT_FOLLOWING|'  temp.txt  >  Freenove_4WD_Car.ino
+sed 's|//#define USE_ZED_F9P|#define USE_ZED_F9P|'  Freenove_4WD_Car.ino  >  temp.txt
+cp -f temp.txt  Freenove_4WD_Car.ino
 rm  temp.txt
 make
 git reset --hard --quiet  HEAD
