@@ -26,13 +26,16 @@ void robotDisplayTime(uint32_t milliseconds)
     uint32_t seconds;
 
     // Display the seconds on the LEDs
-    seconds = milliseconds / R4A_MILLISECONDS_IN_A_SECOND;
-    r4aLEDSetColorRgb(FRONT_L1, (seconds & 1) ? R4A_LED_AQUA : R4A_LED_OFF);
-    r4aLEDSetColorRgb(FRONT_L2, (seconds & 2) ? R4A_LED_AQUA : R4A_LED_OFF);
-    r4aLEDSetColorRgb(FRONT_L3, (seconds & 4) ? R4A_LED_AQUA : R4A_LED_OFF);
-    r4aLEDSetColorRgb(FRONT_R3, (seconds & 8) ? R4A_LED_AQUA : R4A_LED_OFF);
-    r4aLEDSetColorRgb(FRONT_R2, (seconds & 16) ? R4A_LED_AQUA : R4A_LED_OFF);
-    r4aLEDSetColorRgb(FRONT_R1, (seconds & 32) ? R4A_LED_AQUA : R4A_LED_OFF);
+    if (robotUseWS2812)
+    {
+        seconds = milliseconds / R4A_MILLISECONDS_IN_A_SECOND;
+        r4aLEDSetColorRgb(FRONT_L1, (seconds & 1) ? R4A_LED_AQUA : R4A_LED_OFF);
+        r4aLEDSetColorRgb(FRONT_L2, (seconds & 2) ? R4A_LED_AQUA : R4A_LED_OFF);
+        r4aLEDSetColorRgb(FRONT_L3, (seconds & 4) ? R4A_LED_AQUA : R4A_LED_OFF);
+        r4aLEDSetColorRgb(FRONT_R3, (seconds & 8) ? R4A_LED_AQUA : R4A_LED_OFF);
+        r4aLEDSetColorRgb(FRONT_R2, (seconds & 16) ? R4A_LED_AQUA : R4A_LED_OFF);
+        r4aLEDSetColorRgb(FRONT_R1, (seconds & 32) ? R4A_LED_AQUA : R4A_LED_OFF);
+    }
 }
 
 //*********************************************************************
@@ -42,7 +45,7 @@ void robotIdle(uint32_t currentMsec)
     static uint32_t previousMsec;
 
     // Update the LEDs on a regular interval
-    if ((currentMsec - previousMsec) > 50)
+    if (robotUseWS2812 && ((currentMsec - previousMsec) > 50))
     {
         previousMsec = currentMsec;
 

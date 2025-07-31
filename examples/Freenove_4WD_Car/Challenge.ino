@@ -22,8 +22,11 @@ void challengeHalt(const char * errorMessage)
 void challengeInit()
 {
     // Update the lights
-    car.ledsOff();
-    car.brakeLightsOn();
+    if (robotUseWS2812)
+    {
+        car.ledsOff();
+        car.brakeLightsOn();
+    }
 
     // Apply the brakes
     r4aPca9685MotorBrakeAll();
@@ -34,8 +37,11 @@ void challengeInit()
 void challengeStart()
 {
     // Update the lights
-    car.headlightsOn();
-    car.brakeLightsOff();
+    if (robotUseWS2812)
+    {
+        car.headlightsOn();
+        car.brakeLightsOff();
+    }
 }
 
 //*********************************************************************
@@ -43,10 +49,13 @@ void challengeStart()
 void challengeStop()
 {
     // Update the lights
-    car.brakeLightsOn();
-    car.ledsTurnOff();
-    car.headlightsOff();
-    car.backupLightsOff();
+    if (robotUseWS2812)
+    {
+        car.brakeLightsOn();
+        car.ledsTurnOff();
+        car.headlightsOff();
+        car.backupLightsOff();
+    }
 
     // Apply the brakes
     r4aPca9685MotorBrakeAll();

@@ -57,6 +57,7 @@ uint32_t pca9685FrequencyHz;
 //****************************************
 
 uint8_t startIndex;
+bool robotUseWS2812;
 
 //****************************************
 // Servos
@@ -183,6 +184,7 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
     // Robot challenge
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,      CHALLENGE_MAX - 1, &startIndex,                "StartIndex",   0},
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotUseWS2812,            "RobotWS2812",  true},
 
     // Servos
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value

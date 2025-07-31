@@ -296,6 +296,7 @@ enum MENU_TABLE_INDEX
     MTI_NTRIP,
 #endif  // USE_NTRIP
     MTI_NVM,
+    MTI_ROBOT,
     MTI_SERVO,
     MTI_START,
     MTI_TELNET,
@@ -357,6 +358,15 @@ const R4A_MENU_ENTRY ledMenuTable[] =
     {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
 };
 #define LED_MENU_ENTRIES      sizeof(ledMenuTable) / sizeof(ledMenuTable[0])
+
+// Robot menu
+const R4A_MENU_ENTRY robotMenuTable[] =
+{
+    // Command  menuRoutine         menuParam                   HelpRoutine    align    HelpText
+    {"w",       r4aMenuBoolToggle, (intptr_t)&robotUseWS2812,   r4aMenuBoolHelp, 0,     "Enable/disable WS2812 use"},
+    {"x",       nullptr,            R4A_MENU_MAIN,              nullptr,         0,     "Return to the main menu"},
+};
+#define ROBOT_MENU_ENTRIES      sizeof(robotMenuTable) / sizeof(robotMenuTable[0])
 
 // Start menu
 const R4A_MENU_ENTRY startMenuTable[] =
@@ -431,6 +441,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #endif  // USE_NTRIP
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
+    {"robot",   nullptr,            MTI_ROBOT,      nullptr,    0,      "Enter the robot menu"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
     {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
     {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
@@ -464,6 +475,7 @@ const R4A_MENU_TABLE menuTable[] =
     {"NTRIP Menu",      nullptr,  r4aNtripClientMenuTable,  R4A_NTRIP_CLIENT_MENU_ENTRIES},
 #endif  // USE_NTRIP
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
+    {"Robot Menu",      nullptr,      robotMenuTable,       ROBOT_MENU_ENTRIES},
     {"Servo Menu",      nullptr,  r4aPca9685ServoMenuTable, R4A_PCA9685_SERVO_MENU_ENTRIES},
     {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
