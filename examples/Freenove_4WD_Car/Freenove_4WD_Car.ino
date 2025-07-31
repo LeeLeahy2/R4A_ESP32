@@ -535,7 +535,7 @@ void loop()
     if (r4aWifiSsidPasswordEntries)
     {
         // Check for NTP updates
-        if (ntpEnable)
+        if (ntpEnable && (r4aNtpIsTimeValid() == false))
         {
             if (DEBUG_LOOP_CORE_1)
                 callingRoutine("r4aNtpUpdate");
