@@ -131,7 +131,6 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
 
         // Read the data from the I2C device into the I2C RX buffer
         bytesRead = esp32I2cBus->_twoWire->requestFrom(i2cAddress, readByteCount);
-        status = esp32I2cBus->_twoWire->endTransmission();
 
         // Move the data into the read buffer
         for (size_t index = 0; index < bytesRead; index++)
