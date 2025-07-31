@@ -106,6 +106,7 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
                    R4A_I2C_ADDRESS_t i2cAddress,
                    uint8_t * readBuffer,
                    size_t readByteCount,
+                   size_t * bytesReadAddr,
                    Print * display)
 {
     size_t bytesRead;
@@ -148,6 +149,8 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
     r4aLockRelease(&esp32I2cBus->_lock);
 
     // Return the number of bytes read
+    if (bytesReadAddr)
+        *bytesReadAddr = bytesRead;
     return (status == ESP_OK) && (bytesRead == readByteCount);
 }
 
