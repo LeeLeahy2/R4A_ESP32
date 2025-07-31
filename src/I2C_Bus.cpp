@@ -83,25 +83,6 @@ bool r4aI2cBusEnumerateDevice(R4A_I2C_BUS * i2cBus, R4A_I2C_ADDRESS_t i2cAddress
 }
 
 //*********************************************************************
-// Get the TwoWire pointer
-//
-// Warning: Using the I2C bus outside of these routines will break the
-// I2C controller synchronization leading to hangs, crashes and unspecified
-// behavior!
-//
-// Inputs:
-//   i2cBus: Address of a R4A_I2C_BUS data structure
-// Outputs:
-//   Returns the TwoWire object address
-TwoWire * r4aI2cBusGetTwoWire(R4A_I2C_BUS * i2cBus)
-{
-    R4A_ESP32_I2C_BUS * espI2cBus;
-
-    espI2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
-    return espI2cBus->_twoWire;
-}
-
-//*********************************************************************
 // Read data from an I2C peripheral
 bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
                    R4A_I2C_ADDRESS_t i2cAddress,
@@ -112,15 +93,11 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
 {
     size_t bytesRead;
     R4A_ESP32_I2C_BUS  * esp32I2cBus;
-    uint8_t status;
 
     do
     {
         // Get access to the ESP32 specific data
         esp32I2cBus = (R4A_ESP32_I2C_BUS *)i2cBus;
-
-        // Assume read failure
-        bytesRead = 0;
 
         // Single thread the I2C requests
         r4aLockAcquire(&esp32I2cBus->_lock);
@@ -152,7 +129,7 @@ bool r4aI2cBusRead(R4A_I2C_BUS * i2cBus,
     // Return the number of bytes read
     if (bytesReadAddr)
         *bytesReadAddr = bytesRead;
-    return (status == ESP_OK) && (bytesRead == readByteCount);
+    return (bytesRead == readByteCount);
 }
 
 //*********************************************************************

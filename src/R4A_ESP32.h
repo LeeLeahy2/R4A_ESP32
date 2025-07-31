@@ -349,13 +349,6 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                          Print * display = &Serial,
                          Print * debug = nullptr);
 
-// Get the TwoWire pointer
-// Inputs:
-//   i2cBus: Address of a R4A_I2C_BUS data structure
-// Outputs:
-//   Returns the TwoWire object address
-TwoWire * r4aEsp32I2cBusGetTwoWire(R4A_I2C_BUS * i2cBus);
-
 //****************************************
 // Memory API
 //****************************************
