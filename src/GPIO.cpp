@@ -373,6 +373,8 @@ const R4A_GPIO_MATRIX r4aGpioMatrixNames[] =
     {"-",                     "-"},                 // 253
     {"-",                     "-"},                 // 254
     {"-",                     "-"},                 // 255
+    {"GPIO Input",            "GPIO Output"},       // 256
+    {"??? Input",             "??? Output"},        // 257
 };
 const uint32_t r4aGpioMatrixNamesEntries = sizeof(r4aGpioMatrixNames) / sizeof(r4aGpioMatrixNames[0]);
 
@@ -555,8 +557,8 @@ bool r4aEsp32GpioPullUp(int gpioNumber, bool enable)
 // Validate the GPIO tables
 void r4aEsp32GpioValidateTables()
 {
-    if (r4aGpioMatrixNamesEntries != 256)
-        r4aReportFatalError("Fix r4aGpioMatrixNames table to have 256 entries!");
+    if (r4aGpioMatrixNamesEntries != (256 + 2))
+        r4aReportFatalError("Fix r4aGpioMatrixNames table to have 256 + 2 entries!");
     if (r4aGpioPortToIoMuxIndexEntries != R4A_GPIO_MAX_PORTS)
         r4aReportFatalError("Fix r4aGpioPortToIoMuxIndex table to have R4A_GPIO_MAX_PORTS entries!");
     if (r4aIoMuxFunctionNamesEntries != R4A_GPIO_MAX_PORTS)
