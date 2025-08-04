@@ -23,7 +23,7 @@ const int r4aGpioPortToIoMuxIndex[R4A_GPIO_MAX_PORTS] =
     -1, -1,  7,  8,  5,  6,  1,  2,  3,  4,     // 30
 };
 
-const char * const r4aIoMuxNames[R4A_GPIO_MAX_PORTS][8] =
+const char * const r4aIoMuxFunctionNames[R4A_GPIO_MAX_PORTS][8] =
 { //    0            1         2          3            4             5           6     7
     "GPIO0",    "CLK_OUT1", "GPIO0",  "-",          "-",        "EMAC_TX_CLK",  "-",  "-", //  0
     "U0TXD",    "CLK_OUT3", "GPIO1",  "-",          "-",        "EMAC_RXD2",    "-",  "-", //  1
@@ -466,7 +466,7 @@ void r4aEsp32GpioDisplayIoMuxRegisters(int portNumber, uint32_t regValue, Print 
 {
     const char * function;
 
-    function = r4aIoMuxNames[portNumber][(regValue & IO_MUX_MCU_SEL) >> 12];
+    function = r4aIoMuxFunctionNames[portNumber][(regValue & IO_MUX_MCU_SEL) >> 12];
     display->printf(", %s", function);
     display->printf(", DRV: %ld", (regValue & IO_MUX_FUN_DRV) >> 10);
     if (regValue & IO_MUX_IN_IE) display->print(", IE");

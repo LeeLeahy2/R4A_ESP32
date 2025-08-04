@@ -36,7 +36,7 @@ extern R4A_IO_MUX_REGS * const r4aIoMux;
 extern R4A_RTCIO_REGS * const r4aRtcioRegs;
 
 extern const int r4aGpioPortToIoMuxIndex[R4A_GPIO_MAX_PORTS];
-extern const char * const r4aIoMuxNames[R4A_GPIO_MAX_PORTS][8];
+extern const char * const r4aIoMuxFunctionNames[R4A_GPIO_MAX_PORTS][8];
 extern const uint8_t r4aIoMuxIsGpio[R4A_GPIO_MAX_PORTS];
 extern const R4A_GPIO_MATRIX r4aGpioMatrixNames[256];
 
