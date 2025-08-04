@@ -272,6 +272,12 @@ void r4aEsp32MenuSystemReset(const struct _R4A_MENU_ENTRY * menuEntry,
 //   display: Device used for output
 void r4aEsp32GpioDisplayIoMuxRegisters(Print * display = &Serial);
 
+// Display the GPIO Port
+// Inputs:
+//   gpioNumber: Number of the GPIO port
+//   display: Device used for output
+void r4aEsp32GpioDisplayPort(int gpioNumber, Print * display);
+
 // Display the GPIO registers
 // Inputs:
 //   display: Device used for output

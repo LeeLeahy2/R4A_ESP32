@@ -617,6 +617,16 @@ void r4aEsp32GpioDisplayIoMuxRegisters(Print * display)
 }
 
 //*********************************************************************
+// Display the GPIO Port
+void r4aEsp32GpioDisplayPort(int gpioNumber, Print * display)
+{
+    uint32_t regValue;
+
+    regValue = r4aEsp32GpioGetIoMuxRegister(gpioNumber);
+    r4aEsp32GpioDisplayIoMuxRegisters(gpioNumber, regValue, display);
+}
+
+//*********************************************************************
 // Enable or disable the pull-down resistor
 bool r4aEsp32GpioPullDown(int gpioNumber, bool enable)
 {
