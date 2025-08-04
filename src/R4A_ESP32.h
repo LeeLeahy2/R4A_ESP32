@@ -897,6 +897,12 @@ bool r4aEsp32SpiBegin(struct _R4A_ESP32_SPI * spi,
 //   Returns the address of the SPI controller or nullptr upon failure
 R4A_ESP32_SPI_REGS * r4aEsp32SpiControllerAddress(uint8_t number);
 
+// Display the SPI registers
+// Inputs:
+//   spiAddress: Address of the SPI controller
+//   display: Address of Print object for output
+void r4aEsp32SpiDisplayRegisters(uintptr_t spiAddress, Print * display = &Serial);
+
 // Get the SPI clock frequency
 // Inputs:
 //   spi: Address of the SPI controller

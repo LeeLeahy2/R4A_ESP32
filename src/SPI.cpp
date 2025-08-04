@@ -156,6 +156,53 @@ R4A_ESP32_SPI_REGS * r4aEsp32SpiControllerAddress(uint8_t number)
 };
 
 //*********************************************************************
+// Display the SPI registers
+void r4aEsp32SpiDisplayRegisters(uintptr_t spiAddress, Print * display)
+{
+    uint8_t controller;
+    uint32_t * spi;
+    uint32_t value;
+
+    // Validate display
+    if (!display)
+        return;
+
+    // Validate the I2C address;
+    spi = (uint32_t *)spiAddress;
+    switch ((uintptr_t)spi)
+    {
+    default:
+        display->printf("ERROR: Invalid SPI controller address!\r\n");
+        return;
+    case R4A_ESP32_SPI_0_CONTROLLER: controller = 0; break;
+    case R4A_ESP32_SPI_1_CONTROLLER: controller = 1; break;
+    case R4A_ESP32_SPI_2_CONTROLLER: controller = 2; break;
+    case R4A_ESP32_SPI_3_CONTROLLER: controller = 3; break;
+    }
+
+    // Display the controller number and address
+    display->printf("SPI Controller %d @ %p\r\n", controller, (void *)spi);
+
+    // Display the registers
+    for (int index = 0; index < r4aEsp32SpiNamesEntries; index++)
+    {
+        uint32_t value = spi[index];
+        if (r4aEsp32SpiNames[index])
+            display->printf("%p: 0x%08x, %s\r\n", &spi[index], value, r4aEsp32SpiNames[index]);
+        else
+            display->printf("0x%08x:             Reserved\r\n", &spi[index]);
+
+        // Parse the register
+        switch ((uintptr_t)(&spi[index]) & 0x1ff)
+        {
+        case 0x18:  // SPI_CLOCK
+            r4aEsp32SpiGetClock((R4A_ESP32_SPI_REGS *)spiAddress, display);
+            break;
+        }
+    }
+}
+
+//*********************************************************************
 // Get the SPI clock frequency
 uint32_t r4aEsp32SpiGetClock(R4A_ESP32_SPI_REGS * spi, Print * display)
 {
