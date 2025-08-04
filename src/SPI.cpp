@@ -103,34 +103,92 @@ const uint32_t r4aEsp32SpiNamesEntries = sizeof(r4aEsp32SpiNames) / sizeof(r4aEs
 
 //*********************************************************************
 // Initialize the SPI controller
-// Inputs:
-//   spi: Address of an R4A_ESP32_SPI data structure
-//   spiNumber: Number of the SPI controller
-//   pinMOSI: SPI TX data pin number
-//   clockHz: SPI clock frequency in Hertz
-// Outputs:
-//   Return true if successful and false upon failure
-bool r4aEsp32SpiBegin(struct _R4A_ESP32_SPI * spi,
-                      uint8_t spiNumber,
-                      uint8_t pinMOSI,
-                      uint32_t clockHz)
+bool r4aEsp32SpiBegin(R4A_ESP32_SPI_CONTROLLER * spiController,
+                      Print * display)
 {
-    // Determine the SPI clock divider
-    spi->_div = spiFrequencyToClockDiv(clockHz);
+    spi_bus_config_t buscfg;
+    R4A_ESP32_SPI_REGS * controller;
+    R4A_SPI_BUS * spiBus;
+    esp_err_t status;
 
-    // Configure the SPI device
-    spi->_spi = spiStartBus(spiNumber, spi->_div, SPI_MODE0, SPI_MSBFIRST);
-    if (spi->_spi)
+    // Validate the controller number by getting the controller address
+    spiBus = (R4A_SPI_BUS *)spiController;
+    controller = r4aEsp32SpiControllerAddress(spiBus->_busNumber);
+
+    // Configure the SPI bus
+    memset((void *)&buscfg, 0, sizeof(buscfg));
+    buscfg.flags = SPICOMMON_BUSFLAG_GPIO_PINS
+                 | SPICOMMON_BUSFLAG_MASTER;
+    if (spiBus->_pinMISO >= 0)
+        buscfg.flags = SPICOMMON_BUSFLAG_MISO;
+    if (spiBus->_pinMOSI >= 0)
+        buscfg.flags = SPICOMMON_BUSFLAG_MOSI;
+    if (spiBus->_pinSCLK >= 0)
+        buscfg.flags = SPICOMMON_BUSFLAG_SCLK;
+    buscfg.miso_io_num = spiBus->_pinMISO;
+    buscfg.mosi_io_num = spiBus->_pinMOSI;
+    buscfg.sclk_io_num = spiBus->_pinSCLK;
+    buscfg.quadwp_io_num = -1;
+    buscfg.quadhd_io_num = -1;
+    spiController->_spiHandle = nullptr;
+    status = spi_bus_initialize((spi_host_device_t)(spiBus->_busNumber), &buscfg, 1);
+    if (display)
+        display->printf("SPI %d: %d, %s\r\n", spiBus->_busNumber, status, esp_err_to_name(status));
+    return (status == ESP_OK);
+};
+
+//*********************************************************************
+// Initialize a SPI device
+bool r4aEsp32SpiDeviceSelect(const R4A_SPI_DEVICE * spiDevice,
+                             Print * display)
+{
+    uint32_t clockHz;
+    R4A_SPI_BUS * spiBus;
+    R4A_ESP32_SPI_REGS * controller;
+    spi_device_interface_config_t devcfg;
+    uint8_t mode;
+    R4A_ESP32_SPI_CONTROLLER * spiController;
+    esp_err_t status;
+
+    // Display the desired clock frequency
+    if (display)
     {
-        // Connect the SPI TX output to the MOSI pin
-        spiAttachMOSI(spi->_spi, pinMOSI);
-
-        // Set the routine addresses
-        spi->spi.allocateDmaBuffer = r4aEsp32AllocateDmaBuffer;
-        spi->spi.transfer = r4aEsp32SpiTransfer;
-        return true;
+        clockHz = spiDevice->_clockHz;
+        uint32_t mHz = clockHz / (1000 * 1000);
+        uint32_t kHz = (clockHz / 1000) - (mHz * 1000);
+        display->printf("Requested: %ld.%03ld MHz\r\n", mHz, kHz);
     }
-    return false;
+
+    // Determine the mode for the clock polarity and phase
+    mode = ((spiDevice->_clockPhase & 1) << 1) | (spiDevice->_clockPolarity & 1);
+
+    // Describe the SPI device configuration
+    memset((void *)&devcfg, 0, sizeof(devcfg));
+    devcfg.clock_speed_hz = spiDevice->_clockHz;
+    devcfg.mode = mode;
+    devcfg.spics_io_num = spiDevice->_pinCS;
+    devcfg.queue_size = 7;
+
+    // Configure the SPI controller to talk to the SPI device
+    spiBus = spiDevice->_spiBus;
+    spiController = (R4A_ESP32_SPI_CONTROLLER *)spiBus;
+    status = spi_bus_add_device((spi_host_device_t)(spiBus->_busNumber),
+                                &devcfg,
+                                &spiController->_spiHandle);
+    if (display)
+    {
+        display->printf("SPI %d: %d, %s\r\n", spiBus->_busNumber, status, esp_err_to_name(status));
+        if (status == ESP_OK)
+        {
+            controller = r4aEsp32SpiControllerAddress(spiBus->_busNumber);
+            clockHz = r4aEsp32SpiGetClock(controller);
+            uint32_t mHz = clockHz / (1000 * 1000);
+            uint32_t kHz = (clockHz / 1000) - (mHz * 1000);
+            display->printf("Actual: %ld.%03ld MHz\r\n", mHz, kHz);
+            display->printf("Mode: %d\r\n", mode);
+        }
+    }
+    return (status == ESP_OK);
 }
 
 //*********************************************************************
@@ -273,16 +331,34 @@ uint32_t r4aEsp32SpiGetClock(R4A_ESP32_SPI_REGS * spi, Print * display)
 
 //*********************************************************************
 // Transfer the data to the SPI device
-// Inputs:
-//   txBuffer: Address of the buffer containing the data to send
-//   rxBuffer: Address of the receive data buffer
-//   length: Number of data bytes in the buffer
-void r4aEsp32SpiTransfer(struct _R4A_SPI * spi,
-                         const uint8_t * txBuffer,
-                         uint8_t * rxBuffer,
-                         uint32_t length)
+bool r4aEsp32SpiTransfer(struct _R4A_SPI_BUS * spiBus,
+                         const uint8_t * txDmaBuffer,
+                         uint8_t * rxDmaBuffer,
+                         size_t length,
+                         Print * display)
 {
-    spiTransferBytes(((R4A_ESP32_SPI *)spi)->_spi, txBuffer, rxBuffer, length);
+    R4A_ESP32_SPI_CONTROLLER * spiController;
+    esp_err_t status;
+    spi_transaction_t transaction;
+
+    // Describe the SPI transaction
+    memset(&transaction, 0, sizeof(transaction));
+    transaction.length = length << 3;
+    transaction.tx_buffer = txDmaBuffer;
+    transaction.rx_buffer = rxDmaBuffer;
+
+    // Perform the SPI transaction
+    spiController = (R4A_ESP32_SPI_CONTROLLER *)spiBus;
+    status = spi_device_transmit(spiController->_spiHandle, &transaction);
+    if (status != ESP_OK)
+    {
+        if (display)
+            display->printf("ERROR: SPI transaction failed, %d, %s\r\n",
+                            status, esp_err_to_name(status));
+    }
+
+    // Return the transaction status
+    return (status == ESP_OK);
 }
 
 //*********************************************************************

@@ -135,7 +135,7 @@ void * r4aDmaMalloc(size_t numberOfBytes, const char * text)
     void * buffer;
 
     // Attempt to allocate the DMA buffer
-    buffer = r4aEsp32AllocateDmaBuffer(numberOfBytes);
+    buffer = (uint8_t *)heap_caps_malloc(numberOfBytes, MALLOC_CAP_DMA);
 
     // Display the malloc operation
     if (r4aMallocDebug)
