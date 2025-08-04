@@ -428,7 +428,7 @@ const uint32_t r4aGpioMatrixNamesEntries = sizeof(r4aGpioMatrixNames) / sizeof(r
 int r4aEsp32GpioGetIoMuxRegisterIndex(int portNumber)
 {
     // Validate the port number
-    if (portNumber >= R4A_GPIO_MAX_PORTS)
+    if ((portNumber < 0) || (portNumber >= R4A_GPIO_MAX_PORTS))
         return -1;
 
     // Lookup the I/O mux register index
