@@ -15,15 +15,17 @@ R4A_GPIO_REGS * const r4aGpioRegs = (R4A_GPIO_REGS *)0x3ff44000;
 R4A_IO_MUX_REGS * const r4aIoMux = (R4A_IO_MUX_REGS *)0x3ff49000;
 R4A_RTCIO_REGS * const r4aRtcioRegs = (R4A_RTCIO_REGS *)0x3ff48400;
 
-const int r4aGpioPortToIoMuxIndex[R4A_GPIO_MAX_PORTS] =
+// Offsest from IO_MUX_PIN_CTRL
+const int r4aGpioPortToIoMuxIndex[] =
 { // 0   1   2   3   4   5   6   7   8   9
     17, 34, 16, 33, 18, 27, 24, 25, 26, 21,     //  0
     22, 23, 13, 14, 12, 15, 19, 20, 28, 29,     // 10
     30, 31, 32, 35, 36,  9, 10, 11, -1, -1,     // 20
     -1, -1,  7,  8,  5,  6,  1,  2,  3,  4,     // 30
 };
+const uint32_t r4aGpioPortToIoMuxIndexEntries = sizeof(r4aGpioPortToIoMuxIndex) / sizeof(r4aGpioPortToIoMuxIndex[0]);
 
-const char * const r4aIoMuxFunctionNames[R4A_GPIO_MAX_PORTS][8] =
+const char * const r4aIoMuxFunctionNames[][8] =
 { //    0            1         2          3            4             5           6     7
     "GPIO0",    "CLK_OUT1", "GPIO0",  "-",          "-",        "EMAC_TX_CLK",  "-",  "-", //  0
     "U0TXD",    "CLK_OUT3", "GPIO1",  "-",          "-",        "EMAC_RXD2",    "-",  "-", //  1
@@ -66,8 +68,9 @@ const char * const r4aIoMuxFunctionNames[R4A_GPIO_MAX_PORTS][8] =
     "GPIO38",   "-",        "GPIO38", "-",          "-",        "-",            "-",  "-", //  38
     "GPIO39",   "-",        "GPIO39", "-",          "-",        "-",            "-",  "-", //  39
 };
+const uint32_t r4aIoMuxFunctionNamesEntries = sizeof(r4aIoMuxFunctionNames) >> (3 + 2); // 8 functions, 4 bytes per address
 
-const uint8_t r4aIoMuxIsGpio[R4A_GPIO_MAX_PORTS] =
+const uint8_t r4aIoMuxIsGpio[] =
 {
     0b00000101, //  0
     0b00000101, //  1
@@ -110,8 +113,9 @@ const uint8_t r4aIoMuxIsGpio[R4A_GPIO_MAX_PORTS] =
     0b00000101, // 38
     0b00000101, // 39
 };
+const uint32_t r4aIoMuxIsGpioEntries = sizeof(r4aIoMuxIsGpio) / sizeof(r4aIoMuxIsGpio[0]);
 
-const R4A_GPIO_MATRIX r4aGpioMatrixNames[256] =
+const R4A_GPIO_MATRIX r4aGpioMatrixNames[] =
 { //  Input                    Output
     {"SPICLK_in",             "SPICLK_out"},        //   0
     {"SPIQ_in",               "SPIQ_out"},          //   1
@@ -370,6 +374,7 @@ const R4A_GPIO_MATRIX r4aGpioMatrixNames[256] =
     {"-",                     "-"},                 // 254
     {"-",                     "-"},                 // 255
 };
+const uint32_t r4aGpioMatrixNamesEntries = sizeof(r4aGpioMatrixNames) / sizeof(r4aGpioMatrixNames[0]);
 
 //*********************************************************************
 // Return the index into the I/O mux registers, return -1 if none
@@ -546,3 +551,16 @@ bool r4aEsp32GpioPullUp(int gpioNumber, bool enable)
     return true;
 }
 
+//*********************************************************************
+// Validate the GPIO tables
+void r4aEsp32GpioValidateTables()
+{
+    if (r4aGpioMatrixNamesEntries != 256)
+        r4aReportFatalError("Fix r4aGpioMatrixNames table to have 256 entries!");
+    if (r4aGpioPortToIoMuxIndexEntries != R4A_GPIO_MAX_PORTS)
+        r4aReportFatalError("Fix r4aGpioPortToIoMuxIndex table to have R4A_GPIO_MAX_PORTS entries!");
+    if (r4aIoMuxFunctionNamesEntries != R4A_GPIO_MAX_PORTS)
+        r4aReportFatalError("Fix r4aIoMuxFunctionNames table to have R4A_GPIO_MAX_PORTS entries!");
+    if (r4aIoMuxIsGpioEntries != R4A_GPIO_MAX_PORTS)
+        r4aReportFatalError("Fix r4aIoMuxIsGpio table to have R4A_GPIO_MAX_PORTS entries!");
+}

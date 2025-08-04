@@ -16,6 +16,7 @@ void setup()
     Serial.println(__FILE__);
 
     // Validate the tables
+    r4aEsp32GpioValidateTables();
     r4aNtripClientValidateTables();
     r4aWifiValidateTables();
 
