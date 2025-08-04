@@ -134,6 +134,28 @@ bool r4aEsp32SpiBegin(struct _R4A_ESP32_SPI * spi,
 }
 
 //*********************************************************************
+// Translate a controller number into a controller base register address
+R4A_ESP32_SPI_REGS * r4aEsp32SpiControllerAddress(uint8_t number)
+{
+    const uintptr_t controller[] =
+    {
+        R4A_ESP32_SPI_0_CONTROLLER,
+        R4A_ESP32_SPI_1_CONTROLLER,
+        R4A_ESP32_SPI_2_CONTROLLER,
+        R4A_ESP32_SPI_3_CONTROLLER
+    };
+    const int controllerCount = sizeof(controller) / sizeof(controller[0]);
+
+    // Validate the controller number
+    if (number >= controllerCount)
+    {
+        Serial.printf("Invalid SPI controller number!");
+        return nullptr;
+    }
+    return (R4A_ESP32_SPI_REGS *)controller[number];
+};
+
+//*********************************************************************
 // Transfer the data to the SPI device
 // Inputs:
 //   txBuffer: Address of the buffer containing the data to send

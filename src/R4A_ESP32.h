@@ -890,6 +890,13 @@ bool r4aEsp32SpiBegin(struct _R4A_ESP32_SPI * spi,
                       uint8_t pinMOSI,
                       uint32_t clockHz);
 
+// Translate a controller number into a controller base register address
+// Inputs:
+//   number: Number of the SPI controller (0 - 3)
+// Outputs:
+//   Returns the address of the SPI controller or nullptr upon failure
+R4A_ESP32_SPI_REGS * r4aEsp32SpiControllerAddress(uint8_t number);
+
 // Transfer the data to the SPI device
 // Inputs:
 //   spi: Address of an R4A_SPI data structure
