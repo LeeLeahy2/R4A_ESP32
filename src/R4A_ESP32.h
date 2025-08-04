@@ -36,6 +36,7 @@ extern R4A_IO_MUX_REGS * const r4aIoMux;
 extern R4A_RTCIO_REGS * const r4aRtcioRegs;
 
 extern const int r4aGpioPortToIoMuxIndex[];
+extern const char * const r4aIoMuxNames[];
 extern const char * const r4aIoMuxFunctionNames[][8];
 extern const uint8_t r4aIoMuxIsGpio[];
 extern const R4A_GPIO_MATRIX r4aGpioMatrixNames[];

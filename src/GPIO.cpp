@@ -25,6 +25,51 @@ const int r4aGpioPortToIoMuxIndex[] =
 };
 const uint32_t r4aGpioPortToIoMuxIndexEntries = sizeof(r4aGpioPortToIoMuxIndex) / sizeof(r4aGpioPortToIoMuxIndex[0]);
 
+const char * const r4aIoMuxNames[] =
+{
+    "IO_MUX_GPIO36_REG",
+    "IO_MUX_GPIO37_REG",
+    "IO_MUX_GPIO38_REG",
+    "IO_MUX_GPIO39_REG",
+    "IO_MUX_GPIO34_REG",
+    "IO_MUX_GPIO35_REG",
+    "IO_MUX_GPIO32_REG",
+    "IO_MUX_GPIO33_REG",
+    "IO_MUX_GPIO25_REG",
+    "IO_MUX_GPIO26_REG",
+    "IO_MUX_GPIO27_REG",
+    "IO_MUX_MTMS_REG",
+    "IO_MUX_MTDI_REG",
+    "IO_MUX_MTCK_REG",
+    "IO_MUX_MTDO_REG",
+    "IO_MUX_GPIO2_REG",
+    "IO_MUX_GPIO0_REG",
+    "IO_MUX_GPIO4_REG",
+    "IO_MUX_GPIO16_REG",
+    "IO_MUX_GPIO17_REG",
+    "IO_MUX_SD_DATA2_REG",
+    "IO_MUX_SD_DATA3_REG",
+    "IO_MUX_SD_CMD_REG",
+    "IO_MUX_SD_CLK_REG",
+    "IO_MUX_SD_DATA0_REG",
+    "IO_MUX_SD_DATA1_REG",
+    "IO_MUX_GPIO5_REG",
+    "IO_MUX_GPIO18_REG",
+    "IO_MUX_GPIO19_REG",
+    "IO_MUX_GPIO20_REG",
+    "IO_MUX_GPIO21_REG",
+    "IO_MUX_GPIO22_REG",
+    "IO_MUX_U0RXD_REG",
+    "IO_MUX_U0TXD_REG",
+    "IO_MUX_GPIO23_REG",
+    "IO_MUX_GPIO24_REG",
+    "",
+    "",
+    "",
+    "",
+};
+const uint32_t r4aIoMuxNamesEntries = sizeof(r4aIoMuxNames) / sizeof(r4aIoMuxNames[0]);
+
 const char * const r4aIoMuxFunctionNames[][8] =
 { //    0            1         2          3            4             5           6     7
     "GPIO0",    "CLK_OUT1", "GPIO0",  "-",          "-",        "EMAC_TX_CLK",  "-",  "-", //  0
@@ -565,4 +610,6 @@ void r4aEsp32GpioValidateTables()
         r4aReportFatalError("Fix r4aIoMuxFunctionNames table to have R4A_GPIO_MAX_PORTS entries!");
     if (r4aIoMuxIsGpioEntries != R4A_GPIO_MAX_PORTS)
         r4aReportFatalError("Fix r4aIoMuxIsGpio table to have R4A_GPIO_MAX_PORTS entries!");
+    if (r4aIoMuxNamesEntries != R4A_GPIO_MAX_PORTS)
+        r4aReportFatalError("Fix r4aIoMuxNames table to have R4A_GPIO_MAX_PORTS entries!");
 }
