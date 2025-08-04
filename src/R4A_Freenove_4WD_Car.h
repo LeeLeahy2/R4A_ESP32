@@ -56,6 +56,7 @@
 #define BACK_L3         9
 #define BACK_L2         10
 #define BACK_L1         11
+#define WS2812_MAX      12
 
 class R4A_Freenove_4WD_Car
 {
