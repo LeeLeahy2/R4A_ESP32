@@ -449,7 +449,7 @@ int r4aEsp32GpioGetIoMuxRegister(int portNumber)
         return (uint32_t)-1;
 
     // Lookup the
-    muxReg = &r4aIoMux->R4A_IO_MUX_GPIO36_REG;
+    muxReg = (uint32_t *)r4aIoMux;
     regValue = muxReg[index];
     return regValue;
 }
