@@ -13,9 +13,15 @@ set -e
 git reset --hard --quiet HEAD
 
 # Select the initial example directory
-pushd   ../examples/01_Basic_Line_Following
+pushd   ../examples/00_Validate_Tables
+
+# Validate tables
+make clean
+make
+make clean
 
 # Basic line following
+cd   ../01_Basic_Line_Following
 make clean
 make
 make clean
@@ -74,6 +80,12 @@ sed 's|#define USE_SPARKFUN_THING_PLUS_ESP32_WROOM     0|#define USE_SPARKFUN_TH
 sed 's|#ESP32_CHIP=esp32|ESP32_CHIP=esp32|' makefile  >  temp.txt
 sed 's|ESP32_CHIP=esp32wrover|#ESP32_CHIP=esp32wrover|'  temp.txt > makefile
 rm  temp.txt
+make clean
+make
+make clean
+
+# WS2812 LEDs
+cd ../09_WS2812
 make clean
 make
 make clean
