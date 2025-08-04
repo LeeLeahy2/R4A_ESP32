@@ -126,8 +126,8 @@ typedef struct _R4A_IO_MUX_REGS
 
 typedef struct _R4A_GPIO_MATRIX
 {
-    const char * r4aInput;
-    const char * r4aOutput;
+    const char * _input;
+    const char * _output;
 } R4A_GPIO_MATRIX;
 
 typedef struct _R4A_RTCIO_REGS

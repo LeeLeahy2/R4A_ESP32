@@ -514,12 +514,74 @@ void r4aEsp32GpioDisplayRegisters(Print * display)
 
 //*********************************************************************
 // Decode the IO Mux registers
-void r4aEsp32GpioDisplayIoMuxRegisters(int portNumber, uint32_t regValue, Print * display)
+void r4aEsp32GpioDisplayIoMuxRegisters(int gpioNumber, uint32_t regValue, Print * display)
 {
-    const char * function;
+    String functionName;
+    uint32_t functionNumber;
+    uint32_t gpioMatrixInUse;
+    char number[8];
 
-    function = r4aIoMuxFunctionNames[portNumber][(regValue & IO_MUX_MCU_SEL) >> 12];
-    display->printf(", %s", function);
+    // Verify the GPIO number
+    if ((gpioNumber < 0) || (gpioNumber >= R4A_GPIO_MAX_PORTS))
+        return;
+
+    // Determine if the GPIO is an output
+    uint32_t output = ((gpioNumber < 32) ? r4aGpioRegs->R4A_GPIO_ENABLE_REG
+                                         : r4aGpioRegs->R4A_GPIO_ENABLE1_REG)
+                    & (1 << (gpioNumber & 0x1f));
+    functionNumber = (regValue & IO_MUX_MCU_SEL) >> 12;
+    gpioMatrixInUse = r4aIoMuxIsGpio[gpioNumber] & (1 << functionNumber);
+    if (output)
+    {
+        // Peripheral --> GPIO mux --> IOMUX --> GPIO pin
+        // Controlled with I/O mux
+        functionName = r4aIoMuxFunctionNames[gpioNumber][functionNumber];
+
+        // Determine if GPIO is using GPIO function mux in addition to IO mux
+        if (gpioMatrixInUse)
+        {
+            // Convert the GPIO number into a string
+            sprintf(number, "%d", gpioNumber);
+
+            // Get the peripheral that is driving the GPIO pin
+            functionNumber = r4aGpioRegs->R4A_GPIO_FUNC_OUT_SEL_CFG_REG[gpioNumber] & 0x1ff;
+            functionName = r4aGpioMatrixNames[functionNumber]._output;
+            functionName += " --> GPIO ";
+            functionName += String(number);
+        }
+    }
+    // Input
+    else
+    {
+        // GPIO pin --> IOMUX --> GPIO mux --> Peripheral
+        // Possibly controlled with I/O mux
+        functionName = r4aIoMuxFunctionNames[gpioNumber][functionNumber];
+
+        // Determine if GPIO is using GPIO function mux in addition to IO mux
+        if (gpioMatrixInUse)
+        {
+            // Convert the GPIO number into a string
+            sprintf(number, "%d", gpioNumber);
+
+            // Determine the peripherals that are fed by the GPIO pin
+            functionName = "";
+            for (int index = 0; index < 256; index++)
+                if ((r4aGpioRegs->R4A_GPIO_FUNC_IN_SEL_CFG_REG[index] & 0x3f) == gpioNumber)
+                {
+                    if (functionName.length())
+                        functionName += ", ";
+                    functionName += r4aGpioMatrixNames[index]._input;
+                }
+            if (functionName.length())
+                functionName = ", " + functionName;
+            functionName = "GPIO Input" + functionName;
+            functionName += " <-- GPIO ";
+            functionName += String(number);
+        }
+    }
+
+    // Display the GPIO port
+    display->printf("%s", functionName.c_str());
     display->printf(", DRV: %ld", (regValue & IO_MUX_FUN_DRV) >> 10);
     if (regValue & IO_MUX_IN_IE) display->print(", IE");
     if (regValue & IO_MUX_FUN_WPU) display->print(", Pull-up");
@@ -548,7 +610,7 @@ void r4aEsp32GpioDisplayIoMuxRegisters(Print * display)
         regValue = r4aEsp32GpioGetIoMuxRegister(portNumber);
         if (regValue != (uint32_t)-1)
         {
-            display->printf("    0x%08lx: IO_MUX_GPIO%d_REG", regValue, portNumber);
+            display->printf("    0x%08lx: IO_MUX_GPIO%d_REG, ", regValue, portNumber);
             r4aEsp32GpioDisplayIoMuxRegisters(portNumber, regValue, display);
         }
     }
