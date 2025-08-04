@@ -17,6 +17,7 @@ void setup()
 
     // Validate the tables
     r4aEsp32GpioValidateTables();
+    r4aEsp32SpiValidateTables();
     r4aNtripClientValidateTables();
     r4aWifiValidateTables();
 

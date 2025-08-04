@@ -24,6 +24,7 @@
 #include <R4A_Robot.h>          // Robots-For-All robot support
 #include <R4A_I2C.h>            // Robots-For-All I2C support
 #include "R4A_ESP32_GPIO.h"     // Robots-For-All ESP32 GPIO declarations
+#include "R4A_ESP32_SPI.h"      // Robots-For-All ESP32 SPI declarations
 #include "R4A_ESP32_Timer.h"    // Robots-For-All ESP32 Timer declarations
 #include "R4A_WiFi.h"           // Robots-For-All WiFi support
 
@@ -899,6 +900,9 @@ void r4aEsp32SpiTransfer(struct _R4A_SPI * spi,
                          const uint8_t * txBuffer,
                          uint8_t * rxBuffer,
                          uint32_t length);
+
+// Validate the SPI tables
+void r4aEsp32SpiValidateTables();
 
 //****************************************
 // Timer API
