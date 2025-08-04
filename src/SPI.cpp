@@ -156,6 +156,75 @@ R4A_ESP32_SPI_REGS * r4aEsp32SpiControllerAddress(uint8_t number)
 };
 
 //*********************************************************************
+// Get the SPI clock frequency
+uint32_t r4aEsp32SpiGetClock(R4A_ESP32_SPI_REGS * spi, Print * display)
+{
+    uint32_t clkcnt_h;
+    uint32_t clkcnt_l;
+    uint32_t clkcnt_n;
+    uint32_t clockHz;
+    uint8_t controller;
+    uint32_t kHz;
+    uint32_t mHz;
+    uint32_t pre;
+    uint32_t sysclk;
+    uint32_t value;
+
+    // Validate the I2C address;
+    switch ((uintptr_t)spi)
+    {
+    default:
+        if (display)
+            display->printf("ERROR: Invalid SPI controller address!\r\n");
+        return 0;
+    case R4A_ESP32_SPI_0_CONTROLLER: controller = 0; break;
+    case R4A_ESP32_SPI_1_CONTROLLER: controller = 1; break;
+    case R4A_ESP32_SPI_2_CONTROLLER: controller = 2; break;
+    case R4A_ESP32_SPI_3_CONTROLLER: controller = 3; break;
+    }
+
+    // Get the SPI clock register value
+    value = spi->SPI_CLOCK;
+
+    // Parse the register value
+    sysclk = (value >> 31) & 1;
+    if (sysclk)
+    {
+        pre = 0;
+        clkcnt_n = 0;
+        clkcnt_h = 0;
+        clkcnt_l = 0;
+    }
+    else
+    {
+        pre = (value >> 18) & 0x1fff;
+        clkcnt_n = (value >> 12) & 0x3f;
+        clkcnt_h = (value >> 6) & 0x3f;
+        clkcnt_l = value & 0x3f;
+    }
+
+    // Compute the clock frequency
+    clockHz = r4aEsp32ClockGetApb();
+    clockHz /= ((pre + 1) * (clkcnt_n + 1));
+
+    // Display the register value
+    if (display)
+    {
+        display->printf("    SYSCLK: %ld\r\n", sysclk);
+        display->printf("    PRE: 0x%04lx\r\n", pre);
+        display->printf("    CLKCNT_N: 0x%02lx\r\n", clkcnt_n);
+        display->printf("    CLKCNT_H: 0x%02lx\r\n", clkcnt_h);
+        display->printf("    CLKCNT_L: 0x%02lx\r\n", clkcnt_l);
+        mHz = clockHz / (1000 * 1000);
+        kHz = (clockHz / 1000) - (mHz * 1000);
+        display->printf("    SPI clock: %ld.%03ld MHz\r\n", mHz, kHz);
+    }
+
+    // Return the SPI clock frequency
+    return clockHz;
+}
+
+//*********************************************************************
 // Transfer the data to the SPI device
 // Inputs:
 //   txBuffer: Address of the buffer containing the data to send
