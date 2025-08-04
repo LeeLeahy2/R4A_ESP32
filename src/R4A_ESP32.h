@@ -1070,4 +1070,11 @@ void r4aWebServerStop(R4A_WEB_SERVER * object);
 //   wifiConnected: True when WiFi has an IP address and false otherwise
 void r4aWebServerUpdate(R4A_WEB_SERVER * object, bool wifiConnected);
 
+//****************************************
+// WiFi
+//****************************************
+
+// Validate the WiFi tables
+void r4aWifiValidateTables();
+
 #endif  // __R4A_ESP32_H__

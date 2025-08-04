@@ -2689,17 +2689,17 @@ void r4aWifiUpdate()
 }
 
 //*********************************************************************
-// Verify the WiFi tables
-void r4aWifiVerifyTables()
+// Validate the WiFi tables
+void r4aWifiValidateTables()
 {
-    // Verify the authorization name table
+    // Validate the authorization name table
     if (WIFI_AUTH_MAX != r4aWifiAuthorizationNameEntries)
     {
         Serial.printf("ERROR: Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types.h!\r\n");
         r4aReportFatalError("Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types.h!");
     }
 
-    // Verify the start name table
+    // Validate the start name table
     if (WIFI_MAX_START != (1 << r4aWifiStartNamesEntries))
     {
         Serial.printf("ERROR: Fix wifiStartNames list to match list of defines!\r\n");
