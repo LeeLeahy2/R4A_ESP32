@@ -17,6 +17,7 @@
 
 static const char * r4aWifiAuthorizationName[] =
 {
+    // Added in Espressif IDF v0.9
     "Open",
     "WEP",
     "WPA_PSK",
@@ -28,6 +29,15 @@ static const char * r4aWifiAuthorizationName[] =
     "WAPI_PSK",
     "OWE",
     "WPA3_ENT_192",
+    "WPA3_EXT_PSK",
+    "WPA3_EXT_PSK_MIXED_MODE",
+    "DPP",
+    // Added in Espressif IDF v5.3
+    "WPA3_ENTERPRISE",
+    "WPA2_WPA3_ENTERPRISE",
+
+    // Added in master
+//    "WIFI_AUTH_WPA_ENTERPRISE",
 };
 static const int r4aWifiAuthorizationNameEntries =
     sizeof(r4aWifiAuthorizationName) / sizeof(r4aWifiAuthorizationName[0]);
@@ -2695,8 +2705,8 @@ void r4aWifiValidateTables()
     // Validate the authorization name table
     if (WIFI_AUTH_MAX != r4aWifiAuthorizationNameEntries)
     {
-        Serial.printf("ERROR: Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types.h!\r\n");
-        r4aReportFatalError("Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types.h!");
+        Serial.printf("ERROR: Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types_generic.h!\r\n");
+        r4aReportFatalError("Fix wifiAuthorizationName list to match wifi_auth_mode_t in esp_wifi_types_generic.h!");
     }
 
     // Validate the start name table
