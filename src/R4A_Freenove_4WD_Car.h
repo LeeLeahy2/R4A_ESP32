@@ -88,12 +88,7 @@ class R4A_Freenove_4WD_Car
     const int numberOfLEDs = 12;
 
     // Constructor
-    R4A_Freenove_4WD_Car(uint32_t blinkMsec = 150)
-        : _backupLightColor{R4A_LED_OFF}, _blinkMsec{blinkMsec},
-          _brakeLightColor{R4A_LED_OFF}, _headlightColor{R4A_LED_OFF},
-          _ledState{0}, _timer{0}, _updateLEDs{false}
-    {
-    }
+    R4A_Freenove_4WD_Car(uint32_t blinkMsec = 150);
 
     // Get the backup light color
     // Outputs:

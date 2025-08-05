@@ -31,6 +31,15 @@ const uint8_t r4aLedMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
 R4A_Freenove_4WD_Car r4aFreenove4wdCar;
 
 //*********************************************************************
+// Constructor
+R4A_Freenove_4WD_Car::R4A_Freenove_4WD_Car(uint32_t blinkMsec)
+    : _backupLightColor{R4A_LED_OFF}, _blinkMsec{blinkMsec},
+      _brakeLightColor{R4A_LED_OFF}, _headlightColor{R4A_LED_OFF},
+      _ledState{0}, _timer{0}, _updateLEDs{false}
+{
+}
+
+//*********************************************************************
 // Get the backup light color
 uint32_t R4A_Freenove_4WD_Car::backupLightColorGet()
 {
