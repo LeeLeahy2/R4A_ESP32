@@ -18,17 +18,6 @@ static uint8_t r4aEsp32GpioPinMode[256];
 static float r4aEsp32VoltageReference;
 
 //*********************************************************************
-// Allocate DMA buffer
-// Inputs:
-//   length: Number of data bytes to allocate
-// Outputs:
-//   Returns the buffer address if successful and nullptr otherwise
-uint8_t * r4aEsp32AllocateDmaBuffer(int length)
-{
-    return (uint8_t *)heap_caps_malloc(length, MALLOC_CAP_DMA);
-}
-
-//*********************************************************************
 // Display the ESP32 clocks
 void r4aEsp32ClockDisplay(Print * display)
 {

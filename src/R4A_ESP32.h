@@ -79,13 +79,6 @@ R4A_BLUETOOTH_STATE_TRANSITION r4aBluetoothUpdate();
 // ESP32 API
 //****************************************
 
-// Allocate DMA buffer
-// Inputs:
-//   length: Number of data bytes to allocate
-// Outputs:
-//   Returns the buffer address if successful and nullptr otherwise
-uint8_t * r4aEsp32AllocateDmaBuffer(int length);
-
 // Display the ESP32 clocks
 // Inputs:
 //   display: Device used for output
