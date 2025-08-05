@@ -277,6 +277,24 @@ void r4aEsp32GpioDisplayPort(int gpioNumber, Print * display);
 //   display: Device used for output
 void r4aEsp32GpioDisplayRegisters(Print * display = &Serial);
 
+// Display all GPIO port configurations
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32GpioMenuDisplayAllPorts(const R4A_MENU_ENTRY * menuEntry,
+                                     const char * command,
+                                     Print * display);
+
+// Display a GPIO port configuration
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32GpioMenuDisplayPort(const R4A_MENU_ENTRY * menuEntry,
+                                 const char * command,
+                                 Print * display);
+
 // Enable or disable the pull-down resistor
 // Inputs:
 //   gpioNumber: Number of the GPIO port

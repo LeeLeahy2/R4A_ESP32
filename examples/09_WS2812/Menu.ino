@@ -155,6 +155,7 @@ void ws2812MenuLedColors(const R4A_MENU_ENTRY * menuEntry,
 enum MENU_TABLE_INDEX
 {
     MTI_DEBUG = R4A_MENU_MAIN + 1,
+    MTI_GPIO,
     MTI_LED,
     MTI_NVM,
     MTI_WS2812,
@@ -169,6 +170,16 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define DEBUG_MENU_ENTRIES      sizeof(debugMenuTable) / sizeof(debugMenuTable[0])
+
+// GPIO menu
+const R4A_MENU_ENTRY gpioMenuTable[] =
+{
+    // Command  menuRoutine                 menuParam       HelpRoutine         align   HelpText
+    {"g",  r4aEsp32GpioMenuDisplayAllPorts, 0,              nullptr,            2,      "Display all GPIO port registers"},
+    {"p",  r4aEsp32GpioMenuDisplayPort,     (intptr_t)"pp", r4aMenuHelpSuffix,  2,      "Display GPIO port pp configuration"},
+    {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,            0,      "Return to the main menu"},
+};
+#define GPIO_MENU_ENTRIES      sizeof(gpioMenuTable) / sizeof(gpioMenuTable[0])
 
 // LED menu
 const R4A_MENU_ENTRY ledMenuTable[] =
@@ -202,6 +213,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 {
     // Command  menuRoutine         menuParam       HelpRoutine align   HelpText
     {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
+    {"g",       nullptr,            MTI_GPIO,       nullptr,    0,      "Enter the GPIO menu"},
     {"l",       nullptr,            MTI_LED,        nullptr,    0,      "Enter the LED menu"},
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
@@ -215,6 +227,7 @@ const R4A_MENU_TABLE menuTable[] =
     // menuName         preMenu routine firstEntry          entryCount
     {"Main Menu",       mainMenuPre,    mainMenuTable,      MAIN_MENU_ENTRIES},
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
+    {"GPIO Menu",       nullptr,        gpioMenuTable,      GPIO_MENU_ENTRIES},
     {"LED Menu",        nullptr,        ledMenuTable,       LED_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"WS2812 Menu",     nullptr,        ws2812MenuTable,    WS2812_MENU_ENTRIES},

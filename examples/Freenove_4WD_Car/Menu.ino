@@ -289,6 +289,7 @@ enum MENU_TABLE_INDEX
 #ifdef  USE_ZED_F9P
     MTI_GNSS,
 #endif  // USE_ZED_F9P
+    MTI_GPIO,
     MTI_I2C,
     MTI_LED,
     MTI_MOTOR,
@@ -318,6 +319,7 @@ const int menuTableIndexMax = MTI_MAX;
 const R4A_MENU_ENTRY debugMenuTable[] =
 {
     // Command  menuRoutine                 menuParam       HelpRoutine align   HelpText
+    {"g",       nullptr,                    MTI_GPIO,       nullptr,    0,      "Enter the GPIO menu"},
     {"h",       r4aEsp32MenuDisplayHeap,    0,              nullptr,    0,      "Display the heap"},
     {"i",       nullptr,                    MTI_I2C,        nullptr,    0,      "I2C menu"},
     {"l",       nullptr,                    MTI_LED,        nullptr,    0,      "LED menu"},
@@ -342,6 +344,16 @@ const R4A_MENU_ENTRY gnssMenuTable[] =
 };
 #define GNSS_MENU_ENTRIES       sizeof(gnssMenuTable) / sizeof(gnssMenuTable[0])
 #endif  // USE_ZED_F9P
+
+// GPIO menu
+const R4A_MENU_ENTRY gpioMenuTable[] =
+{
+    // Command  menuRoutine                 menuParam       HelpRoutine         align   HelpText
+    {"g",  r4aEsp32GpioMenuDisplayAllPorts, 0,              nullptr,            2,      "Display all GPIO port registers"},
+    {"p",  r4aEsp32GpioMenuDisplayPort,     (intptr_t)"pp", r4aMenuHelpSuffix,  2,      "Display GPIO port pp configuration"},
+    {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,            0,      "Return to the main menu"},
+};
+#define GPIO_MENU_ENTRIES      sizeof(gpioMenuTable) / sizeof(gpioMenuTable[0])
 
 // LED menu
 const R4A_MENU_ENTRY ledMenuTable[] =
@@ -485,6 +497,7 @@ const R4A_MENU_TABLE menuTable[] =
 #ifdef  USE_ZED_F9P
     {"GNSS Menu",       nullptr,        gnssMenuTable,      GNSS_MENU_ENTRIES},
 #endif  // USE_ZED_F9P
+    {"GPIO Menu",       nullptr,        gpioMenuTable,      GPIO_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
     {"LED Menu",        nullptr,        ledMenuTable,       LED_MENU_ENTRIES},
 //    {"LED Menu",        nullptr,        r4aLEDMenuTable,    R4A_LED_MENU_ENTRIES},

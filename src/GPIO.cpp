@@ -627,6 +627,47 @@ void r4aEsp32GpioDisplayPort(int gpioNumber, Print * display)
 }
 
 //*********************************************************************
+// Display all GPIO port configurations
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32GpioMenuDisplayAllPorts(const R4A_MENU_ENTRY * menuEntry,
+                                     const char * command,
+                                     Print * display)
+{
+    int gpioPort;
+    String restOfLine;
+
+    // Display the GPIO port configurations
+    r4aEsp32GpioDisplayRegisters(display);
+    r4aEsp32GpioDisplayIoMuxRegisters(display);
+}
+
+//*********************************************************************
+// Display a GPIO port configuration
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32GpioMenuDisplayPort(const R4A_MENU_ENTRY * menuEntry,
+                                 const char * command,
+                                 Print * display)
+{
+    int gpioPort;
+    String restOfLine;
+
+    // Get the data following the command
+    restOfLine = r4aMenuGetParameters(menuEntry, command);
+
+    // Determine the GPIO port
+    if (sscanf(restOfLine.c_str(), "%d", &gpioPort) == 1)
+        r4aEsp32GpioDisplayPort(gpioPort, display);
+    else
+        display->printf("ERROR: Missing GPIO port number!\r\n");
+}
+
+//*********************************************************************
 // Enable or disable the pull-down resistor
 bool r4aEsp32GpioPullDown(int gpioNumber, bool enable)
 {
