@@ -40,6 +40,9 @@ R4A_Freenove_4WD_Car::R4A_Freenove_4WD_Car(uint32_t blinkMsec)
     // Turn off the buzzer and blue LED
     pinMode(BLUE_LED_BUZZER_PIN, OUTPUT);
     digitalWrite(BLUE_LED_BUZZER_PIN, ESP32_WROVER_BLUE_LED_OFF);
+
+    // Make the battery voltage pin an input
+    pinMode(BATTERY_WS2812_PIN, INPUT);
 }
 
 //*********************************************************************
