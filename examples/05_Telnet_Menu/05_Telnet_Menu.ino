@@ -175,8 +175,6 @@ bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display = nullptr)
 
 #define ROBOT_MINIMUM_VOLTAGE       8.0 // Don't start robot if below this voltage
 
-R4A_Freenove_4WD_Car car;
-
 //****************************************
 // Robot operation
 //****************************************

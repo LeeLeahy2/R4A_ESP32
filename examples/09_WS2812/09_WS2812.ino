@@ -47,12 +47,6 @@ extern const R4A_MENU_TABLE menuTable[];
 extern const int menuTableEntries;
 
 //****************************************
-// Robot
-//****************************************
-
-R4A_Freenove_4WD_Car car;
-
-//****************************************
 // Serial menu support
 //****************************************
 

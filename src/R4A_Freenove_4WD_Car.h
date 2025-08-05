@@ -170,6 +170,10 @@ class R4A_Freenove_4WD_Car
     void ledsUpdate(uint32_t currentMsec);
 };
 
+extern R4A_Freenove_4WD_Car r4aFreenove4wdCar;
+
+#define car         r4aFreenove4wdCar
+
 //****************************************
 // ESP32 WRover Module Pins
 //****************************************
