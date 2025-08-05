@@ -119,7 +119,6 @@ void setup()
     log_v("Calling r4aEsp32VoltageSetReference");
     r4aEsp32VoltageSetReference(ADC_REFERENCE_VOLTAGE);
 
-/*
     // Turn off the buzzer
     log_v("Turning off the buzzer\r\n");
     pinMode(BLUE_LED_BUZZER_PIN, OUTPUT);
@@ -131,7 +130,6 @@ void setup()
     int blueLED = (batteryVoltage > 2.)
                 ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
     digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
-*/
 
     // Delay to allow the hardware initialize
     delay(1000);
@@ -178,22 +176,21 @@ void setup()
 // Idle loop for core 1 of the application
 void loop()
 {
+    float batteryVoltage;
     uint32_t currentMsec;
     static uint32_t lastBatteryCheckMsec;
     static bool previousConnected;
 
     // Turn on the ESP32 WROVER blue LED when the battery power is OFF
     currentMsec = millis();
-/*
     if ((currentMsec - lastBatteryCheckMsec) >= 100)
     {
         lastBatteryCheckMsec = currentMsec;
-        float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
+//        batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
         int blueLED = (batteryVoltage > 2.)
                     ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
         digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
     }
-*/
 
     // Update the WiFi status
     r4aWifiUpdate();
