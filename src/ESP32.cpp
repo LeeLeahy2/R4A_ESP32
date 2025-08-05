@@ -304,24 +304,6 @@ void r4aEsp32SystemReset()
 }
 
 //*********************************************************************
-// Display the voltage
-void r4aEsp32VoltageDisplay(int adcPin, float offset, float multiplier, Print * display)
-{
-    float voltage;
-    int16_t adcValue;
-
-    // Get the battery voltage
-    voltage = r4aEsp32VoltageGet(adcPin, offset, multiplier, &adcValue);
-
-    // Display the battery voltage
-    if (adcValue < 5)
-        display->printf("Power switch is off (0x%04x)!\r\n", adcValue);
-    else
-        display->printf("Battery Voltage (%d, 0x%04x): %.2f Volts\r\n",
-                       adcValue, adcValue, voltage);
-}
-
-//*********************************************************************
 // Get the voltage
 float r4aEsp32VoltageGet(int adcPin, float offset, float multiplier, int16_t * adcValue)
 {

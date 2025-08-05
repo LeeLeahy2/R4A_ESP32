@@ -132,12 +132,6 @@ bool vk16k33Present;
 
 #define ADC_REFERENCE_VOLTAGE   3.48    // Volts
 
-#define DISPLAY_BATTERY_VOLTAGE(display)  \
-    r4aEsp32VoltageDisplay(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, display)
-
-#define READ_BATTERY_VOLTAGE(adcValue)  \
-    r4aEsp32VoltageGet(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, adcValue)
-
 //****************************************
 // Line sensors
 //****************************************

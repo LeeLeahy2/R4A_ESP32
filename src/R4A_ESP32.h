@@ -197,17 +197,6 @@ uint8_t r4aEsp32PinMode(uint8_t pin, uint8_t mode);
 // System reset
 void r4aEsp32SystemReset();
 
-// Display the voltage
-// Inputs:
-//   adcPin: GPIO pin number for the ADC pin
-//   offset: Ground level offset correction
-//   multiplier: Multiplier for each of the ADC bits
-//   display: Device used for output
-void r4aEsp32VoltageDisplay(int adcPin,
-                            float offset,
-                            float multiplier,
-                            Print * display = &Serial);
-
 // Read the voltage
 // Inputs:
 //   adcPin: GPIO pin number for the ADC pin

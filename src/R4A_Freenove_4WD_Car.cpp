@@ -82,6 +82,52 @@ void R4A_Freenove_4WD_Car::backupLightsToggle()
 }
 
 //*********************************************************************
+// Display the battery voltage
+void R4A_Freenove_4WD_Car::batteryVoltageDisplay(float offset,
+                                                 float multiplier,
+                                                 Print * display)
+{
+    float voltage;
+    int16_t adcValue;
+
+    // Get the battery voltage
+    voltage = batteryVoltageGet(offset, multiplier, &adcValue);
+
+    // Display the battery voltage
+    if (adcValue < 5)
+        display->printf("Power switch is off (0x%04x)!\r\n", adcValue);
+    else
+        display->printf("Battery Voltage (%d, 0x%04x): %.2f Volts\r\n",
+                       adcValue, adcValue, voltage);
+}
+
+//*********************************************************************
+// Get the battery voltage
+float R4A_Freenove_4WD_Car::batteryVoltageGet(float offset,
+                                              float multiplier,
+                                              int16_t * adcValue)
+{
+    bool ws2812LedsInUse;
+    float voltage;
+
+    // Bug: No WS2812 output
+    //      The WS2812 code uses the SPI controller as an output driving
+    //      the shared battery voltage and WS2812 pin (BATTERY_WS2812_PIN).
+    //
+    // Fix: 1.  Output the WS2812 LEDs first if active, this causes any
+    //          glitches on the WS2812 input when reading the battery
+    //          voltage to be sent to non-existant the "13th" WS2812 LED.
+    //      2.  Before reading the battery voltage, switch the battery pin
+    //          from output to input.
+    //      3.  After the battery voltage is read restore the pin as an
+    //          output.
+
+    // Read the battery voltage
+    voltage = r4aEsp32VoltageGet(BATTERY_WS2812_PIN, offset, multiplier, adcValue);
+    return voltage;
+}
+
+//*********************************************************************
 // Get the brake light color
 uint32_t R4A_Freenove_4WD_Car::brakeLightColorGet()
 {

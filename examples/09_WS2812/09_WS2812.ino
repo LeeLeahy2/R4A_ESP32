@@ -33,12 +33,6 @@ bool contextCreate(void ** contextData, NetworkClient * client);
 
 #define ADC_REFERENCE_VOLTAGE   3.48    // Volts
 
-#define DISPLAY_BATTERY_VOLTAGE(display)  \
-    r4aEsp32VoltageDisplay(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, display)
-
-#define READ_BATTERY_VOLTAGE(adcValue)  \
-    r4aEsp32VoltageGet(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, adcValue)
-
 //****************************************
 // Menus
 //****************************************
@@ -181,7 +175,7 @@ void loop()
     if ((currentMsec - lastBatteryCheckMsec) >= 100)
     {
         lastBatteryCheckMsec = currentMsec;
-//        batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
+        batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
         int blueLED = (batteryVoltage > 2.)
                     ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
         digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);

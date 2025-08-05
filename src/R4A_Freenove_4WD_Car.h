@@ -19,10 +19,10 @@
 #define BATTERY_VOLTAGE_MULTIPLIER  4
 
 #define DISPLAY_BATTERY_VOLTAGE(display)  \
-    r4aEsp32VoltageDisplay(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, display)
+    car.batteryVoltageDisplay(0, BATTERY_VOLTAGE_MULTIPLIER, display)
 
 #define READ_BATTERY_VOLTAGE(adcValue)  \
-    r4aEsp32VoltageGet(BATTERY_WS2812_PIN, 0, BATTERY_VOLTAGE_MULTIPLIER, adcValue)
+    car.batteryVoltageGet(0, BATTERY_VOLTAGE_MULTIPLIER, adcValue)
 
 //****************************************
 // Buzzer
@@ -108,6 +108,26 @@ class R4A_Freenove_4WD_Car
 
     // Toggle the backup lights
     void backupLightsToggle();
+
+    // Display the voltage
+    // Inputs:
+    //   offset: Ground level offset correction
+    //   multiplier: Multiplier for each of the ADC bits
+    //   display: Device used for output
+    void batteryVoltageDisplay(float offset,
+                               float multiplier,
+                               Print * display = &Serial);
+
+    // Read the voltage
+    // Inputs:
+    //   offset: Ground level offset correction
+    //   multiplier: Multiplier for each of the ADC bits
+    //   adcValue: Return the value read from the ADC
+    // Outputs:
+    //   Returns the computed voltage
+    float batteryVoltageGet(float offset,
+                            float multiplier,
+                            int16_t * adcValue);
 
     // Get the brake light color
     // Outputs:
