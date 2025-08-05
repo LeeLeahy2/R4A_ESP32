@@ -393,11 +393,6 @@ void setup()
     log_v("Calling r4aEsp32VoltageSetReference");
     r4aEsp32VoltageSetReference(ADC_REFERENCE_VOLTAGE);
 
-    // Turn off the buzzer
-    log_v("Turning off the buzzer\r\n");
-    pinMode(BLUE_LED_BUZZER_PIN, OUTPUT);
-    digitalWrite(BLUE_LED_BUZZER_PIN, ESP32_WROVER_BLUE_LED_OFF);
-
     // Turn off ESP32 Wrover blue LED when battery power is applied
     log_v("Setting the blue LED\r\n");
     float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);

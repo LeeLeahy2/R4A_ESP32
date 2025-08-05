@@ -37,6 +37,9 @@ R4A_Freenove_4WD_Car::R4A_Freenove_4WD_Car(uint32_t blinkMsec)
       _brakeLightColor{R4A_LED_OFF}, _headlightColor{R4A_LED_OFF},
       _ledState{0}, _timer{0}, _updateLEDs{false}
 {
+    // Turn off the buzzer and blue LED
+    pinMode(BLUE_LED_BUZZER_PIN, OUTPUT);
+    digitalWrite(BLUE_LED_BUZZER_PIN, ESP32_WROVER_BLUE_LED_OFF);
 }
 
 //*********************************************************************
