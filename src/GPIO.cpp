@@ -627,6 +627,49 @@ void r4aEsp32GpioDisplayPort(int gpioNumber, Print * display)
 }
 
 //*********************************************************************
+// Select a new function in the I/O mux
+// Returns the previous selected function number
+int r4aEsp32GpioIoMuxFunctionSelect(int gpioNumber, int functionNumber)
+{
+    int index;
+    volatile uint32_t * iomux;
+    uint32_t regValue;
+
+    // Validate the port number
+    if (gpioNumber >= R4A_GPIO_MAX_PORTS)
+    {
+        Serial.printf("ERROR: Invalid gpioNumber, valid range (0 - %d)!\r\n",
+                      R4A_GPIO_MAX_PORTS - 1);
+        return -1;
+    }
+
+    // Validate the register index
+    index = r4aEsp32GpioGetIoMuxRegisterIndex(gpioNumber);
+    if (index < 0)
+    {
+        Serial.printf("ERROR: GPIO port %d does not use the IOMUX!\r\n");
+        return -1;
+    }
+
+    // Validate the function
+    if ((functionNumber < 0) || (functionNumber > 7))
+    {
+        Serial.printf("ERROR: Invalid functionNumber, valid range (0 - 7)!\r\n");
+        return -1;
+    }
+
+    // Get the current IOMUX register value
+    iomux = (uint32_t *)r4aIoMux;
+    regValue = iomux[index];
+
+    // Set the new GPIO pin function
+    iomux[index] = (regValue & ~IO_MUX_MCU_SEL) | (functionNumber << 12);
+
+    // Return the previous IOMUX function
+    return (regValue & IO_MUX_MCU_SEL) >> 12;
+}
+
+//*********************************************************************
 // Display all GPIO port configurations
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry

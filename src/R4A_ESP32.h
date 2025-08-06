@@ -277,6 +277,14 @@ void r4aEsp32GpioDisplayPort(int gpioNumber, Print * display);
 //   display: Device used for output
 void r4aEsp32GpioDisplayRegisters(Print * display = &Serial);
 
+// Select a new function in the I/O mux
+// Inputs:
+//   gpioNumber: Number of the GPIO port
+//   functionNumber: Number of the function to select
+// Outputs:
+//   Returns the previous selected function number
+int r4aEsp32GpioIoMuxFunctionSelect(int gpioNumber, int functionNumber);
+
 // Display all GPIO port configurations
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry
