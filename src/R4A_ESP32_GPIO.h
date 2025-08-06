@@ -10,7 +10,7 @@
 
 #define R4A_GPIO_MAX_PORTS              40
 
-typedef struct _R4A_GPIO_REGS
+typedef volatile struct _R4A_GPIO_REGS
 {
     uint32_t reserved_0;                //     0
     uint32_t R4A_GPIO_OUT_REG;          //     4
@@ -71,7 +71,7 @@ typedef struct _R4A_GPIO_REGS
 //    0x100 = GPIO out           GPIOx_out
 //
 
-typedef struct _R4A_IO_MUX_REGS
+typedef volatile struct _R4A_IO_MUX_REGS
 {
     uint32_t R4A_IO_MUX_PIN_CTRL;       //    0,  0
     uint32_t R4A_IO_MUX_GPIO36_REG;     //    4,  1
@@ -130,7 +130,7 @@ typedef struct _R4A_GPIO_MATRIX
     const char * _output;
 } R4A_GPIO_MATRIX;
 
-typedef struct _R4A_RTCIO_REGS
+typedef volatile struct _R4A_RTCIO_REGS
 {
     uint32_t R4A_RTCIO_RTC_GPIO_OUT_REG;        //    0
     uint32_t R4A_RTCIO_RTC_GPIO_OUT_W1TS_REG;   //    4
