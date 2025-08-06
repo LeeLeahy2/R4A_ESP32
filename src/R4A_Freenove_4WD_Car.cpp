@@ -120,9 +120,19 @@ float R4A_Freenove_4WD_Car::batteryVoltageGet(float offset,
     //      (ADC input).  However setting the pinMode back to output does
     //      not restore the GPIO matrix value.
     //
-    // Fix: Share the pin between battery voltage input and WS2812 output
-    //      Save and restore the GPIO mux value.
+    // Fix:
+    //      1. Update the WS2812 LEDs so that any glitch from switching
+    //         to and from the ADC input is sent to the "13th" WS2812 LED
+    //      2. Save the current GPIO matrix setting and set the GPIO port
+    //         as an input to the ADC
+    //      3. Read the ADC value
+    //      4. Restore the GPIO port to be an output and update the GPIO
+    //         matrix value
     //
+    // Output the WS2812 LEDs value now
+    if (r4aLEDSpi)
+        ledsUpdate(millis(), true);
+
     // Remember the GPIO pin mux value
     previousFunction = r4aGpioRegs->R4A_GPIO_FUNC_OUT_SEL_CFG_REG[BATTERY_WS2812_PIN];
 
@@ -258,14 +268,16 @@ void R4A_Freenove_4WD_Car::ledsTurnRight()
 
 //*********************************************************************
 // Update the color of the LEDs
-void R4A_Freenove_4WD_Car::ledsUpdate(uint32_t currentMsec)
+void R4A_Freenove_4WD_Car::ledsUpdate(uint32_t currentMsec,
+                                      bool forceUpdate)
 {
     uint32_t color;
     uint32_t timer;
     bool updateNeeded;
 
     // Determine if the LEDs need updating
-    updateNeeded = __atomic_exchange_1(&_updateLEDs, false, 0);
+    updateNeeded = __atomic_exchange_1(&_updateLEDs, false, 0)
+                 | forceUpdate;
 
     // Determine if the timer is running
     timer = _timer;

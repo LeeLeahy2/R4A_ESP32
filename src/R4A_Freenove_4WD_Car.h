@@ -182,7 +182,8 @@ class R4A_Freenove_4WD_Car
     // Write the new color values to the WS2812 LEDs
     // Inputs:
     //   currentMsec: Number of milliseconds since boot
-    void ledsUpdate(uint32_t currentMsec);
+    //   forceUpdate: Set true to force an update to the LEDS
+    void ledsUpdate(uint32_t currentMsec, bool forceUpdate = false);
 };
 
 extern R4A_Freenove_4WD_Car r4aFreenove4wdCar;
