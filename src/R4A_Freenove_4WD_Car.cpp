@@ -110,23 +110,32 @@ float R4A_Freenove_4WD_Car::batteryVoltageGet(float offset,
                                               float multiplier,
                                               int16_t * adcValue)
 {
-    bool ws2812LedsInUse;
+    uint32_t previousFunction;
     float voltage;
 
     // Bug: No WS2812 output
-    //      The WS2812 code uses the SPI controller as an output driving
-    //      the shared battery voltage and WS2812 pin (BATTERY_WS2812_PIN).
+    //      The WS2812 code uses a SPI controller routed through the GPIO
+    //      matrix.  The pinMode call below switches the GPIO matrix for
+    //      the ADC pin from the SPI controller to the GPIO controller
+    //      (ADC input).  However setting the pinMode back to output does
+    //      not restore the GPIO matrix value.
     //
-    // Fix: 1.  Output the WS2812 LEDs first if active, this causes any
-    //          glitches on the WS2812 input when reading the battery
-    //          voltage to be sent to non-existant the "13th" WS2812 LED.
-    //      2.  Before reading the battery voltage, switch the battery pin
-    //          from output to input.
-    //      3.  After the battery voltage is read restore the pin as an
-    //          output.
+    // Fix: Share the pin between battery voltage input and WS2812 output
+    //      Save and restore the GPIO mux value.
+    //
+    // Remember the GPIO pin mux value
+    previousFunction = r4aGpioRegs->R4A_GPIO_FUNC_OUT_SEL_CFG_REG[BATTERY_WS2812_PIN];
+
+    // Switch from RMT output for the WS2812 to GPIO input for ADC
+    pinMode(BATTERY_WS2812_PIN, INPUT);
 
     // Read the battery voltage
     voltage = r4aEsp32VoltageGet(BATTERY_WS2812_PIN, offset, multiplier, adcValue);
+
+    // Restore the GPIO pin to an output for the WS2812 and reconnect the
+    // pin to the SPI controller
+    pinMode(BATTERY_WS2812_PIN, OUTPUT);
+    r4aGpioRegs->R4A_GPIO_FUNC_OUT_SEL_CFG_REG[BATTERY_WS2812_PIN] = previousFunction;
     return voltage;
 }
 

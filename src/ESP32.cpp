@@ -308,35 +308,13 @@ void r4aEsp32SystemReset()
 float r4aEsp32VoltageGet(int adcPin, float offset, float multiplier, int16_t * adcValue)
 {
     int averageAdcReading;
-    uint32_t previousFunction;
     float voltage;
-
-    // Bug: No WS2812 output
-    //      The WS2812 code uses the RMT (remote control peripheral) and
-    //      the GPIO mux is making the connection.  The pinMode call below
-    //      switches the GPIO mux for pin 32 from the RMT to the GPIO
-    //      controller.  However setting the pinMode back to output does
-    //      not restore the GPIO mux value.
-    //
-    // Fix: Share the pin between battery voltage input and WS2812 output
-    //      Save and restore the GPIO mux value.
-    //
-    // Remember the GPIO pin mux value
-    previousFunction = r4aGpioRegs->R4A_GPIO_FUNC_OUT_SEL_CFG_REG[adcPin];
-
-    // Switch from RMT output for the WS2812 to GPIO input for ADC
-    pinMode(adcPin, INPUT);
 
     // Read the voltage multiple times and take the average
     averageAdcReading = 0;
     for (int index = 0; index < 8; index++)
         averageAdcReading += analogRead(adcPin);
     averageAdcReading >>= 3;
-
-    // Restore the GPIO pin to an output for the WS2812 and reconnect the
-    // pin to the RMT (remote control peripheral)
-    pinMode(adcPin, r4aEsp32GpioPinMode[adcPin]);
-    r4aGpioRegs->R4A_GPIO_FUNC_OUT_SEL_CFG_REG[adcPin] = previousFunction;
 
     // Return the ADC value
     if (adcValue)
