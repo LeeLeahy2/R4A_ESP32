@@ -5,88 +5,6 @@
 **********************************************************************/
 
 //*********************************************************************
-// Toggle the backup lights
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuBackup(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.backupLightsToggle();
-}
-
-//*********************************************************************
-// Toggle the brake lights
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuBrake(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.brakeLightsToggle();
-}
-
-//*********************************************************************
-// Toggle the headlights
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuHeadlights(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.headlightsToggle();
-}
-
-//*********************************************************************
-// Turn off all the LEDs
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.backupLightsOff();
-    car.brakeLightsOff();
-    car.headlightsOff();
-    car.ledsTurnOff();
-    r4aLEDsOff();
-}
-
-//*********************************************************************
-// Turn left indicator
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuTurnLeft(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.ledsTurnLeft();
-}
-
-
-//*********************************************************************
-// Stop the turn signal blinking
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuTurnOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.ledsTurnOff();
-}
-
-//*********************************************************************
-// Turn right indicator
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuTurnRight(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.ledsTurnRight();
-}
-
-//*********************************************************************
 // Display data before the main menu header
 void mainMenuPre(Print * display)
 {
@@ -166,6 +84,7 @@ const R4A_MENU_ENTRY debugMenuTable[] =
 {
     // Command  menuRoutine                 menuParam       HelpRoutine align   HelpText
     {"h",       r4aEsp32MenuDisplayHeap,    0,              nullptr,    0,      "Display the heap"},
+    {"l",       nullptr,                    MTI_LED,        nullptr,    0,      "Enter the LED menu"},
     {"p",    r4aEsp32MenuDisplayPartitions, 0,              nullptr,    0,      "Display the partitions"},
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
@@ -181,28 +100,10 @@ const R4A_MENU_ENTRY gpioMenuTable[] =
 };
 #define GPIO_MENU_ENTRIES      sizeof(gpioMenuTable) / sizeof(gpioMenuTable[0])
 
-// LED menu
-const R4A_MENU_ENTRY ledMenuTable[] =
-{
-    // Command  menuRoutine         menuParam               HelpRoutine         align   HelpText
-    {"b",       ledMenuBackup,      0,                      nullptr,            0,      "Toggle backup lights"},
-    {"c3",      r4aLEDMenuColor3,   (intptr_t)"ll rrggbb",  r4aMenuHelpSuffix,  9,      "Specify the LED ll color rrggbb (RGB in hex)"},
-    {"c4",      r4aLEDMenuColor4,  (intptr_t)"ll wwrrggbb", r4aMenuHelpSuffix,  11,     "Specify the LED ll color wwrrggbb (RGBW in hex)"},
-    {"d",       r4aLEDMenuDisplay,  0,                      nullptr,            0,      "Display the LED status"},
-    {"h",       ledMenuHeadlights,  0,                      nullptr,            0,      "Toggle headlights"},
-    {"i",      r4aLEDMenuIntensity, (intptr_t)"iii",        r4aMenuHelpSuffix,  4,      "Specify the LED intensity iii (0 - 255)"},
-    {"l",       ledMenuTurnLeft,    0,                      nullptr,            0,      "Turn left"},
-    {"o",       ledMenuTurnOff,     0,                      nullptr,            0,      "Stop the turn signal blinking"},
-    {"off",     ledMenuOff,         0,                      nullptr,            0,      "Turn off all the LEDs"},
-    {"r",       ledMenuTurnRight,   0,                      nullptr,            0,      "Turn right"},
-    {"s",       ledMenuBrake,       0,                      nullptr,            0,      "Toggle brake lights"},
-    {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
-};
-#define LED_MENU_ENTRIES      sizeof(ledMenuTable) / sizeof(ledMenuTable[0])
-
 const R4A_MENU_ENTRY ws2812MenuTable[] =
 {
-    // Command  menuRoutine         menuParam           HelpRoutine align   HelpText
+    // Command  menuRoutine         menuParam           HelpRoutine  align  HelpText
+    {"l",       nullptr,            MTI_LED,                nullptr,    0,  "Enter the LED menu"},
     {"w",      ws2812MenuLedColors, (intptr_t)"rrggbb ...", nullptr,    10, "Enter the WS2812 LED colors in hex (rrggbb)"},
     {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,    0,  "Exit the menu system"},
 };
@@ -228,7 +129,7 @@ const R4A_MENU_TABLE menuTable[] =
     {"Main Menu",       mainMenuPre,    mainMenuTable,      MAIN_MENU_ENTRIES},
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
     {"GPIO Menu",       nullptr,        gpioMenuTable,      GPIO_MENU_ENTRIES},
-    {"LED Menu",        nullptr,        ledMenuTable,       LED_MENU_ENTRIES},
+    {"LED Menu",        nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"WS2812 Menu",     nullptr,        ws2812MenuTable,    WS2812_MENU_ENTRIES},
 };
