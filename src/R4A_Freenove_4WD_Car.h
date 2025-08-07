@@ -202,13 +202,6 @@ extern R4A_Freenove_4WD_Car r4aFreenove4wdCar;
 #define ESP32_WROVER_BLUE_LED_ON        1
 
 //****************************************
-// LED Matrix
-//****************************************
-
-extern const uint8_t r4aLedMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS];
-extern const uint8_t r4aLedMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS];
-
-//****************************************
 // I2C bus configuration
 //****************************************
 
@@ -259,6 +252,69 @@ R4A_ESP32_I2C_BUS esp32I2cBus =                 \
                            16,                                  \
                            8,                                   \
                            15};
+
+//****************************************
+// LED Matrix
+//****************************************
+
+extern const uint8_t r4aLedMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS];
+extern const uint8_t r4aLedMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS];
+
+//****************************************
+// LED Menu
+//****************************************
+
+extern const R4A_MENU_ENTRY r4a4wdCarLedMenuTable[];
+#define R4A_4WD_CAR_LED_MENU_ENTRIES    12
+
+// Toggle the backup lights
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuBackup(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display);
+
+// Toggle the brake lights
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuBrake(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display);
+
+// Toggle the headlights
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuHeadlights(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display);
+
+// Turn off all the LEDs
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display);
+
+// Turn left indicator
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuTurnLeft(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display);
+
+// Stop the turn signal blinking
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuTurnOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display);
+
+// Turn right indicator
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuTurnRight(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display);
 
 //****************************************
 // Line sensors

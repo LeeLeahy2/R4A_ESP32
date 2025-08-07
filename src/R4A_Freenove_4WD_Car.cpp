@@ -420,3 +420,106 @@ void R4A_Freenove_4WD_Car::ledsUpdate(uint32_t currentMsec,
     // Update the LED colors
     r4aLEDUpdate(true);
 }
+
+//*********************************************************************
+// Toggle the backup lights
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuBackup(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
+{
+    car.backupLightsToggle();
+}
+
+//*********************************************************************
+// Toggle the brake lights
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuBrake(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
+{
+    car.brakeLightsToggle();
+}
+
+//*********************************************************************
+// Toggle the headlights
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuHeadlights(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
+{
+    car.headlightsToggle();
+}
+
+//*********************************************************************
+// Turn off all the LEDs
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
+{
+    car.backupLightsOff();
+    car.brakeLightsOff();
+    car.headlightsOff();
+    car.ledsTurnOff();
+    r4aLEDsOff();
+}
+
+//*********************************************************************
+// Turn left indicator
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuTurnLeft(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
+{
+    car.ledsTurnLeft();
+}
+
+//*********************************************************************
+// Stop the turn signal blinking
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuTurnOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
+{
+    car.ledsTurnOff();
+}
+
+//*********************************************************************
+// Turn right indicator
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aLedMenuTurnRight(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
+{
+    car.ledsTurnRight();
+}
+
+//****************************************
+// Menus
+//****************************************
+
+// LED menu
+const R4A_MENU_ENTRY r4a4wdCarLedMenuTable[] =
+{
+    // Command  menuRoutine         menuParam               HelpRoutine         align   HelpText
+    {"b",       r4aLedMenuBackup,   0,                      nullptr,            0,      "Toggle backup lights"},
+    {"c3",      r4aLEDMenuColor3,   (intptr_t)"ll rrggbb",  r4aMenuHelpSuffix,  9,      "Specify the LED ll color rrggbb (RGB in hex)"},
+    {"c4",      r4aLEDMenuColor4,  (intptr_t)"ll wwrrggbb", r4aMenuHelpSuffix,  11,     "Specify the LED ll color wwrrggbb (RGBW in hex)"},
+    {"d",       r4aLEDMenuDisplay,  0,                      nullptr,            0,      "Display the LED status"},
+    {"h",     r4aLedMenuHeadlights, 0,                      nullptr,            0,      "Toggle headlights"},
+    {"i",      r4aLEDMenuIntensity, (intptr_t)"iii",        r4aMenuHelpSuffix,  3,      "Specify the LED intensity iii (0 - 255)"},
+    {"l",       r4aLedMenuTurnLeft, 0,                      nullptr,            0,      "Turn left"},
+    {"o",       r4aLedMenuTurnOff,  0,                      nullptr,            0,      "Stop the turn signal blinking"},
+    {"off",     r4aLedMenuOff,      0,                      nullptr,            0,      "Turn off all the LEDs"},
+    {"r",      r4aLedMenuTurnRight, 0,                      nullptr,            0,      "Turn right"},
+    {"s",       r4aLedMenuBrake,    0,                      nullptr,            0,      "Toggle brake lights"},
+    {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
+};
