@@ -193,6 +193,12 @@ R4A_ROBOT robot;
 R4A_MENU serialMenu;
 
 //****************************************
+// SPI support - WS2812 LEDs
+//****************************************
+
+R4A_4WD_CAR_SPI_WS2812_GLOBALS;
+
+//****************************************
 // WiFi support
 //****************************************
 
@@ -249,6 +255,9 @@ void setup()
 
     // Delay to allow the hardware initialize
     delay(1000);
+
+    // Initialize the SPI controller and WS2812 RGB LEDs
+    R4A_4WD_CAR_SPI_WS2812_SETUP(1);
 
     // Determine if the LED controller is available
     log_v("Calling r4aI2cBusIsDevicePresent");
