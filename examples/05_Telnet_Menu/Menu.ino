@@ -89,6 +89,7 @@ enum MENU_TABLE_INDEX
 {
     MTI_DEBUG = R4A_MENU_MAIN + 1,
     MTI_I2C,
+    MTI_LED,
     MTI_MOTOR,
     MTI_NVM,
     MTI_TELNET,
@@ -100,6 +101,7 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     // Command  menuRoutine                 menuParam       HelpRoutine align   HelpText
     {"h",       r4aEsp32MenuDisplayHeap,    0,              nullptr,    0,      "Display the heap"},
     {"i",       nullptr,                    MTI_I2C,        nullptr,    0,      "I2C menu"},
+    {"l",       nullptr,                    MTI_LED,        nullptr,    0,      "Enter the LED menu"},
     {"m",       nullptr,                    MTI_MOTOR,      nullptr,    0,      "Motor menu"},
     {"p",    r4aEsp32MenuDisplayPartitions, 0,              nullptr,    0,      "Display the partitions"},
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
@@ -142,6 +144,7 @@ const R4A_MENU_TABLE menuTable[] =
     {"Main Menu",       mainMenuPre,    mainMenuTable,      MAIN_MENU_ENTRIES},
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
+    {"LED Menu",        nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
