@@ -133,88 +133,6 @@ void mainMenuPre(Print * display)
 }
 
 //*********************************************************************
-// Toggle the backup lights
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuBackup(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.backupLightsToggle();
-}
-
-//*********************************************************************
-// Toggle the brake lights
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuBrake(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.brakeLightsToggle();
-}
-
-//*********************************************************************
-// Toggle the headlights
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuHeadlights(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.headlightsToggle();
-}
-
-//*********************************************************************
-// Turn off all the LEDs
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.backupLightsOff();
-    car.brakeLightsOff();
-    car.headlightsOff();
-    car.ledsTurnOff();
-    r4aLEDsOff();
-}
-
-//*********************************************************************
-// Turn left indicator
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuTurnLeft(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.ledsTurnLeft();
-}
-
-
-//*********************************************************************
-// Stop the turn signal blinking
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuTurnOff(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.ledsTurnOff();
-}
-
-//*********************************************************************
-// Turn right indicator
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void ledMenuTurnRight(const R4A_MENU_ENTRY * menuEntry, const char * command, Print * display)
-{
-    car.ledsTurnRight();
-}
-
-//*********************************************************************
 // Stop the robot
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry
@@ -355,25 +273,6 @@ const R4A_MENU_ENTRY gpioMenuTable[] =
 };
 #define GPIO_MENU_ENTRIES      sizeof(gpioMenuTable) / sizeof(gpioMenuTable[0])
 
-// LED menu
-const R4A_MENU_ENTRY ledMenuTable[] =
-{
-    // Command  menuRoutine         menuParam               HelpRoutine         align   HelpText
-    {"b",       ledMenuBackup,      0,                      nullptr,            0,      "Toggle backup lights"},
-    {"c3",      r4aLEDMenuColor3,   (intptr_t)"ll rrggbb",  r4aMenuHelpSuffix,  9,      "Specify the LED ll color rrggbb (RGB in hex)"},
-    {"c4",      r4aLEDMenuColor4,  (intptr_t)"ll wwrrggbb", r4aMenuHelpSuffix,  11,     "Specify the LED ll color cccccccc (RGBW in hex)"},
-    {"d",       r4aLEDMenuDisplay,  0,                      nullptr,            0,      "Display the LED status"},
-    {"h",       ledMenuHeadlights,  0,                      nullptr,            0,      "Toggle headlights"},
-    {"i",      r4aLEDMenuIntensity, (intptr_t)"iii",        r4aMenuHelpSuffix,  4,      "Specify the LED intensity iii (0 - 255)"},
-    {"l",       ledMenuTurnLeft,    0,                      nullptr,            0,      "Turn left"},
-    {"o",       ledMenuTurnOff,     0,                      nullptr,            0,      "Stop the turn signal blinking"},
-    {"off",     ledMenuOff,         0,                      nullptr,            0,      "Turn off all the LEDs"},
-    {"r",       ledMenuTurnRight,   0,                      nullptr,            0,      "Turn right"},
-    {"s",       ledMenuBrake,       0,                      nullptr,            0,      "Toggle brake lights"},
-    {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
-};
-#define LED_MENU_ENTRIES      sizeof(ledMenuTable) / sizeof(ledMenuTable[0])
-
 // Robot menu
 const R4A_MENU_ENTRY robotMenuTable[] =
 {
@@ -499,8 +398,7 @@ const R4A_MENU_TABLE menuTable[] =
 #endif  // USE_ZED_F9P
     {"GPIO Menu",       nullptr,        gpioMenuTable,      GPIO_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
-    {"LED Menu",        nullptr,        ledMenuTable,       LED_MENU_ENTRIES},
-//    {"LED Menu",        nullptr,        r4aLEDMenuTable,    R4A_LED_MENU_ENTRIES},
+    {"LED Menu",        nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
 #ifdef  USE_NTRIP
     {"NTRIP Menu",      nullptr,  r4aNtripClientMenuTable,  R4A_NTRIP_CLIENT_MENU_ENTRIES},
