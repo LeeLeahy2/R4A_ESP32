@@ -355,4 +355,60 @@ R4A_PCA9685_SERVO * const r4aPca9685ServoTable[] =  \
 };              \
 const int r4aPca9685ServoTableEntries = sizeof(r4aPca9685ServoTable) / sizeof(r4aPca9685ServoTable[0]);
 
+//****************************************
+// SPI support - WS2812 LEDs
+//****************************************
+
+#define R4A_4WD_CAR_SPI_WS2812_GLOBALS                  \
+/* SPI controller connected to the SPI bus */           \
+R4A_ESP32_SPI_CONTROLLER spiBus =                       \
+{                                                       \
+    {                                                   \
+        1,      /* SPI bus number */                    \
+        -1,     /* SCLK GPIO */                         \
+        BATTERY_WS2812_PIN,   /* MOSI GPIO */           \
+        -1,     /* MISO GPIO  */                        \
+        r4aEsp32SpiTransfer /* SPI transfer routine */  \
+    },                                                  \
+    nullptr,                                            \
+};                                                      \
+                                                        \
+/* WS2812 - RGB LED connected to the SPI bus */         \
+const R4A_SPI_DEVICE ws2812 =                           \
+{                                                       \
+    &spiBus._spiBus, /* SPI bus */                      \
+    4 * 1000 * 1000, /* Clock frequency */              \
+    -1,              /* No chip select pin */           \
+    0,               /* Clock polarity */               \
+    0,               /* Clock phase */                  \
+}
+
+#define R4A_4WD_CAR_SPI_WS2812_SETUP(intensity)             \
+    /* Initialize the SPI controller */                     \
+    log_v("r4aEsp32SpiBegin");                              \
+    if (!r4aEsp32SpiBegin(&spiBus))                         \
+        r4aReportFatalError("Failed to initialize the SPI controller!");    \
+                                                            \
+    /* Select the WS2812 devices on the SPI bus */          \
+    log_v("Calling r4aEsp32SpiDeviceSelect");               \
+    if (!r4aEsp32SpiDeviceSelect(&ws2812))                  \
+        r4aReportFatalError("Failed to select the WS2812 devices on the SPI bus!"); \
+                                                            \
+    /* Initialize the SPI controller for the WD2812 LEDs */ \
+    log_v("Calling r4aLEDSetup");                           \
+    if (!r4aLEDSetup(&ws2812, car.numberOfLEDs))            \
+        r4aReportFatalError("Failed to allocate the SPI device for the WS2812 LEDs!");  \
+                                                            \
+    /* Turn off all of the 3 color LEDs */                  \
+    log_v("Calling car.ledsOff");                           \
+    car.ledsOff();                                          \
+                                                            \
+    /* Reduce the LED intensity */                          \
+    log_v("Calling r4aLEDSetIntensity");                    \
+    r4aLEDSetIntensity(intensity);                          \
+                                                            \
+    /* Set the initial LED values */                        \
+    log_v("Calling r4aLEDUpdate");                          \
+    r4aLEDUpdate(true)
+
 #endif  // __FREENOVE_4WD_CAR_H__
