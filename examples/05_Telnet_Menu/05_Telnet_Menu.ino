@@ -328,8 +328,11 @@ void loop()
     if (r4aWifiSsidPasswordEntries)
     {
         // Check for NTP updates
-        log_v("r4aNtpUpdate");
-        r4aNtpUpdate(r4aWifiStationOnline);
+        if (!r4aNtpIsTimeValid())
+        {
+            log_v("r4aNtpUpdate");
+            r4aNtpUpdate(r4aWifiStationOnline);
+        }
 
         // Notify the telnet server of WiFi changes
         if (previousConnected != r4aWifiStationOnline)
