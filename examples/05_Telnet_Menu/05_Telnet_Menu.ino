@@ -263,6 +263,14 @@ void setup()
     log_v("Calling r4aI2cBusIsDevicePresent");
     vk16k33Present = r4aI2cBusIsDevicePresent(&esp32I2cBus._i2cBus, VK16K33_I2C_ADDRESS);
 
+    // Initialize the VK16K33
+    if (vk16k33Present)
+    {
+        log_v("Calling r4aVk16k33Setup");
+        if (!r4aVk16k33Setup(&vk16k33))
+            r4aReportFatalError("Failed to initialize the VK16K33 LED Matrix controller!");
+    }
+
     // Initialize the PCA9685
     log_d("Calling pca9685.begin");
     pca9685.begin();
