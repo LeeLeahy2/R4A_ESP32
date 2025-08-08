@@ -322,7 +322,7 @@ const R4A_MENU_ENTRY telnetMenuTable[] =
     // Command  menuRoutine     menuParam       HelpRoutine align   HelpText
     {"c",       listClients,    0,              nullptr,    0,      "Client list"},
     {"s",       serverInfo,     0,              nullptr,    0,      "Server information"},
-    {"x",       nullptr,        R4A_MENU_MAIN,  nullptr,    0,      "Exit the menu system"},
+    {"x",       nullptr,        R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define TELNET_MENU_ENTRIES  sizeof(telnetMenuTable) / sizeof(telnetMenuTable[0])
 
