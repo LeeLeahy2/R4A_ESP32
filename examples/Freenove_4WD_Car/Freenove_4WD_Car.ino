@@ -621,6 +621,14 @@ void setupCore0(void *parameter)
     }
 #endif  // USE_SPARKFUN_SEN_13582
 
+    // Initialize the VK16K33
+    if (vk16k33Present)
+    {
+        log_v("Calling r4aVk16k33Setup");
+        if (!r4aVk16k33Setup(&vk16k33))
+            r4aReportFatalError("Failed to initialize the VK16K33 LED Matrix controller!");
+    }
+
     // Initialize the camera
 #ifdef USE_OV2640
     if (ov2640Present)
