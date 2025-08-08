@@ -21,7 +21,7 @@ const uint8_t r4aLedMatrixColumnMap[R4A_VK16K33_MAX_COLUMNS] =
 
 const uint8_t r4aLedMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
 {
-    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
+    0, 1, 2, 3, 4, 5, 6, 7
 };
 
 //****************************************
