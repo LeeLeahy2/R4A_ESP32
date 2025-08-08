@@ -89,10 +89,11 @@ enum MENU_TABLE_INDEX
 {
     MTI_DEBUG = R4A_MENU_MAIN + 1,
     MTI_I2C,
-    MTI_LED,
+    MTI_LED_MATRIX,
     MTI_MOTOR,
     MTI_NVM,
     MTI_TELNET,
+    MTI_WS2812_LED,
 };
 
 // Debug menu
@@ -101,9 +102,10 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     // Command  menuRoutine                 menuParam       HelpRoutine align   HelpText
     {"h",       r4aEsp32MenuDisplayHeap,    0,              nullptr,    0,      "Display the heap"},
     {"i",       nullptr,                    MTI_I2C,        nullptr,    0,      "I2C menu"},
-    {"l",       nullptr,                    MTI_LED,        nullptr,    0,      "Enter the LED menu"},
+    {"l",       nullptr,                    MTI_LED_MATRIX, nullptr,    0,      "LED Matrix menu"},
     {"m",       nullptr,                    MTI_MOTOR,      nullptr,    0,      "Motor menu"},
     {"p",    r4aEsp32MenuDisplayPartitions, 0,              nullptr,    0,      "Display the partitions"},
+    {"w",       nullptr,                    MTI_WS2812_LED, nullptr,    0,      "WS2812 LED menu"},
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define DEBUG_MENU_ENTRIES      sizeof(debugMenuTable) / sizeof(debugMenuTable[0])
@@ -144,9 +146,10 @@ const R4A_MENU_TABLE menuTable[] =
     {"Main Menu",       mainMenuPre,    mainMenuTable,      MAIN_MENU_ENTRIES},
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
-    {"LED Menu",        nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
+    {"LED Matrix Menu", nullptr,       r4aVk16k33MenuTable, R4A_VK16K33_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
+    {"WS2812 LED Menu", nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
 };
 const int menuTableEntries = sizeof(menuTable) / sizeof(menuTable[0]);
