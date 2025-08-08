@@ -92,6 +92,7 @@ enum MENU_TABLE_INDEX
     MTI_LED_MATRIX,
     MTI_MOTOR,
     MTI_NVM,
+    MTI_SERVO,
     MTI_TELNET,
     MTI_WS2812_LED,
 };
@@ -105,6 +106,7 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     {"l",       nullptr,                    MTI_LED_MATRIX, nullptr,    0,      "LED Matrix menu"},
     {"m",       nullptr,                    MTI_MOTOR,      nullptr,    0,      "Motor menu"},
     {"p",    r4aEsp32MenuDisplayPartitions, 0,              nullptr,    0,      "Display the partitions"},
+    {"s",       nullptr,                    MTI_SERVO,      nullptr,    0,      "Servo menu"},
     {"w",       nullptr,                    MTI_WS2812_LED, nullptr,    0,      "WS2812 LED menu"},
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
@@ -149,6 +151,7 @@ const R4A_MENU_TABLE menuTable[] =
     {"LED Matrix Menu", nullptr,       r4aVk16k33MenuTable, R4A_VK16K33_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
+    {"Servo Menu",      nullptr,  r4aPca9685ServoMenuTable, R4A_PCA9685_SERVO_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
     {"WS2812 LED Menu", nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
 };
