@@ -49,6 +49,10 @@ void robotIdle(uint32_t currentMsec)
     {
         previousMsec = currentMsec;
 
+        // Display Idle on the LED matrix
+        if (vk16k33Present)
+            r4aVk16k33DisplayIdle(&vk16k33);
+
         // Read the line sensors
         pcf8574.read(&lineSensors);
         lineSensors &= 7;
