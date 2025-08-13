@@ -12,6 +12,7 @@
 //****************************************
 
 Print * r4aWebServerDebug;
+bool r4aWebServerEnable = true;
 const char * r4aWebServerDownloadArea;
 const char * r4aWebServerNvmArea;
 
@@ -279,10 +280,10 @@ void r4aWebServerStop(R4A_WEB_SERVER * object)
 void r4aWebServerUpdate(R4A_WEB_SERVER * object, bool wifiConnected)
 {
     // Start the web server if necessary
-    if ((!object->_webServer) && wifiConnected)
+    if ((!object->_webServer) && wifiConnected && r4aWebServerEnable)
         r4aWebServerStart(object);
 
     // Stop the web server if necessary
-    if (object->_webServer && (!wifiConnected))
+    if (object->_webServer && ((!wifiConnected) || (!r4aWebServerEnable)))
         r4aWebServerStop(object);
 }

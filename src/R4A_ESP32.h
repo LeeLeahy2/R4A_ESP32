@@ -1070,6 +1070,7 @@ typedef struct _R4A_WEB_SERVER
     httpd_handle_t _webServer;  // HTTP server object
 } R4A_WEB_SERVER;
 
+extern bool r4aWebServerEnable;     // Set true to enable the web server
 extern Print * r4aWebServerDebug;   // Address of a Print object for web server debugging
 extern const char * r4aWebServerDownloadArea;   // Directory path for the download area
 extern const char * r4aWebServerNvmArea;   // Directory path for the NVM download area
