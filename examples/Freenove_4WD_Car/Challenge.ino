@@ -66,4 +66,8 @@ void challengeStop()
         car.headlightsOff();
         car.backupLightsOff();
     }
+
+    // Display halt
+    if (vk16k33Present)
+        r4aVk16k33DisplayHalt(&vk16k33);
 }
