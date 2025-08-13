@@ -48,6 +48,9 @@ void challengeStart()
 // Called when the robot stops
 void challengeStop()
 {
+    // Apply the brakes
+    r4aPca9685MotorBrakeAll();
+
     // Update the lights
     if (robotUseWS2812)
     {
@@ -56,7 +59,4 @@ void challengeStop()
         car.headlightsOff();
         car.backupLightsOff();
     }
-
-    // Apply the brakes
-    r4aPca9685MotorBrakeAll();
 }
