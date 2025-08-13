@@ -21,11 +21,14 @@
 
 #include <hal/ledc_types.h>     // IDF built-in
 
+#include <soc/i2s_struct.h>     // IDF built-in
+
 #include <BluetoothSerial.h>    // ESP32 built-in Library
 
 #include <R4A_Robot.h>          // Robots-For-All robot support
 #include <R4A_I2C.h>            // Robots-For-All I2C support
 #include "R4A_ESP32_GPIO.h"     // Robots-For-All ESP32 GPIO declarations
+#include "R4A_ESP32_I2S.h"      // Robots-For-All ESP32 I2S Controller declarations
 #include "R4A_ESP32_LEDC.h"     // Robots-For-All ESP32 LED Controller declarations
 #include "R4A_ESP32_SPI.h"      // Robots-For-All ESP32 SPI declarations
 #include "R4A_ESP32_Timer.h"    // Robots-For-All ESP32 Timer declarations
@@ -370,6 +373,34 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                          bool enumerate = true,
                          Print * display = &Serial,
                          Print * debug = nullptr);
+
+//****************************************
+// I2S API
+//****************************************
+
+// Display the I2S registers
+// Inputs:
+//   i2sAddress: Address of the I2S controller
+//   display: Device used for debug output
+void r4aEsp32I2sDisplayRegisters(uintptr_t i2sAddress, Print * display = &Serial);
+
+// Display the I2S 0 registers
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32MenuI2s0Display(const R4A_MENU_ENTRY * menuEntry,
+                             const char * command,
+                             Print * display);
+
+// Display the I2S 1 registers
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32MenuI2s1Display(const R4A_MENU_ENTRY * menuEntry,
+                             const char * command,
+                             Print * display);
 
 //****************************************
 // LEDC API
