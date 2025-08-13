@@ -21,6 +21,13 @@ void challengeHalt(const char * errorMessage)
 // Called when the robot starts
 void challengeInit()
 {
+    // Turn off the LED matrix
+    if (vk16k33Present)
+    {
+        r4aVk16k33BufferClear(&vk16k33);
+        r4aVk16k33DisplayPixels(&vk16k33);
+    }
+
     // Update the lights
     if (robotUseWS2812)
     {
