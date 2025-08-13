@@ -121,11 +121,11 @@ extern const char * r4aWifiSoftApPassword;// Password of the soft AP
 //          none = IPAddress((uint32_t)0)
 // Outputs:
 //   Returns true if the soft AP was successfully configured.
-bool r4aWifiSoftApConfiguration(IPAddress ipAddress,
-                                IPAddress subnetMask,
-                                IPAddress firstDhcpAddress,
-                                IPAddress dnsAddress,
-                                IPAddress gateway);
+bool r4aWifiSoftApConfiguration(IPAddress ipAddress = IPAddress(192, 168, 4, 1),
+                                IPAddress subnetMask = IPAddress(192, 255, 255, 0),
+                                IPAddress firstDhcpAddress = IPAddress(192, 168, 4, 32),
+                                IPAddress dnsAddress = IPAddress((uint32_t)0),
+                                IPAddress gateway = IPAddress((uint32_t)0));
 
 // Display the soft AP configuration
 // Inputs:
