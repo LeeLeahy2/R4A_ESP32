@@ -128,10 +128,22 @@ void robotIdle(uint32_t currentMsec)
 
         // Display the line sensors
         car.ledsOff();
-        r4aLEDSetColorRgb(FRONT_L1, lineSensors & 1 ? R4A_LED_YELLOW : R4A_LED_OFF);
-        r4aLEDSetColorRgb(FRONT_L3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
-        r4aLEDSetColorRgb(FRONT_R3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
-        r4aLEDSetColorRgb(FRONT_R1, lineSensors & 4 ? R4A_LED_YELLOW : R4A_LED_OFF);
+        if (sx1509Present)
+        {
+            r4aLEDSetColorRgb(FRONT_L1, lineSensors & 0x02 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_L2, lineSensors & 0x04 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_L3, lineSensors & 0x08 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_R3, lineSensors & 0x10 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_R2, lineSensors & 0x20 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_R1, lineSensors & 0x40 ? R4A_LED_YELLOW : R4A_LED_OFF);
+        }
+        else
+        {
+            r4aLEDSetColorRgb(FRONT_L1, lineSensors & 1 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_L3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_R3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            r4aLEDSetColorRgb(FRONT_R1, lineSensors & 4 ? R4A_LED_YELLOW : R4A_LED_OFF);
+        }
     }
 }
 
