@@ -228,14 +228,20 @@ bool r4aWebServerStart(R4A_WEB_SERVER * object)
                                           error);
             break;
         }
+        if (r4aWebServerDebug)
+            r4aWebServerDebug->printf("Started the web server\r\n");
 
         // Register URI handlers
         if (!object->_registerUriHandlers(object))
             break;
+        if (r4aWebServerDebug)
+            r4aWebServerDebug->printf("Registered URI handlers\r\n");
 
         // Register the error handlers
         if (!object->_registerErrorHandlers(object))
             break;
+        if (r4aWebServerDebug)
+            r4aWebServerDebug->printf("Registered error handlers\r\n");
 
         // Display the web server path
         Serial.printf("Starting web-server: http://%s:%d\r\n",
