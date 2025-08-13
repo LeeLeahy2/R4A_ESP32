@@ -19,11 +19,14 @@
 #include <esp32-hal-i2c.h>      // Built-in
 #include <esp32-hal-spi.h>      // IDF built-in
 
+#include <hal/ledc_types.h>     // IDF built-in
+
 #include <BluetoothSerial.h>    // ESP32 built-in Library
 
 #include <R4A_Robot.h>          // Robots-For-All robot support
 #include <R4A_I2C.h>            // Robots-For-All I2C support
 #include "R4A_ESP32_GPIO.h"     // Robots-For-All ESP32 GPIO declarations
+#include "R4A_ESP32_LEDC.h"     // Robots-For-All ESP32 LED Controller declarations
 #include "R4A_ESP32_SPI.h"      // Robots-For-All ESP32 SPI declarations
 #include "R4A_ESP32_Timer.h"    // Robots-For-All ESP32 Timer declarations
 #include "R4A_WiFi.h"           // Robots-For-All WiFi support
@@ -367,6 +370,92 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                          bool enumerate = true,
                          Print * display = &Serial,
                          Print * debug = nullptr);
+
+//****************************************
+// LEDC API
+//****************************************
+
+// Display a LEDC Channel
+// Inputs:
+//   groupNumber: High speed group (0) or low speed group (1)
+//   channelNumber: Number of the channel (0 - 7)
+//   displayAll: Set to true to display disabled channels
+//   display: Device used for debug output
+//   indent: Zero terminated string to display before the line
+void r4aEsp32LedCChannelDisplay(uint8_t groupNumber,
+                                uint8_t channelNumber,
+                                bool displayAll = false,
+                                Print * display = &Serial,
+                                const char * indent = "");
+
+// Get the LEDC APB_CLOCK frequency in Hz
+// Outputs:
+//   Returns the clock frequency on the APB_CLK input to the mux
+uint32_t r4aEsp32LedCClockHz();
+
+// Display the LED controller state
+// Inputs:
+//   displayAll: Set to true to display disabled channels and reset timers
+//   display: Device used for debug output
+void r4aEsp32LedCDisplay(bool displayAll = false,
+                         Print * display = &Serial);
+
+// Configure a LEDC timer
+// Inputs:
+//   lowSpeedMode: Set true for low speed mode or false for high speed mode
+//   timerNumber: Number of the low speed timer (0 - 3)
+//   clockHz: Target clock speed in Hz
+//   resolutionBits: Number of bits to use in the resolution counter
+//   display: Device used for debug output
+// Outputs:
+//   Returns true if successful and false upon error
+bool r4aEsp32LedCTimerConfig(bool lowSpeedMode,
+                             int timerNumber,
+                             uint32_t clockHz,
+                             uint32_t resolutionBits,
+                             Print * display = &Serial);
+
+// Display a LEDC timer
+// Inputs:
+//   groupNumber: High speed group (0) or low speed group (1)
+//   timerNumber: Number of the low speed timer (0 - 3)
+//   displayAll: Set to true to display reset timers
+//   display: Device used for debug output
+//   indent: Zero terminated string to display before the line
+void r4aEsp32LedCTimerDisplay(uint8_t groupNumber,
+                              uint8_t timerNumber,
+                              bool displayAll = false,
+                              Print * display = &Serial,
+                              const char * indent = "");
+
+// Get the LEDC timer clock frequency
+// Inputs:
+//   groupNumber: High speed group (0) or low speed group (1)
+//   timerNumber: Number of the low speed timer (0 - 3)
+//   display: Device used for debug output
+// Outputs:
+//   Returns the timer's output frequency in Hz
+uint32_t r4aEsp32LedCTimerHz(uint8_t groupNumber,
+                             uint8_t timerNumber,
+                             Print * display);
+
+// Verify the channel number
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32MenuLedCDisplay(const R4A_MENU_ENTRY * menuEntry,
+                             const char * command,
+                             Print * display);
+
+// Display a summary of the LED controller registers
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void r4aEsp32MenuLedCDisplaySummary(const R4A_MENU_ENTRY * menuEntry,
+                                    const char * command,
+                                    Print * display);
 
 //****************************************
 // Memory API
