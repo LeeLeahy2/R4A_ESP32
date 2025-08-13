@@ -205,9 +205,16 @@ extern R4A_Freenove_4WD_Car r4aFreenove4wdCar;
 // I2C bus configuration
 //****************************************
 
+#define R4A_4WD_CAR_I2C_BUS_NUMBER      0
+#define R4A_4WD_CAR_SCCB_BUS_NUMBER     1
+
 // I2C controller pins
 #define I2C_SDA                 13  // I2C data line
 #define I2C_SCL                 14  // I2C clock line
+
+// SCCB (I2C) controller pins
+#define SCCB_SDA                26  // I2C data line
+#define SCCB_SCL                27  // I2C clock line
 
 // I2C addresses
 #define OV2640_I2C_ADDRESS      0x70
@@ -226,17 +233,17 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =  \
 };  \
 const int i2cBusDeviceTableEntries = sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]);
 
-#define USE_I2C_BUS_TABLE   \
-R4A_ESP32_I2C_BUS esp32I2cBus =                 \
-{                                               \
-    {   /* R4A_I2C_BUS */                       \
-        i2cBusDeviceTable,  /* _deviceTable */  \
+#define USE_I2C_BUS_TABLE                           \
+R4A_ESP32_I2C_BUS esp32I2cBus =                     \
+{                                                   \
+    {   /* R4A_I2C_BUS */                           \
+        i2cBusDeviceTable,      /* _deviceTable */  \
         sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), /* _deviceTableEntries */ \
-        {0,},               /* _present */      \
-        false,              /* _enumerated */   \
-    },                                          \
-    0,                      /* _busNumber */    \
-};                                              \
+        {0,},                   /* _present */      \
+        false,                  /* _enumerated */   \
+    },                                              \
+    R4A_4WD_CAR_I2C_BUS_NUMBER, /* _busNumber */    \
+};                                                  \
     R4A_PCA9685 pca9685(&esp32I2cBus._i2cBus, PCA9685_I2C_ADDRESS, 50, 25 * 1000 * 1000);   \
         R4A_PCA9685_SERVO servoPan(&pca9685, 0, 0, 180);        \
         R4A_PCA9685_SERVO servoTilt(&pca9685, 1, 2, 150);       \

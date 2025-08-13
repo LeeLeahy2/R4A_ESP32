@@ -127,12 +127,12 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 R4A_ESP32_I2C_BUS esp32I2cBus =
 {
     {   // R4A_I2C_BUS
-        i2cBusDeviceTable,  // _deviceTable
+        i2cBusDeviceTable,      // _deviceTable
         sizeof(i2cBusDeviceTable) / sizeof(i2cBusDeviceTable[0]), // _deviceTableEntries
-        {0,},               // _present
-        false,              // _enumerated
+        {0,},                   // _present
+        false,                  // _enumerated
     },
-    0,                  // _busNumber
+    R4A_4WD_CAR_I2C_BUS_NUMBER, // _busNumber
 };
 
 R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
@@ -586,6 +586,7 @@ void setupCore0(void *parameter)
                         I2C_SCL,
                         R4A_I2C_FAST_MODE_HZ);
     i2cBus = &esp32I2cBus._i2cBus;
+    r4aI2cBus = i2cBus;
 
     // Allow I2C devices time to power up
     delay(100);
