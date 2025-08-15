@@ -890,33 +890,6 @@ bool r4aEsp32NvmWriteFileString(File &file, const char * string);
 // OV2640 API
 //****************************************
 
-typedef struct _R4A_OV2640_PINS
-{
-    // Control pins
-    int pinReset;
-    int pinPowerDown;
-    int pinXCLK;
-
-    // I2C pins
-    int pinI2cClk;
-    int pinI2cData;
-
-    // Frame synchronization
-    int pinVSYNC;   // High at beginning of frame
-    int pinHREF;    // High during each horizontal line
-    int pinPCLK;    // Pixel clock
-
-    // Image data pins
-    int pinY2;
-    int pinY3;
-    int pinY4;
-    int pinY5;
-    int pinY6;
-    int pinY7;
-    int pinY8;
-    int pinY9;
-} R4A_OV2640_PINS;
-
 // Process the frame buffer
 // Inputs:
 //   object: Address of a R4A_OV2640 data structure
@@ -947,7 +920,7 @@ typedef struct _R4A_OV2640
     uint32_t _clockHz;              // Input clock frequency for the OV2640
     R4A_I2C_BUS * _i2cBus;          // I2C bus to access the OV2640
     R4A_I2C_ADDRESS_t _i2cAddress;  // Address of the OV2640
-    const R4A_OV2640_PINS * _pins;  // ESP32 GPIO pins for the 0V2640 camera
+    const R4A_CAMERA_PINS * _pins;  // ESP32 GPIO pins for the 0V2640 camera
 } R4A_OV2640;
 
 // Display a group of registers
@@ -990,7 +963,6 @@ void r4aOv2640Update(R4A_OV2640 * object,
 esp_err_t r4aOV2640JpegHandler(httpd_req_t *request);
 
 extern bool r4aOv2640JpegDisplayTime;   // Set to true to display the JPEG conversion time
-extern const R4A_OV2640_PINS r4aOV2640Pins; // ESP32 WRover camera pins
 
 //****************************************
 // SPI API

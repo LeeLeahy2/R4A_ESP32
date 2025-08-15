@@ -24,6 +24,36 @@ const uint8_t r4aLedMatrixRowPixelMap[R4A_VK16K33_MAX_ROWS] =
     0, 1, 2, 3, 4, 5, 6, 7
 };
 
+const R4A_CAMERA_PINS r4a4wdCarOv2640Pins =
+{
+    // Control pins
+    -1, // _pinReset
+    -1, // _pinPowerDown
+    21, // _pinXCLK - External clock input
+    -1, // _pinStrobe - Flash control output
+
+    // Serial Camera Control Bus (SCCB/I2C) pins
+    27, // _pinSccbClk
+    26, // _pinSccbData
+
+    // Frame synchronization
+    25, // _pinVSYNC - High at beginning of frame
+    23, // _pinHREF - High during each horizontal line
+    22, // _pinPCLK - Pixel clock output
+
+    // Image data pins
+    -1, // _pinY0
+    -1, // _pinY1
+     4, // _pinY2
+     5, // _pinY3
+    18, // _pinY4
+    19, // _pinY5
+    36, // _pinY6
+    39, // _pinY7
+    34, // _pinY8
+    35, // _pinY9
+};
+
 //****************************************
 // Globals
 //****************************************

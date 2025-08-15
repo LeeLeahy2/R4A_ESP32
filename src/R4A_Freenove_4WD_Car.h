@@ -351,6 +351,12 @@ R4A_PCA9685_MOTOR * const r4aPca9685MotorTable[] =  \
 const int r4aPca9685MotorTableEntries = sizeof(r4aPca9685MotorTable) / sizeof(r4aPca9685MotorTable[0]);
 
 //****************************************
+// OV2640 Camera
+//****************************************
+
+extern const R4A_CAMERA_PINS r4a4wdCarOv2640Pins;
+
+//****************************************
 // Servos
 //****************************************
 

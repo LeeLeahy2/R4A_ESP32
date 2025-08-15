@@ -163,31 +163,31 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
     config.ledc_timer = LEDC_TIMER_0;
 
     // Reset and power down are not supported
-    config.pin_reset = object->_pins->pinReset;
-    config.pin_pwdn = object->_pins->pinPowerDown;
+    config.pin_reset = object->_pins->_pinReset;
+    config.pin_pwdn = object->_pins->_pinPowerDown;
 
     // Clock pin
     config.xclk_freq_hz = 20000000;
-    config.pin_xclk = object->_pins->pinXCLK;
+    config.pin_xclk = object->_pins->_pinXCLK;
 
     // Serial IO pins
-    config.pin_sccb_sda = object->_pins->pinI2cData;
-    config.pin_sccb_scl = object->_pins->pinI2cClk;
+    config.pin_sccb_sda = object->_pins->_pinSccbData;
+    config.pin_sccb_scl = object->_pins->_pinSccbClk;
 
     // Frame synchronization
-    config.pin_vsync = object->_pins->pinVSYNC;
-    config.pin_href = object->_pins->pinHREF;
-    config.pin_pclk = object->_pins->pinPCLK;
+    config.pin_vsync = object->_pins->_pinVSYNC;
+    config.pin_href = object->_pins->_pinHREF;
+    config.pin_pclk = object->_pins->_pinPCLK;
 
     // Data from the camera
-    config.pin_d0 = object->_pins->pinY2;
-    config.pin_d1 = object->_pins->pinY3;
-    config.pin_d2 = object->_pins->pinY4;
-    config.pin_d3 = object->_pins->pinY5;
-    config.pin_d4 = object->_pins->pinY6;
-    config.pin_d5 = object->_pins->pinY7;
-    config.pin_d6 = object->_pins->pinY8;
-    config.pin_d7 = object->_pins->pinY9;
+    config.pin_d0 = object->_pins->_pinY2;
+    config.pin_d1 = object->_pins->_pinY3;
+    config.pin_d2 = object->_pins->_pinY4;
+    config.pin_d3 = object->_pins->_pinY5;
+    config.pin_d4 = object->_pins->_pinY6;
+    config.pin_d5 = object->_pins->_pinY7;
+    config.pin_d6 = object->_pins->_pinY8;
+    config.pin_d7 = object->_pins->_pinY9;
 
     // Select output data format
 //    config.pixel_format = PIXFORMAT_GRAYSCALE;
