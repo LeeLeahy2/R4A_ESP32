@@ -155,97 +155,91 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
                     pixformat_t pixelFormat,
                     Print * display)
 {
+    bool cameraInitialized;
+    camera_config_t config;
     sensor_t * ov2640Camera;
     esp_err_t status;
 
-    camera_config_t config;
-    config.ledc_channel = LEDC_CHANNEL_0;
-    config.ledc_timer = LEDC_TIMER_0;
+    do
+    {
+        cameraInitialized = false;
 
-    // Reset and power down are not supported
-    config.pin_reset = object->_pins->_pinReset;
-    config.pin_pwdn = object->_pins->_pinPowerDown;
+        // Connect the control pins
+        config.pin_reset = object->_pins->_pinReset;
+        config.pin_pwdn = object->_pins->_pinPowerDown;
 
-    // Clock pin
-    config.xclk_freq_hz = 20000000;
-    config.pin_xclk = object->_pins->_pinXCLK;
+        // Configure the LED controller to generate the camera clock
+        config.ledc_channel = LEDC_CHANNEL_0;
+        config.ledc_timer = LEDC_TIMER_0;
+        config.xclk_freq_hz = 20 * 1000 * 1000;
+        config.pin_xclk = object->_pins->_pinXCLK;
 
-    // Serial IO pins
-    config.pin_sccb_sda = object->_pins->_pinSccbData;
-    config.pin_sccb_scl = object->_pins->_pinSccbClk;
+        // Serial SCCB (I2C) pins
+        config.pin_sccb_sda = object->_pins->_pinSccbData;
+        config.pin_sccb_scl = object->_pins->_pinSccbClk;
 
-    // Frame synchronization
-    config.pin_vsync = object->_pins->_pinVSYNC;
-    config.pin_href = object->_pins->_pinHREF;
-    config.pin_pclk = object->_pins->_pinPCLK;
+        // Frame synchronization
+        config.pin_vsync = object->_pins->_pinVSYNC;
+        config.pin_href = object->_pins->_pinHREF;
+        config.pin_pclk = object->_pins->_pinPCLK;
 
-    // Data from the camera
-    config.pin_d0 = object->_pins->_pinY2;
-    config.pin_d1 = object->_pins->_pinY3;
-    config.pin_d2 = object->_pins->_pinY4;
-    config.pin_d3 = object->_pins->_pinY5;
-    config.pin_d4 = object->_pins->_pinY6;
-    config.pin_d5 = object->_pins->_pinY7;
-    config.pin_d6 = object->_pins->_pinY8;
-    config.pin_d7 = object->_pins->_pinY9;
+        // Data from the camera
+        config.pin_d0 = object->_pins->_pinY2;
+        config.pin_d1 = object->_pins->_pinY3;
+        config.pin_d2 = object->_pins->_pinY4;
+        config.pin_d3 = object->_pins->_pinY5;
+        config.pin_d4 = object->_pins->_pinY6;
+        config.pin_d5 = object->_pins->_pinY7;
+        config.pin_d6 = object->_pins->_pinY8;
+        config.pin_d7 = object->_pins->_pinY9;
 
-    // Select output data format
+        // Select output data format
 //    config.pixel_format = PIXFORMAT_GRAYSCALE;
 //    config.pixel_format = PIXFORMAT_JPEG;
-//    config.jpeg_quality = 10;   // 0 - 63, lower numbers are higher quality
+        config.jpeg_quality = 10;
 //    config.pixel_format = PIXFORMAT_RGB565;
 //    config.pixel_format = PIXFORMAT_YUV422;
-    config.pixel_format = pixelFormat;
+        config.pixel_format = pixelFormat;
 
-    // Use PSRAM for frame buffer
-    config.fb_count = 2;
-    config.frame_size = FRAMESIZE_QQVGA;    // 160x120
-//    config.frame_size = FRAMESIZE_QCIF;     // 176x144
-//    config.frame_size = FRAMESIZE_HQVGA;    // 240x176
-//    config.frame_size = FRAMESIZE_240X240;  // 240x240
-//    config.frame_size = FRAMESIZE_QVGA;     // 320x240
-//    config.frame_size = FRAMESIZE_CIF;      // 400x296
-//    config.frame_size = FRAMESIZE_HVGA;     // 480x320
-//    config.frame_size = FRAMESIZE_VGA;      // 640x480
-//    config.frame_size = FRAMESIZE_SVGA;     // 800x600
-//    config.frame_size = FRAMESIZE_XGA;      // 1024x768
-//    config.frame_size = FRAMESIZE_HD;       // 1280x720
-//    config.frame_size = FRAMESIZE_SXGA;     // 1280x1024
-//    config.frame_size = FRAMESIZE_UXGA;     // 1600x1200
+        // Use PSRAM for frame buffer
+        config.fb_count = 2;
+        config.frame_size = FRAMESIZE_QQVGA;    // 160x120
 
-    // When to take the picture
-    config.grab_mode = CAMERA_GRAB_LATEST;
-    config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
+        // When to take the picture
+        config.grab_mode = CAMERA_GRAB_LATEST;
+        config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
 
-    // Initialize the camera
-    status = esp_camera_init(&config);
-    if (status != ESP_OK)
-    {
-        // Display the camera initialization error
-        display->printf("ERROR: Camera setup failed, returned error 0x%x\r\n", status);
-        return false;
-    }
+        // Initialize the camera
+        status = esp_camera_init(&config);
+        if (status != ESP_OK)
+        {
+            // Display the camera initialization error
+            display->printf("ERROR: Camera setup failed, returned error 0x%x\r\n", status);
+            break;
+        }
 
-    // Get the camera structure
-    ov2640Camera = esp_camera_sensor_get();
-    if (!ov2640Camera)
-    {
-        // Display camera structure allocation failure
-        display->println("ERROR: Camera structure allocation failure");
-        return false;
-    }
+        // Get the camera structure
+        ov2640Camera = esp_camera_sensor_get();
+        if (!ov2640Camera)
+        {
+            // Display camera structure allocation failure
+            display->println("ERROR: Camera structure allocation failure");
+            break;
+        }
 
-    // Adjust the image to match what is seen
-    ov2640Camera->set_hmirror(ov2640Camera, 1);
-    ov2640Camera->set_vflip(ov2640Camera, 1);
+        // Adjust the image to match what is seen
+        ov2640Camera->set_hmirror(ov2640Camera, 1);
+        ov2640Camera->set_vflip(ov2640Camera, 1);
 
-    // Adjust the brightness and color saturation
-    ov2640Camera->set_brightness(ov2640Camera, 1);
-    ov2640Camera->set_saturation(ov2640Camera, -2);
-    ov2640Camera->set_agc_gain(ov2640Camera, 30);
-    ov2640Camera->set_awb_gain(ov2640Camera, 1);
-    ov2640Camera->set_gain_ctrl(ov2640Camera, 1);
-    return true;
+        // Adjust the brightness and color saturation
+        ov2640Camera->set_brightness(ov2640Camera, 1);
+        ov2640Camera->set_saturation(ov2640Camera, -2);
+        ov2640Camera->set_agc_gain(ov2640Camera, 30);
+        ov2640Camera->set_awb_gain(ov2640Camera, 1);
+        ov2640Camera->set_gain_ctrl(ov2640Camera, 1);
+        cameraInitialized = true;
+    } while (0);
+    return cameraInitialized;
 }
 
 //*********************************************************************
