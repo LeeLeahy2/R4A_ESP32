@@ -171,9 +171,6 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
             break;
         }
 
-        // Process the frame buffer
-        object->_processWebServerFrameBuffer(object, frameBuffer);
-
         // Build the response header
         httpd_resp_set_type(request, "image/jpeg");
         httpd_resp_set_hdr(request, "Content-Disposition", "inline; filename=capture.jpg");
@@ -184,6 +181,9 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
         snprintf(timestamp, sizeof(timestamp), "%lld.%06ld",
                  frameBuffer->timestamp.tv_sec, frameBuffer->timestamp.tv_usec);
         httpd_resp_set_hdr(request, "X-Timestamp", (const char *)timestamp);
+
+        // Process the frame buffer
+        object->_processWebServerFrameBuffer(object, frameBuffer);
 
         // Send the captured image
         if (frameBuffer->format == PIXFORMAT_JPEG)
