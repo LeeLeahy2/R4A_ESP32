@@ -82,6 +82,25 @@ bool r4aBluetoothIsConnected();
 R4A_BLUETOOTH_STATE_TRANSITION r4aBluetoothUpdate();
 
 //****************************************
+// Camera API
+//****************************************
+
+// Get a register value
+// Inputs:
+//   regAddress: Address of the camera register
+//   display: Device used for output or nullptr
+// Outputs:
+//   Returns the 8-bit register value or -1 upon failure
+int r4aCameraGetRegister(int regAddress, Print * display = nullptr);
+
+// Get the initialization status
+// Inputs:
+//   display: Device used for output or nullptr
+// Outputs:
+//   Returns a sensor_t data structure or nullptr upon failure
+sensor_t * r4aCameraGetSensor(Print * display = nullptr);
+
+//****************************************
 // ESP32 API
 //****************************************
 
