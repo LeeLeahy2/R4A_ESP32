@@ -244,40 +244,50 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
     bool cameraInitialized;
     camera_config_t config;
     sensor_t * ov2640Camera;
+    const R4A_CAMERA_PINS * pins;
     esp_err_t status;
 
     do
     {
         cameraInitialized = false;
 
+        // Get the pins data structure
+        pins = object->_pins;
+        if (pins == nullptr)
+        {
+            if (display)
+                display->printf("ERROR: Camera pins need to be specified!\r\n");
+            break;
+        }
+
         // Connect the control pins
-        config.pin_reset = object->_pins->_pinReset;
-        config.pin_pwdn = object->_pins->_pinPowerDown;
+        config.pin_reset = pins->_pinReset;
+        config.pin_pwdn = pins->_pinPowerDown;
 
-        // Configure the LED controller to generate the camera clock
-        config.ledc_channel = LEDC_CHANNEL_0;
-        config.ledc_timer = LEDC_TIMER_0;
+        // Route a clock signal from the ESP32 to the camera
         config.xclk_freq_hz = 20 * 1000 * 1000;
-        config.pin_xclk = object->_pins->_pinXCLK;
+        config.ledc_timer = LEDC_TIMER_0;
+        config.ledc_channel = LEDC_CHANNEL_0;
+        config.pin_xclk = pins->_pinXCLK;
 
-        // Serial SCCB (I2C) pins
-        config.pin_sccb_sda = object->_pins->_pinSccbData;
-        config.pin_sccb_scl = object->_pins->_pinSccbClk;
+        // Connect and I2C controller to the camera's SCCB pins
+        config.pin_sccb_sda = pins->_pinSccbData;
+        config.pin_sccb_scl = pins->_pinSccbClk;
 
         // Frame synchronization
-        config.pin_vsync = object->_pins->_pinVSYNC;
-        config.pin_href = object->_pins->_pinHREF;
-        config.pin_pclk = object->_pins->_pinPCLK;
+        config.pin_vsync = pins->_pinVSYNC;
+        config.pin_href = pins->_pinHREF;
+        config.pin_pclk = pins->_pinPCLK;
 
-        // Data from the camera
-        config.pin_d0 = object->_pins->_pinY2;
-        config.pin_d1 = object->_pins->_pinY3;
-        config.pin_d2 = object->_pins->_pinY4;
-        config.pin_d3 = object->_pins->_pinY5;
-        config.pin_d4 = object->_pins->_pinY6;
-        config.pin_d5 = object->_pins->_pinY7;
-        config.pin_d6 = object->_pins->_pinY8;
-        config.pin_d7 = object->_pins->_pinY9;
+        // Route the camera data to the ESP32 I2S controller
+        config.pin_d0 = pins->_pinY2;
+        config.pin_d1 = pins->_pinY3;
+        config.pin_d2 = pins->_pinY4;
+        config.pin_d3 = pins->_pinY5;
+        config.pin_d4 = pins->_pinY6;
+        config.pin_d5 = pins->_pinY7;
+        config.pin_d6 = pins->_pinY8;
+        config.pin_d7 = pins->_pinY9;
 
         // Select output data format
 //    config.pixel_format = PIXFORMAT_GRAYSCALE;
@@ -300,7 +310,8 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
         if (status != ESP_OK)
         {
             // Display the camera initialization error
-            display->printf("ERROR: Camera setup failed, returned error 0x%x\r\n", status);
+            if (display)
+                display->printf("ERROR: Camera setup failed, returned error 0x%x\r\n", status);
             break;
         }
 
@@ -323,6 +334,10 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
         ov2640Camera->set_agc_gain(ov2640Camera, 30);
         ov2640Camera->set_awb_gain(ov2640Camera, 1);
         ov2640Camera->set_gain_ctrl(ov2640Camera, 1);
+
+        // Successful initialization
+        if (display)
+            display->println("Camera configuration complete!");
         cameraInitialized = true;
     } while (0);
     return cameraInitialized;
