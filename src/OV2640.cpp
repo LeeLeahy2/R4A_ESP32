@@ -144,6 +144,98 @@ void r4aOv2640DumpRegisters(Print * display)
 }
 
 //*********************************************************************
+// JPEG image web page handler
+esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
+{
+    int64_t endTime;
+    camera_fb_t * frameBuffer;
+    int64_t startTime;
+    esp_err_t status;
+    R4A_OV2640 * object;
+
+    // Get the OV2640 data structure address
+    object = (R4A_OV2640 *)request->user_ctx;
+
+    do
+    {
+        startTime = esp_timer_get_time();
+        frameBuffer = nullptr;
+        status = ESP_FAIL;
+
+        // Allocate the frame buffer
+        frameBuffer = esp_camera_fb_get();
+        if (!frameBuffer)
+        {
+            Serial.println("ERROR: Failed to capture the image");
+            httpd_resp_send_500(request);
+            break;
+        }
+
+        // Process the frame buffer
+        object->_processWebServerFrameBuffer(object, frameBuffer);
+
+        // Build the response header
+        httpd_resp_set_type(request, "image/jpeg");
+        httpd_resp_set_hdr(request, "Content-Disposition", "inline; filename=capture.jpg");
+        httpd_resp_set_hdr(request, "Access-Control-Allow-Origin", "*");
+
+        // Add the timestamp to the header
+        char timestamp[32];
+        snprintf(timestamp, sizeof(timestamp), "%lld.%06ld",
+                 frameBuffer->timestamp.tv_sec, frameBuffer->timestamp.tv_usec);
+        httpd_resp_set_hdr(request, "X-Timestamp", (const char *)timestamp);
+
+        // Send the captured image
+        if (frameBuffer->format == PIXFORMAT_JPEG)
+        {
+            status = httpd_resp_send(request, (const char *)frameBuffer->buf, frameBuffer->len);
+            if (status != ESP_OK)
+                break;
+        }
+        else
+        {
+            // Break the image into multiple chunks
+            R4A_JPEG_CHUNKING_T jchunk = {request, 0};
+            status = frame2jpg_cb(frameBuffer,
+                                  80,
+                                  r4aOv2640SendJpegChunk,
+                                  &jchunk) ? ESP_OK : ESP_FAIL;
+            if (status != ESP_OK)
+                break;
+            status = httpd_resp_send_chunk(request, NULL, 0);
+            if (status != ESP_OK)
+                break;
+        }
+        endTime = esp_timer_get_time();
+        if (r4aOV2640JpegDisplayTime)
+            Serial.printf("JPG: %lu bytes %lu mSec", (uint32_t)(frameBuffer->len),
+                          (uint32_t)((endTime - startTime) / 1000));
+        status = ESP_OK;
+    } while (0);
+
+    // Return the frame buffer
+    if (frameBuffer)
+        esp_camera_fb_return(frameBuffer);
+    return status;
+}
+
+//*********************************************************************
+// Encode the JPEG image
+size_t r4aOv2640SendJpegChunk(void * arg,
+                              size_t index,
+                              const void* data,
+                              size_t len)
+{
+    R4A_JPEG_CHUNKING_T * chunk = (R4A_JPEG_CHUNKING_T *)arg;
+    if (!index)
+        chunk->length = 0;
+    if (httpd_resp_send_chunk(chunk->req, (const char *)data, len) != ESP_OK)
+        return 0;
+    chunk->length += len;
+    return len;
+}
+
+//*********************************************************************
 // Initialize the camera
 bool r4aOv2640Setup(R4A_OV2640 * object,
                     pixformat_t pixelFormat,
@@ -253,98 +345,4 @@ void r4aOv2640Update(R4A_OV2640 * object,
 
     // Return the frame buffer
     esp_camera_fb_return(frameBuffer);
-}
-
-//*********************************************************************
-// Encode the JPEG image
-size_t r4aOV2640SendJpegChunk(void * arg,
-                              size_t index,
-                              const void* data,
-                              size_t len)
-{
-    R4A_JPEG_CHUNKING_T * chunk = (R4A_JPEG_CHUNKING_T *)arg;
-    if(!index){
-        chunk->length = 0;
-    }
-    if(httpd_resp_send_chunk(chunk->req, (const char *)data, len) != ESP_OK){
-        return 0;
-    }
-    chunk->length += len;
-    return len;
-}
-
-//*********************************************************************
-// JPEG image web page handler
-esp_err_t r4aOV2640JpegHandler(httpd_req_t *request)
-{
-    int64_t endTime;
-    camera_fb_t * frameBuffer;
-    int64_t startTime;
-    esp_err_t status;
-    R4A_OV2640 * object;
-
-    // Get the OV2640 data structure address
-    object = (R4A_OV2640 *)request->user_ctx;
-
-    do
-    {
-        startTime = esp_timer_get_time();
-        frameBuffer = nullptr;
-        status = ESP_FAIL;
-
-        // Allocate the frame buffer
-        frameBuffer = esp_camera_fb_get();
-        if (!frameBuffer)
-        {
-            Serial.println("ERROR: Failed to capture the image");
-            httpd_resp_send_500(request);
-            break;
-        }
-
-        // Process the frame buffer
-        object->_processWebServerFrameBuffer(object, frameBuffer);
-
-        // Build the response header
-        httpd_resp_set_type(request, "image/jpeg");
-        httpd_resp_set_hdr(request, "Content-Disposition", "inline; filename=capture.jpg");
-        httpd_resp_set_hdr(request, "Access-Control-Allow-Origin", "*");
-
-        // Add the timestamp to the header
-        char timestamp[32];
-        snprintf(timestamp, sizeof(timestamp), "%lld.%06ld",
-                 frameBuffer->timestamp.tv_sec, frameBuffer->timestamp.tv_usec);
-        httpd_resp_set_hdr(request, "X-Timestamp", (const char *)timestamp);
-
-        // Send the captured image
-        if (frameBuffer->format == PIXFORMAT_JPEG)
-        {
-            status = httpd_resp_send(request, (const char *)frameBuffer->buf, frameBuffer->len);
-            if (status != ESP_OK)
-                break;
-        }
-        else
-        {
-            // Break the image into multiple chunks
-            R4A_JPEG_CHUNKING_T jchunk = {request, 0};
-            status = frame2jpg_cb(frameBuffer,
-                                  80,
-                                  r4aOV2640SendJpegChunk,
-                                  &jchunk) ? ESP_OK : ESP_FAIL;
-            if (status != ESP_OK)
-                break;
-            status = httpd_resp_send_chunk(request, NULL, 0);
-            if (status != ESP_OK)
-                break;
-        }
-        endTime = esp_timer_get_time();
-        if (r4aOV2640JpegDisplayTime)
-            Serial.printf("JPG: %lu bytes %lu mSec", (uint32_t)(frameBuffer->len),
-                          (uint32_t)((endTime - startTime) / 1000));
-        status = ESP_OK;
-    } while (0);
-
-    // Return the frame buffer
-    if (frameBuffer)
-        esp_camera_fb_return(frameBuffer);
-    return status;
 }

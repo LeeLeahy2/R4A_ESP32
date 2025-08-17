@@ -956,6 +956,26 @@ void r4aOv2640DisplayRegisters(uint8_t firstRegister,
 //   display: Address of Print object for output
 void r4aOv2640DumpRegisters(Print * display = &Serial);
 
+// Return a webpage to the requester containing a JPEG image
+// Inputs:
+//   request: Request from the browser
+// Outputs:
+//   Returns operation status
+esp_err_t r4aOv2640JpegHandler(httpd_req_t *request);
+
+// Encode the JPEG image
+// Inputs:
+//   arg: Address of a R4A_JPEG_CHUNKING_T data structure
+//   index: Chunk number, zero is the first chunk number
+//   data: Address of the data to send
+//   len: Number of data bytes to send
+// Outputs:
+//   Returns the number of bytes sent
+size_t r4aOv2640SendJpegChunk(void * arg,
+                              size_t index,
+                              const void* data,
+                              size_t len);
+
 // Initialize the camera
 // Inputs:
 //   object: Address of a R4A_OV2640 data structure
@@ -971,11 +991,6 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
 //   display: Address of Print object for debug output, may be nullptr
 void r4aOv2640Update(R4A_OV2640 * object,
                      Print * display = nullptr);
-
-// Return a webpage to the requester containing a JPEG image
-// Inputs:
-//   request: Request from the browser
-esp_err_t r4aOV2640JpegHandler(httpd_req_t *request);
 
 extern bool r4aOv2640JpegDisplayTime;   // Set to true to display the JPEG conversion time
 
