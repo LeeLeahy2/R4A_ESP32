@@ -151,10 +151,10 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
     camera_fb_t * frameBuffer;
     int64_t startTime;
     esp_err_t status;
-    R4A_OV2640 * object;
+    R4A_OV2640_SETUP * ov2640Parameters;
 
     // Get the OV2640 data structure address
-    object = (R4A_OV2640 *)request->user_ctx;
+    ov2640Parameters = (R4A_OV2640_SETUP *)request->user_ctx;
 
     do
     {
@@ -183,7 +183,8 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
         httpd_resp_set_hdr(request, "X-Timestamp", (const char *)timestamp);
 
         // Process the frame buffer
-        object->_processWebServerFrameBuffer(object, frameBuffer);
+        if (ov2640Parameters && (ov2640Parameters->_processWebServerFrameBuffer))
+            ov2640Parameters->_processWebServerFrameBuffer(frameBuffer, &Serial);
 
         // Send the captured image
         if (frameBuffer->format == PIXFORMAT_JPEG)
@@ -237,8 +238,7 @@ size_t r4aOv2640SendJpegChunk(void * arg,
 
 //*********************************************************************
 // Initialize the camera
-bool r4aOv2640Setup(R4A_OV2640 * object,
-                    pixformat_t pixelFormat,
+bool r4aOv2640Setup(const R4A_OV2640_SETUP * ov2640Parameters,
                     Print * display)
 {
     bool cameraInitialized;
@@ -252,7 +252,7 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
         cameraInitialized = false;
 
         // Get the pins data structure
-        pins = object->_pins;
+        pins = ov2640Parameters->_pins;
         if (pins == nullptr)
         {
             if (display)
@@ -265,9 +265,9 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
         config.pin_pwdn = pins->_pinPowerDown;
 
         // Route a clock signal from the ESP32 to the camera
-        config.xclk_freq_hz = 20 * 1000 * 1000;
-        config.ledc_timer = LEDC_TIMER_0;
-        config.ledc_channel = LEDC_CHANNEL_0;
+        config.xclk_freq_hz = ov2640Parameters->_clockHz;
+        config.ledc_timer = ov2640Parameters->_ledcTimer;
+        config.ledc_channel = ov2640Parameters->_ledcChannel;
         config.pin_xclk = pins->_pinXCLK;
 
         // Connect and I2C controller to the camera's SCCB pins
@@ -289,17 +289,15 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
         config.pin_d6 = pins->_pinY8;
         config.pin_d7 = pins->_pinY9;
 
-        // Select output data format
-//    config.pixel_format = PIXFORMAT_GRAYSCALE;
-//    config.pixel_format = PIXFORMAT_JPEG;
-        config.jpeg_quality = 10;
-//    config.pixel_format = PIXFORMAT_RGB565;
-//    config.pixel_format = PIXFORMAT_YUV422;
-        config.pixel_format = pixelFormat;
+        // Select the pixel format sent over the I2S bus (camera --> ESP32)
+        config.pixel_format = ov2640Parameters->_pixelFormat;
+        config.jpeg_quality = ov2640Parameters->_jpegQuality;
 
-        // Use PSRAM for frame buffer
-        config.fb_count = 2;
-        config.frame_size = FRAMESIZE_QQVGA;    // 160x120
+        // Select the frame size
+        config.frame_size = ov2640Parameters->_frameSize;
+
+        // Select the number of frame buffers
+        config.fb_count = ov2640Parameters->_frameBufferCount;
 
         // When to take the picture
         config.grab_mode = CAMERA_GRAB_LATEST;
@@ -345,19 +343,22 @@ bool r4aOv2640Setup(R4A_OV2640 * object,
 
 //*********************************************************************
 // Update the camera processing state
-void r4aOv2640Update(R4A_OV2640 * object,
+void r4aOv2640Update(R4A_OV2640_SETUP * ov2640Parameters,
                      Print * display)
 {
     camera_fb_t * frameBuffer;
 
-    // Get a frame buffer
-    frameBuffer = esp_camera_fb_get();
-    if (!frameBuffer)
-        return;
+    if (ov2640Parameters->_processFrameBuffer)
+    {
+        // Get a frame buffer
+        frameBuffer = esp_camera_fb_get();
+        if (!frameBuffer)
+            return;
 
-    // Process the frame buffer
-    object->_processFrameBuffer(object, frameBuffer, display);
+        // Process the frame buffer
+        ov2640Parameters->_processFrameBuffer(frameBuffer, display);
 
-    // Return the frame buffer
-    esp_camera_fb_return(frameBuffer);
+        // Return the frame buffer
+        esp_camera_fb_return(frameBuffer);
+    }
 }

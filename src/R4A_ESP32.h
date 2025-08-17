@@ -911,36 +911,37 @@ bool r4aEsp32NvmWriteFileString(File &file, const char * string);
 
 // Process the frame buffer
 // Inputs:
-//   object: Address of a R4A_OV2640 data structure
 //   frameBuffer: Buffer containing the raw image data
 //   display: Address of Print object for output
 // Outputs:
 //   Returns true if the processing was successful and false upon error
-typedef bool (* R4A_OV2640_PROCESS_FRAME_BUFFER)(struct _R4A_OV2640 * object,
-                                                 camera_fb_t * frameBuffer,
+typedef bool (* R4A_OV2640_PROCESS_FRAME_BUFFER)(camera_fb_t * frameBuffer,
                                                  Print * display);
 
 // Process the web server's frame buffer
 // Inputs:
-//   object: Address of a R4A_OV2640 data structure
 //   frameBuffer: Buffer containing the raw image data
+//   display: Address of Print object for output
 // Outputs:
 //   Returns true if the processing was successful and false upon error
-typedef bool (* R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER)(struct _R4A_OV2640 * object,
-                                                            camera_fb_t * frameBuffer);
+typedef bool (* R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER)(camera_fb_t * frameBuffer,
+                                                            Print * display);
 
-// OV2640 data structure declaration
-typedef struct _R4A_OV2640
+// OV2640 setup data structure declaration
+typedef struct _R4A_OV2640_SETUP
 {
-    // Constants, DO NOT MODIFY, set during structure initialization
     R4A_OV2640_PROCESS_FRAME_BUFFER _processFrameBuffer;
     R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER _processWebServerFrameBuffer;
-
-    uint32_t _clockHz;              // Input clock frequency for the OV2640
-    R4A_I2C_BUS * _i2cBus;          // I2C bus to access the OV2640
-    R4A_I2C_ADDRESS_t _i2cAddress;  // Address of the OV2640
     const R4A_CAMERA_PINS * _pins;  // ESP32 GPIO pins for the 0V2640 camera
-} R4A_OV2640;
+    uint32_t _clockHz;              // Input clock frequency for the OV2640
+    ledc_timer_t _ledcTimer;        // Timer producing the 2x clock frequency
+    ledc_channel_t _ledcChannel;    // Channel dividing the clock frequency to 1x
+    R4A_I2C_ADDRESS_t _i2cAddress;  // Address of the OV2640
+    int _jpegQuality;               // Value for JPEG quality
+    pixformat_t _pixelFormat;       // Value specifying the pixel format
+    framesize_t _frameSize;         // Value specifying the frame size
+    uint8_t _frameBufferCount;      // Number of frame buffers to allocate
+} R4A_OV2640_SETUP;
 
 // Display a group of registers
 // Inputs:
@@ -978,19 +979,20 @@ size_t r4aOv2640SendJpegChunk(void * arg,
 
 // Initialize the camera
 // Inputs:
-//   object: Address of a R4A_OV2640 data structure
-//   pixelFormat: Pixel format to use for the image
+//   parameters: Address of a R4A_OV2640_SETUP data structure
 //   display: Address of Print object for debug output, may be nullptr
-bool r4aOv2640Setup(R4A_OV2640 * object,
-                    pixformat_t pixelFormat,
-                    Print * display = nullptr);
+// Outputs:
+//   Returns true upon success and false upon failure
+bool r4aOv2640Setup(const R4A_OV2640_SETUP * parameters,
+                    Print * display = &Serial);
 
 // Update the camera processing state
 // Inputs:
-//   object: Address of a R4A_OV2640 data structure
 //   display: Address of Print object for debug output, may be nullptr
-void r4aOv2640Update(R4A_OV2640 * object,
-                     Print * display = nullptr);
+void r4aOv2640Update(Print * display = nullptr);
+
+// Verify the camera tables
+void r4aEsp32Ov2640VerifyTables();
 
 extern bool r4aOv2640JpegDisplayTime;   // Set to true to display the JPEG conversion time
 

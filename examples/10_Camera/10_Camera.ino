@@ -26,13 +26,6 @@
 #include "Parameters.h"
 
 //****************************************
-// Camera
-//****************************************
-
-#define CAMERA_MODEL_WROVER_KIT
-#include "camera_pins.h"
-
-//****************************************
 // I2C bus configuration
 //****************************************
 
@@ -47,6 +40,29 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 
 extern const R4A_MENU_TABLE menuTable[];
 extern const int menuTableEntries;
+
+//****************************************
+// OV2640 Camera
+//****************************************
+
+// Forward routines
+bool ov2640ProcessFrameBuffer(camera_fb_t * frameBuffer, Print * display);
+bool ov2640ProcessWebServerFrameBuffer(camera_fb_t * frameBuffer, Print * display);
+
+const R4A_OV2640_SETUP ov2640Parameters =
+{
+    ov2640ProcessFrameBuffer,
+    ov2640ProcessWebServerFrameBuffer,
+    &r4a4wdCarOv2640Pins,   // ESP32 GPIO pins for the 0V2640 camera
+    20 * 1000 * 1000,       // Input clock frequency for the OV2640
+    LEDC_TIMER_0,           // Timer producing the 2x clock frequency
+    LEDC_CHANNEL_0,         // Channel dividing the clock frequency to 1x
+    OV2640_I2C_ADDRESS,     // Device address of the OV2640 on the SCCB bus
+    10,                     // Value for JPEG quality
+    PIXFORMAT_JPEG,         // Value specifying the pixel format
+    FRAMESIZE_CIF,          // Value specifying the frame size
+    1                       // Number of frame buffers to allocate
+};
 
 //****************************************
 // Serial menu support
@@ -135,8 +151,8 @@ void setup()
     r4aI2cBus = &esp32I2cBus._i2cBus;
 
     // Initialize the camera
-    log_d("Calling cameraSetup");
-    ov2640Setup();
+    log_d("Calling r4aOv2640Setup");
+    r4aOv2640Setup(&ov2640Parameters);
 
     disableCore0WDT();
 }
