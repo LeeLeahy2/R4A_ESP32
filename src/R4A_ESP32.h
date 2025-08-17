@@ -85,6 +85,38 @@ R4A_BLUETOOTH_STATE_TRANSITION r4aBluetoothUpdate();
 // Camera API
 //****************************************
 
+typedef struct _R4A_FRAME_SIZE_TO_FORMAT
+{
+    framesize_t _frameSize;
+    R4A_FRAME_SIZE_t _r4aFrameFormat;
+} R4A_FRAME_SIZE_TO_FORMAT;
+
+typedef struct _R4A_PIXEL_FORMAT_TO_FORMAT
+{
+    pixformat_t _pixelFormat;
+    R4A_PIXEL_FORMAT_t _r4aPixelFormat;
+} R4A_PIXEL_FORMAT_TO_FORMAT;
+
+extern const R4A_FRAME_SIZE_TO_FORMAT r4aCameraFrameFormat[];
+extern const int r4aCameraFrameFormatEntries;
+
+extern const R4A_PIXEL_FORMAT_TO_FORMAT r4aCameraPixelFormat[];
+extern const int r4aCameraPixelFormatEntries;
+
+// Lookup the frame size details
+// Inputs:
+//   frameSize: ESP32 frame size value
+// Outputs:
+//   Returns a R4A_CAMERA_FRAME address or nullptr upon failure
+const R4A_CAMERA_FRAME * r4aCameraFindFrameDetails(framesize_t frameSize);
+
+// Lookup the pixel format details
+// Inputs:
+//   pixelFormat: ESP32 pixel format value
+// Outputs:
+//   Returns a R4A_CAMERA_PIXEL address or nullptr upon failure
+const R4A_CAMERA_PIXEL * r4aCameraFindPixelDetails(pixformat_t pixelFormat);
+
 // Get a register value
 // Inputs:
 //   regAddress: Address of the camera register
@@ -99,6 +131,9 @@ int r4aCameraGetRegister(int regAddress, Print * display = nullptr);
 // Outputs:
 //   Returns a sensor_t data structure or nullptr upon failure
 sensor_t * r4aCameraGetSensor(Print * display = nullptr);
+
+// Verify the camera tables
+void r4aEsp32CameraVerifyTables();
 
 //****************************************
 // ESP32 API

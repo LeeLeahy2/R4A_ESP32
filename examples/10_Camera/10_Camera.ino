@@ -128,8 +128,8 @@ void setup()
     Serial.printf("%s\r\n", __FILE__);
 
     // Verify the tables
-    log_d("Calling r4aCameraVerifyTables");
-    r4aCameraVerifyTables();
+    log_d("Calling r4aEsp32CameraVerifyTables");
+    r4aEsp32CameraVerifyTables();
 
     // Get the parameters
     log_d("Calling r4aEsp32NvmGetParameters");
