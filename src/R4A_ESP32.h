@@ -944,21 +944,17 @@ typedef struct _R4A_OV2640
 
 // Display a group of registers
 // Inputs:
-//   object: Address of a R4A_OV2640 data structure
 //   firstRegister: The register address of the first register to be displayed
 //   bytesToRead: The number of registers to display
 //   display: Address of Print object for output
-void r4aOv2640DisplayRegisters(R4A_OV2640 * object,
-                               uint8_t firstRegister,
+void r4aOv2640DisplayRegisters(uint8_t firstRegister,
                                size_t bytesToRead,
-                               Print * display);
+                               Print * display = &Serial);
 
 // Dump all of the OV2640 registers in hexadecimal
 // Inputs:
-//   object: Address of a R4A_OV2640 data structure
 //   display: Address of Print object for output
-void r4aOv2640DumpRegisters(R4A_OV2640 * object,
-                            Print * display);
+void r4aOv2640DumpRegisters(Print * display = &Serial);
 
 // Initialize the camera
 // Inputs:

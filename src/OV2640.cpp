@@ -17,12 +17,14 @@ bool r4aOV2640JpegDisplayTime;  // Set to true to display the JPEG conversion ti
 
 //*********************************************************************
 // Display a group of registers
-void r4aOv2640DisplayRegisters(R4A_OV2640 * object,
-                               uint8_t firstRegister,
+void r4aOv2640DisplayRegisters(uint8_t firstRegister,
                                size_t bytesToRead,
                                Print * display)
 {
     uint8_t data[256];
+    uint32_t offset;
+    uint8_t regAddress;
+    int value;
 
     do
     {
@@ -33,28 +35,21 @@ void r4aOv2640DisplayRegisters(R4A_OV2640 * object,
             break;
         }
 
-        // Send the first register number to the camera
-        if (r4aI2cBusWrite(object->_i2cBus,
-                           object->_i2cAddress,
-                           &firstRegister,
-                           sizeof(firstRegister),
-                           display) == false)
+        // Read the register values
+        regAddress = firstRegister;
+        for (offset = 0; offset < bytesToRead; offset++)
         {
-            display->printf("ERROR: Failed to write first register 0x%02x\r\n", firstRegister);
-            break;
+            value = r4aCameraGetRegister(regAddress, nullptr);
+            if (value < 0)
+            {
+                if (display)
+                    display->printf("ERROR: Failed to read register 0x%02x\r\n", regAddress);
+                break;
+            }
+            data[offset] = (uint8_t)value;
         }
-
-        // Read the bytes from the camera
-        if (r4aI2cBusRead(object->_i2cBus,
-                          object->_i2cAddress,
-                          data,
-                          bytesToRead,
-                          nullptr,
-                          display) == false)
-        {
-            display->printf("ERROR: Failed to read register 0x%02x\r\n", firstRegister);
+        if (value < 0)
             break;
-        }
 
         // Display the bytes
         r4aDumpBuffer(firstRegister, data, bytesToRead, display);
@@ -63,8 +58,7 @@ void r4aOv2640DisplayRegisters(R4A_OV2640 * object,
 
 //*********************************************************************
 // Dump all of the OV2640 registers in hexadecimal
-void r4aOv2640DumpRegisters(R4A_OV2640 * object,
-                            Print * display)
+void r4aOv2640DumpRegisters(Print * display)
 {
     size_t bytesToRead;
     uint32_t offset;
@@ -81,67 +75,67 @@ void r4aOv2640DumpRegisters(R4A_OV2640 * object,
         // Display register 5
         offset = 5;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0x44
         offset = 0x44;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0x50 - 0x57
         offset = 0x50;
         bytesToRead = 8;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0x5a - 0x57c
         offset = 0x5a;
         bytesToRead = 3;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0x7c - 0x7d
         offset = 0x7c;
         bytesToRead = 2;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0x86 - 0x87
         offset = 0x86;
         bytesToRead = 2;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0x8c
         offset = 0x8c;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0xc0 - 0xc3
         offset = 0xc0;
         bytesToRead = 4;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0xd3
         offset = 0xd3;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0xda
         offset = 0xda;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0xe0
         offset = 0xe0;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0xf0
         offset = 0xf0;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display register 0xf7
         offset = 0xf7;
         bytesToRead = 1;
-        r4aOv2640DisplayRegisters(object, offset, bytesToRead, display);
+        r4aOv2640DisplayRegisters(offset, bytesToRead, display);
 
         // Display the offset header
         display->println("            -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  ----------------");
