@@ -57,6 +57,18 @@ const httpd_uri_t webServerFileDownloadUri =
     .supported_subprotocol = nullptr,
 };
 
+// URI handler for getting OV2640 details
+const httpd_uri_t webServerOv2640DetailsUri =
+{
+    .uri       = "/OV2640",
+    .method    = HTTP_GET,
+    .handler   = r4aOv2640WebPage,
+    .user_ctx  = (void *)&webServer,
+    .is_websocket = true,
+    .handle_ws_control_frames = false,
+    .supported_subprotocol = nullptr,
+};
+
 //*********************************************************************
 // Register the URI handlers
 // Inputs:
@@ -86,6 +98,15 @@ bool webServerRegisterUriHandlers(R4A_WEB_SERVER * object)
         {
             if (r4aWebServerDebug)
                 r4aWebServerDebug->printf("ERROR: Failed to register JPEG handler, error: %d!\r\n", error);
+            break;
+        }
+
+        // Add the OV2640 details page
+        error = httpd_register_uri_handler(object->_webServer, &webServerOv2640DetailsUri);
+        if (error != ESP_OK)
+        {
+            if (r4aWebServerDebug)
+                r4aWebServerDebug->printf("ERROR: Failed to register OV2640 details page, error: %d!\r\n", error);
             break;
         }
 

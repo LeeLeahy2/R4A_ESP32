@@ -48,6 +48,9 @@ extern const char * const r4aIoMuxFunctionNames[][8];
 extern const uint8_t r4aIoMuxIsGpio[];
 extern const R4A_GPIO_MATRIX r4aGpioMatrixNames[];
 
+// Create a bit mask for a supported value
+#define SUPPORTED(x)        (1 << x)
+
 //****************************************
 // Bluetooth
 //****************************************
@@ -1029,7 +1032,18 @@ void r4aOv2640Update(Print * display = nullptr);
 // Verify the camera tables
 void r4aEsp32Ov2640VerifyTables();
 
+// Build web page describing the OV2640
+// Inputs:
+//   request: Address of a httpd_req_t data structure
+// Outputs:
+//   Returns the request processing status
+esp_err_t r4aOv2640WebPage(httpd_req_t *request);
+
 extern bool r4aOv2640JpegDisplayTime;   // Set to true to display the JPEG conversion time
+
+// Supported frame sizes and pixel formats
+extern const R4A_FRAME_SIZE_MASK_t r4aOv2640SupportedFrameSizes;
+extern const R4A_PIXEL_FORMAT_MASK_t r4aOv2640SupportedPixelFormats;
 
 //****************************************
 // SPI API

@@ -8,6 +8,41 @@
 #include "R4A_ESP32.h"
 
 //****************************************
+// Constants
+//****************************************
+
+const R4A_FRAME_SIZE_MASK_t r4aOv2640SupportedFrameSizes = 0
+//    | SUPPORTED(FRAMESIZE_96X96)    //   96 x   96
+    | SUPPORTED(FRAMESIZE_QQVGA)    //  160 x  120
+    | SUPPORTED(FRAMESIZE_128X128)  //  128 x  128
+    | SUPPORTED(FRAMESIZE_QCIF)     //  176 x  144
+    | SUPPORTED(FRAMESIZE_HQVGA)    //  240 x  176
+    | SUPPORTED(FRAMESIZE_240X240)  //  240 x  240
+    | SUPPORTED(FRAMESIZE_QVGA)     //  320 x  240
+//    | SUPPORTED(FRAMESIZE_320X320)  //  320 x  320
+    | SUPPORTED(FRAMESIZE_CIF)      //  400 x  296
+    | SUPPORTED(FRAMESIZE_HVGA)     //  480 x  320
+    | SUPPORTED(FRAMESIZE_VGA)      //  640 x  480
+    | SUPPORTED(FRAMESIZE_SVGA)     //  800 x  600
+    | SUPPORTED(FRAMESIZE_XGA)      // 1024 x  768
+    | SUPPORTED(FRAMESIZE_HD)       // 1200 x  720
+    | SUPPORTED(FRAMESIZE_SXGA)     // 1280 x 1024
+    | SUPPORTED(FRAMESIZE_UXGA)     // 1600 x 1200
+;
+
+const R4A_PIXEL_FORMAT_MASK_t r4aOv2640SupportedPixelFormats = 0
+    | SUPPORTED(R4A_PIXEL_FORMAT_GRAYSCALE)
+    | SUPPORTED(R4A_PIXEL_FORMAT_JPEG)
+    | SUPPORTED(R4A_PIXEL_FORMAT_RAW)
+    | SUPPORTED(R4A_PIXEL_FORMAT_RGB444)
+    | SUPPORTED(R4A_PIXEL_FORMAT_RGB555)
+    | SUPPORTED(R4A_PIXEL_FORMAT_RGB565)
+    | SUPPORTED(R4A_PIXEL_FORMAT_RGB888)
+    | SUPPORTED(R4A_PIXEL_FORMAT_YUV420)
+    | SUPPORTED(R4A_PIXEL_FORMAT_YUV422)
+;
+
+//****************************************
 // Locals
 //****************************************
 
@@ -339,6 +374,148 @@ bool r4aOv2640Setup(const R4A_OV2640_SETUP * ov2640Parameters,
         cameraInitialized = true;
     } while (0);
     return cameraInitialized;
+}
+
+//*********************************************************************
+// Build the OV2640 details web page
+esp_err_t r4aOv2640WebPage(httpd_req_t *request)
+{
+    sensor_t * sensor;
+    String webPage("");
+
+    // Build the web page
+    webPage += "<!DOCTYPE html>";
+    webPage += "<html lang=\"en\">";
+    webPage += "<head>";
+    webPage += "<meta charset=\"utf-8\">";
+    webPage += "<title>OV2640 Details</title>";
+    webPage += "</head>";
+    webPage += "<body>";
+    webPage += "<h1>OV2640 Details</h1>";
+    webPage += "<p>Supported frame sizes:";
+    if (r4aOv2640SupportedFrameSizes == 0)
+        webPage += " None</p>";
+    else
+    {
+        webPage += "</p>";
+        webPage += "<ul>";
+        for (int index = 0; index < (sizeof(r4aOv2640SupportedFrameSizes) << 2); index++)
+            if (r4aOv2640SupportedFrameSizes & (1 << index))
+            {
+                const R4A_CAMERA_FRAME * frameDetails;
+                char sizeName[32];
+
+                // Get the frame format details
+                frameDetails = r4aCameraFindFrameDetails((framesize_t)index);
+                if (frameDetails)
+                {
+                    // Build the size name width x height
+                    sprintf(sizeName, "%dx%d", frameDetails->_xPixels, frameDetails->_yPixels);
+
+                    // Add the FRAMESIZE_t value
+                    webPage += "<li>";
+                    webPage += String(index);
+                    webPage += ": ";
+
+                    // Add the name
+                    webPage += frameDetails->_name;
+                    if (strcmp(sizeName, frameDetails->_name) != 0)
+                    {
+                        // Add the width and height
+                        webPage += " (";
+                        webPage += String(frameDetails->_xPixels);
+                        webPage += " x ";
+                        webPage += String(frameDetails->_yPixels);
+                        webPage += " )";
+                    }
+                    webPage += "</li>";
+                }
+            }
+        webPage += "</ul>";
+    }
+
+    webPage += "<p>Supported pixel formats:";
+    if (r4aOv2640SupportedPixelFormats == 0)
+        webPage += " None</p>";
+    else
+    {
+        webPage += "</p>";
+        webPage += "<ul>";
+        for (int index = 0; index < (sizeof(r4aOv2640SupportedPixelFormats) << 2); index++)
+            if (r4aOv2640SupportedPixelFormats & (1 << index))
+            {
+                const R4A_CAMERA_PIXEL * pixelDetails;
+
+                // Get the frame format details
+                pixelDetails = r4aCameraFindPixelDetails((pixformat_t)index);
+                if (pixelDetails)
+                {
+                    // Add the PIXFORMAT_t value
+                    webPage += "<li>";
+                    webPage += String(index);
+                    webPage += ": ";
+
+                    // Add the name
+                    webPage += pixelDetails->_name;
+                    webPage += ", bits per pixel: ";
+                    webPage += String(pixelDetails->_bitsPerPixel);
+                    webPage += "</li>";
+                }
+            }
+        webPage += "</ul>";
+    }
+
+    // Display the current image
+    sensor = r4aCameraGetSensor();
+    if (sensor)
+    {
+        framesize_t frameSize;
+        int khz;
+        int mhz;
+        char mhzString[16];
+        R4A_FRAME_SIZE_t r4aFrameFormat;
+        int xPixels;
+        int xRatio;
+        int yPixels;
+        int yRatio;
+
+        frameSize = sensor->status.framesize;
+        r4aFrameFormat = r4aCameraFrameFormat[frameSize]._r4aFrameFormat;
+
+        xRatio = r4aCameraFrameFormats[r4aFrameFormat]._xRatio;
+        yRatio = r4aCameraFrameFormats[r4aFrameFormat]._yRatio;
+
+        xPixels = r4aCameraFrameFormats[r4aFrameFormat]._xPixels;
+        yPixels = r4aCameraFrameFormats[r4aFrameFormat]._yPixels;
+
+        khz = sensor->xclk_freq_hz / 1000;
+        mhz = khz / 1000;
+        khz -= mhz * 1000;
+        sprintf(mhzString, "%d.%03d MHz", mhz, khz);
+
+        webPage += "<h2>Image</h2>";
+        webPage += "<ul>";
+        webPage += "<li>XCLK: ";
+        webPage += String(mhzString);
+        webPage += "</li>";
+        webPage += "<li>Frame Size: " + String(frameSize) + "</li>";
+        webPage += "<li>Pixel Format: " + String(sensor->pixformat) + "</li>";
+        webPage += "<li>Quality: " + String(sensor->status.quality) + "</li>";
+        webPage += "<li>Aspect Ratio: "
+                + String(xRatio) + " x "
+                + String(yRatio) + ", ("
+                + String(xPixels) + " x "
+                + String(yPixels) + " pixels)</li>";
+        webPage += "</ul>";
+        webPage += "<img src=\"../jpeg\">";
+    }
+
+    webPage += "</body>";
+    webPage += "</html>";
+
+    // Respond to the request with the web page
+    httpd_resp_send(request, webPage.c_str(), HTTPD_RESP_USE_STRLEN);
+    return ESP_OK;
 }
 
 //*********************************************************************
