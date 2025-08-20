@@ -98,6 +98,13 @@ git reset --hard --quiet HEAD
 make clean
 make
 
+# I2C - None
+cp  Freenove_4WD_Car.ino  temp.txt
+sed 's|#define USE_I2C|//#define USE_I2C|'  temp.txt  >  Freenove_4WD_Car.ino
+rm  temp.txt
+make
+git reset --hard --quiet HEAD
+
 # NTRIP
 cp  Freenove_4WD_Car.ino  temp.txt
 sed 's|//#define USE_NTRIP|#define USE_NTRIP|'  temp.txt  >  Freenove_4WD_Car.ino

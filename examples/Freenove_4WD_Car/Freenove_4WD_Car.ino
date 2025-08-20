@@ -10,6 +10,7 @@
 // Constants
 //****************************************
 
+#define USE_I2C
 //#define USE_NTRIP
 //#define USE_OV2640
 //#define USE_SPARKFUN_SEN_13582
@@ -620,6 +621,7 @@ void setupCore0(void *parameter)
     // Display the core number
     log_v("setupCore0() running on core %d", xPortGetCoreID());
 
+#ifdef USE_I2C
     // Initialize the I2C bus
     log_v("Calling r4aEsp32I2cBusBegin");
     r4aEsp32I2cBusBegin(&esp32I2cBus,
@@ -666,6 +668,7 @@ void setupCore0(void *parameter)
     // Initialize the PCF8574
     log_v("Calling pcf8574.write");
     pcf8574.write(0xff);
+#endif  // USE_I2C
 
     // Initialize the SX1509
 #ifdef USE_SPARKFUN_SEN_13582

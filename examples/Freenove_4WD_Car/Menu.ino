@@ -244,11 +244,15 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     // Command  menuRoutine                 menuParam       HelpRoutine align   HelpText
     {"g",       nullptr,                    MTI_GPIO,       nullptr,    0,      "Enter the GPIO menu"},
     {"h",       r4aEsp32MenuDisplayHeap,    0,              nullptr,    0,      "Display the heap"},
+#ifdef  USE_I2C
     {"i",       nullptr,                    MTI_I2C,        nullptr,    0,      "I2C menu"},
     {"l",       nullptr,                    MTI_LED_MATRIX, nullptr,    0,      "LED matrix menu"},
     {"m",       nullptr,                    MTI_MOTOR,      nullptr,    0,      "Motor menu"},
+#endif  // USE_I2C
     {"p",    r4aEsp32MenuDisplayPartitions, 0,              nullptr,    0,      "Display the partitions"},
+#ifdef  USE_I2C
     {"s",       nullptr,                    MTI_SERVO,      nullptr,    0,      "Servo menu"},
+#endif  // USE_I2C
     {"w",       nullptr,                    MTI_WS2812_LED, nullptr,    0,      "WS2812 RGB LED menu"},
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
@@ -371,17 +375,23 @@ const R4A_MENU_ENTRY wayPointMenuTable[] =
 const R4A_MENU_ENTRY mainMenuTable[] =
 {
     // Command  menuRoutine         menuParam       HelpRoutine align   HelpText
+#ifdef  USE_I2C
     {"alf",     alfStartMenu,       0,              nullptr,    0,      "Advanced line following"},
     {"blf",     blfStartMenu,       0,              nullptr,    0,      "Basic line following"},
     {"blt",     bltStartMenu,       0,              nullptr,    0,      "Basic light tracking"},
+#endif  // USE_I2C
 #ifdef  USE_OV2640
     {"c", r4aMenuBoolToggle, (intptr_t)&ov2640Enable, r4aMenuBoolHelp, 0, "Toggle OV2640 camera"},
+#ifdef  USE_I2C
     {"clf",     clfStartMenu,       0,              nullptr,    0,      "Camera line following"},
+#endif  // USE_I2C
 #endif  // USE_OV2640
     {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
+#ifdef  USE_I2C
 #ifdef  USE_ZED_F9P
     {"g",       nullptr,            MTI_GNSS,       nullptr,    0,      "Enter the GNSS menu"},
 #endif  // USE_ZED_F9P
+#endif  // USE_I2C
     {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
     {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
 #ifdef  USE_NTRIP
@@ -389,21 +399,25 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #endif  // USE_NTRIP
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
+#ifdef  USE_I2C
     {"robot",   nullptr,            MTI_ROBOT,      nullptr,    0,      "Enter the robot menu"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
 #ifdef  USE_SPARKFUN_SEN_13582
     {"sen",     nullptr,            MTI_SEN13582,   nullptr,    0,      "Enter the SparkFun SEN-13582 menu"},
 #endif  // USE_SPARKFUN_SEN_13582
     {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
+#endif  // USE_I2C
     {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
     {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
     {"wd", r4aMenuBoolToggle, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
+#ifdef  USE_I2C
 #ifdef  USE_ZED_F9P
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
 #ifdef  USE_WAYPOINT_FOLLOWING
     {"wpf",     wpfStartMenu,       0,              nullptr,    0,      "Waypoint following"},
 #endif  // USE_WAYPOINT_FOLLOWING
 #endif  // USE_ZED_F9P
+#endif  // USE_I2C
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
     {"wv", r4aMenuBoolToggle, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
