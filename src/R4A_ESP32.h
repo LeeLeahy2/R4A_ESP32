@@ -88,6 +88,8 @@ R4A_BLUETOOTH_STATE_TRANSITION r4aBluetoothUpdate();
 // Camera API
 //****************************************
 
+#define R4A_ERROR_NO_SENSOR         -128
+
 typedef struct _R4A_FRAME_SIZE_TO_FORMAT
 {
     framesize_t _frameSize;
@@ -120,20 +122,431 @@ const R4A_CAMERA_FRAME * r4aCameraFindFrameDetails(framesize_t frameSize);
 //   Returns a R4A_CAMERA_PIXEL address or nullptr upon failure
 const R4A_CAMERA_PIXEL * r4aCameraFindPixelDetails(pixformat_t pixelFormat);
 
+// Discard multiple frame buffers
+// Inputs:
+//   framesToDiscard: The number of frames to discard
+void r4aCameraFrameBufferDiscard(int framesToDiscard);
+
+// Free the frame buffer
+// Inputs:
+//   frameBuffer: Address of a camera_fb_t data structure
+void r4aCameraFrameBufferFree(camera_fb_t * frameBuffer);
+
+// Get a frame buffer
+// Outputs:
+//   Returns the address of a camera_fb_t data structure or nullptr upon failure
+camera_fb_t * r4aCameraFrameBufferGet();
+
+// Get the automatic exposure correction value
+// Outputs:
+//   Returns the automatic exposure correction value
+int r4aCameraGetAutomaticExposureCorrection();
+
+// Get the automatic exposure enable/disable
+// Outputs:
+//   Returns the automatic exposure enable value
+int r4aCameraGetAutomaticExposureEnable();
+
+// Get the automatic exposure level
+// Outputs:
+//   Returns the automatic exposure level
+int r4aCameraGetAutomaticExposureLevel();
+
+// Get the automatic gain control value
+// Outputs:
+//   Returns the automatic gain control value
+int r4aCameraGetAutomaticGainControl();
+
+// Get the automatic white balance enable/disable value
+// Outputs:
+//   Returns the automatic white balance enable value
+int r4aCameraGetAutomaticWhiteBalanceEnable();
+
+// Get the bpc value
+// Outputs:
+//   Returns the bpc value
+int r4aCameraGetBpc();
+
+// Get the brightness value
+// Outputs:
+//   Returns the brightness value
+int r4aCameraGetBrightness();
+
+// Get the external clock (XCLK) frequency
+// Outputs:
+//   Returns the XCLK frequency in Hertz
+int r4aCameraGetClockHz();
+
+// Get the color bar enable/disable value
+// Outputs:
+//   Returns the color bar enable value
+int r4aCameraGetColorBarEnable();
+
+// Get the contrast value
+// Outputs:
+//   Returns the contrast value
+int r4aCameraGetContrast();
+
+// Get the dcw value
+// Outputs:
+//   Returns the dcw value
+int r4aCameraGetDcw();
+
+// Get the denoise value
+// Outputs:
+//   Returns the denoise value
+int r4aCameraGetDenoise();
+
+// Get the exposure control enable value
+// Outputs:
+//   Returns the exposure control enable value
+int r4aCameraGetExposureControlEnable();
+
+// Get the frame size
+// Inputs:
+//   framesize: A framesize_t value
+// Outputs:
+//   Returns the framesize_t value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetFrameSize();
+
+// Get the gain ceiling
+// Outputs:
+//   Returns the gain ceiling value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetGainCeiling();
+
+// Get the gain control enable value
+// Outputs:
+//   Returns the gain control enable value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetGainControlEnable();
+
+// Get the horizontal mirror state
+// Outputs:
+//   Returns the horizontal mirror state value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetHorizontalMirror();
+
+// Get the lens control enable value
+// Outputs:
+//   Returns the lens control enable value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetLensControlEnable();
+
+// Get the pixel format
+// Outputs:
+//   Returns the pixformat_t value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetPixelFormat();
+
+// Get the quality
+// Outputs:
+//   Returns the quality value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetQuality();
+
+// Get the raw GMA enable value
+// Outputs:
+//   Returns the raw GMA enable value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetRawGmaEnable();
+
 // Get a register value
 // Inputs:
 //   regAddress: Address of the camera register
 //   display: Device used for output or nullptr
 // Outputs:
-//   Returns the 8-bit register value or -1 upon failure
+//   Returns the 8-bit register value or R4A_ERROR_NO_SENSOR upon failure
 int r4aCameraGetRegister(int regAddress, Print * display = nullptr);
 
-// Get the initialization status
+// Get the saturation level
+// Outputs:
+//   Returns the saturation value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetSaturation();
+
+// Get the sensor data structure
 // Inputs:
 //   display: Device used for output or nullptr
 // Outputs:
 //   Returns a sensor_t data structure or nullptr upon failure
 sensor_t * r4aCameraGetSensor(Print * display = nullptr);
+
+// Get the sensor data structure
+sensor_t * r4aCameraGetSensor(Print * display);
+
+// Get the sharpness
+// Outputs:
+//   Returns the sharpness value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetSharpness();
+
+// Get the special effect
+// Outputs:
+//   Returns the special effect value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetSpecialEffect();
+
+// Get the vertical flip state
+// Outputs:
+//   Returns the vertical flip value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetVerticalFlip();
+
+// Get the white balance mode
+// Outputs:
+//   Returns the white balance mode value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetWhiteBalanceMode();
+
+// Get the WPC value
+// Outputs:
+//   Returns the WPC value or R4A_ERROR_NO_SENSOR upon failure
+int r4aCameraGetWpc();
+
+// Set the automatic exposure control gain value
+// Inputs:
+//   gain: New gain value in the range of 0 - 1200
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetAutomaticExposureControl(int gain);
+
+// Enable or disable automatic exposure control
+// Inputs:
+//   enable: Set to one to enable and zero to disable
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetAutomaticExposureControlEnable(int enable);
+
+// Set the automatic exposure level
+// Inputs:
+//   level: New level value in the range of -2 - 2
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetAutomaticExposureLevel(int level);
+
+// Set the automatic gain control
+// Inputs:
+//   gain: New gain value
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetAutomaticGainControl(int gain);
+
+// Enable or disable automatic white balance
+// Inputs:
+//   enable: Set to one to enable and zero to disable
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetAutomaticWhiteBalance(int enable);
+
+// Enable or disable bpc
+// Inputs:
+//   enable: Set to one to enable and zero to disable
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetBpc(int enable);
+
+// Set the brightness
+// Inputs:
+//   level: New brightness level in the range of -2 - 2
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetBrightness(int level);
+
+// Enable or disable color bar
+// Inputs:
+//   enable: Set to one to enable and zero to disable
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetColorBar(int enable);
+
+// Set the contrast
+// Inputs:
+//   level: New contrast level
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetContrast(int level);
+
+// Enable or disable dcw
+// Inputs:
+//   enable: Set to one to enable and zero to disable
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetDcw(int enable);
+
+// Set the denoise
+// Inputs:
+//   level: New denoise level
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetDenoise(int level);
+
+// Enable or disable exposure control
+// Inputs:
+//   enable: Set to one to enable and zero to disable
+// Outputs:
+//   Returns 0 upon success and R4A_NO_SENSOR upon failure
+int r4aCameraSetExposureControl(int enable);
+
+// Set the external clock frequency
+// Inputs:
+//   timer: Number of the LED controller (LEDC) timer to use for the clock
+//   xclk:
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetExternalClockFrequency(int timer, int xclk);
+
+// Set frame size
+// Inputs:
+//   framesize: A framesize_t value
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetFrameSize(framesize_t framesize);
+
+// Set gain ceiling
+// Inputs:
+//   gainceiling: Value in the range of 0 - 6
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetGainCeiling(gainceiling_t gainceiling);
+
+// Enable or disable gain control
+// Inputs:
+//   enable: Set true to enable gain control
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetGainControlEnable(int enable);
+
+// Enable or disable horizontal mirror
+// Inputs:
+//   enable: Set true to mirror horizontally
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetHorizontalMirror(int enable);
+
+// Enable or disable lens control
+// Inputs:
+//   enable: Set true to enable lens control
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetLensControlEnable(int enable);
+
+// Set pixel format
+// Inputs:
+//   pixformat: A pixformat_t value
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetPixelFormat(pixformat_t pixformat);
+
+// Set PLL frequency
+// Inputs:
+//   bypass:
+//   mul:
+//   sys:
+//   root:
+//   pre:
+//   seld5:
+//   pclken:
+//   pclk:
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetPllFrequency(int bypass,
+                             int mul,
+                             int sys,
+                             int root,
+                             int pre,
+                             int seld5,
+                             int pclken,
+                             int pclk);
+
+// Set quality
+// Inputs:
+//   Quality: Value in the range of 0 - 63
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetQuality(int quality);
+
+// Enable or disable raw GMA
+// Inputs:
+//   enable: Set true to enable raw GMA
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetRawGmaEnable(int enable);
+
+// Set raw resolution
+// Inputs:
+//   startX:
+//   startY:
+//   endX:
+//   endY:
+//   offsetX:
+//   offsetY:
+//   totalX:
+//   totalY:
+//   outputX:
+//   outputY:
+//   scale:
+//   binning:
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetRawResolution(int startX,
+                              int startY,
+                              int endX,
+                              int endY,
+                              int offsetX,
+                              int offsetY,
+                              int totalX,
+                              int totalY,
+                              int outputX,
+                              int outputY,
+                              bool scale,
+                              bool binning);
+
+// Set register
+// Inputs:
+//   reg: Address of the device register
+//   mask: Mask of bits to set in register from value
+//   value: Value to replace masked bits
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetRegister(int reg, int mask, int value);
+
+// Set saturation
+// Inputs:
+//   level: Value in the range of -2 - 2
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetSaturation(int level);
+
+// Set sharpness
+// Inputs:
+//   level: Value in the range of -2 - 2
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetSharpness(int level);
+
+// Set special effect
+// Inputs:
+//   effect: Value in the range of 0 - 6
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetSpecialEffect(int effect);
+
+// Enable or disable vertical flip
+// Inputs:
+//   enable: Set true to flip vertically
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetVerticalFlip(int enable);
+
+// Set white balance mode
+// Inputs:
+//   mode: Value in the range of 0 - 4
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetWhiteBalanceMode(int mode);
+
+// Enable or disable white balance
+// Inputs:
+//   enable: Set true to enable white balance
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetWhiteBalanceEnable(int enable);
+
+// Enable or disable WPC
+// Inputs:
+//   enable: Set true to enable WPC
+// Outputs:
+//   Returns a status value, zero = success
+int r4aCameraSetWpcEnable(int enable);
 
 // Verify the camera tables
 void r4aEsp32CameraVerifyTables();

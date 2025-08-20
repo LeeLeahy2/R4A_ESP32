@@ -8,8 +8,64 @@
 #include "R4A_ESP32.h"
 
 //****************************************
+// Types
+//****************************************
+
+typedef struct _R4A_WEB_PAGE_ENABLES
+{
+    int _valueId;
+    const char * _tagText;
+    const char * _titleText;
+} R4A_WEB_PAGE_ENABLES;
+
+typedef struct _R4A_WEB_PAGE_VALUES
+{
+    int _valueId;
+    const char * _tagText;
+    const char * _titleText;
+    int _minValue;
+    int _maxValue;
+} R4A_WEB_PAGE_VALUES;
+
+//****************************************
 // Constants
 //****************************************
+
+enum R4A_ENABLE_ID
+{
+    EID_AECE = 0,
+    EID_AWB,
+    EID_BPC,
+    EID_COLORBAR,
+    EID_DCW,
+    EID_ECE,
+    EID_GCE,
+    EID_GMA,
+    EID_HMIRROR,
+    EID_LENS,
+    EID_VFLIP,
+    EID_WPC,
+    // Add new values here
+    EID_MAX_EID
+};
+
+enum R4A_VALUE_ID
+{
+    VID_AE_LEVEL = 0,
+    VID_AEC_VALUE,
+    VID_AGC_GAIN,
+    VID_BRIGHTNESS,
+    VID_CONTRAST,
+    VID_DENOISE,
+    VID_GAIN_CEILING,
+    VID_QUALITY,
+    VID_SATURATION,
+    VID_SHARPNESS,
+    VID_EFFECTS,
+    VID_WB_MODE,
+    // Add new values here
+    VID_MAX_VID
+};
 
 const R4A_FRAME_SIZE_MASK_t r4aOv2640SupportedFrameSizes = 0
 //    | SUPPORTED(FRAMESIZE_96X96)    //   96 x   96
@@ -377,28 +433,56 @@ bool r4aOv2640Setup(const R4A_OV2640_SETUP * ov2640Parameters,
 }
 
 //*********************************************************************
-// Build the OV2640 details web page
-esp_err_t r4aOv2640WebPage(httpd_req_t *request)
+// Add the supported pixel formats
+void r4aOv2640WebPageAddPixelFormats(String &webPage)
 {
-    sensor_t * sensor;
-    String webPage("");
-
-    // Build the web page
-    webPage += "<!DOCTYPE html>";
-    webPage += "<html lang=\"en\">";
-    webPage += "<head>";
-    webPage += "<meta charset=\"utf-8\">";
-    webPage += "<title>OV2640 Details</title>";
-    webPage += "</head>";
-    webPage += "<body>";
-    webPage += "<h1>OV2640 Details</h1>";
-    webPage += "<p>Supported frame sizes:";
-    if (r4aOv2640SupportedFrameSizes == 0)
-        webPage += " None</p>";
+    // Display the supported pixel formats
+    webPage += "<H1>Supported Pixel Formats</h1>";
+    if (r4aOv2640SupportedPixelFormats == 0)
+        webPage += "<p>None</p>";
     else
     {
-        webPage += "</p>";
         webPage += "<ul>";
+
+        // Walk the list of supported pixel formats
+        for (int index = 0; index < (sizeof(r4aOv2640SupportedPixelFormats) << 2); index++)
+            if (r4aOv2640SupportedPixelFormats & (1 << index))
+            {
+                const R4A_CAMERA_PIXEL * pixelDetails;
+
+                // Get the frame format details
+                pixelDetails = r4aCameraFindPixelDetails((pixformat_t)index);
+                if (pixelDetails)
+                {
+                    // Add the PIXFORMAT_t value
+                    webPage += "<li>";
+                    webPage += String(index);
+                    webPage += ": ";
+
+                    // Add the name
+                    webPage += pixelDetails->_name;
+                    webPage += ", bits per pixel: ";
+                    webPage += String(pixelDetails->_bitsPerPixel);
+                    webPage += "</li>";
+                }
+            }
+        webPage += "</ul>";
+    }
+}
+
+//*********************************************************************
+// Add the supported frame sizes
+void r4aOv2640WebPageAddFrameSizes(String &webPage)
+{
+    // Display the supported frame sizes
+    webPage += "<h1>Supported Frame Sizes</h1>";
+    if (r4aOv2640SupportedFrameSizes == 0)
+        webPage += "<p>None</p>";
+    else
+    {
+        webPage += "<ul>";
+
+        // Walk the list of supported frame sizes
         for (int index = 0; index < (sizeof(r4aOv2640SupportedFrameSizes) << 2); index++)
             if (r4aOv2640SupportedFrameSizes & (1 << index))
             {
@@ -433,85 +517,553 @@ esp_err_t r4aOv2640WebPage(httpd_req_t *request)
             }
         webPage += "</ul>";
     }
+}
 
-    webPage += "<p>Supported pixel formats:";
-    if (r4aOv2640SupportedPixelFormats == 0)
-        webPage += " None</p>";
-    else
+//*********************************************************************
+// Add the images sizes
+void r4aOv2640WebPageAddImageAttributes(String &webPage)
+{
+    framesize_t frameSize;
+    int khz;
+    int mhz;
+    char mhzString[16];
+    pixformat_t pixelFormat;
+    R4A_FRAME_SIZE_t r4aFrameFormat;
+    R4A_PIXEL_FORMAT_t r4aPixelFormat;
+    int xPixels;
+    int xRatio;
+    int yPixels;
+    int yRatio;
+
+    // Translate the frame size
+    frameSize = (framesize_t)r4aCameraGetFrameSize();
+    r4aFrameFormat = r4aCameraFrameFormat[frameSize]._r4aFrameFormat;
+
+    xRatio = r4aCameraFrameFormats[r4aFrameFormat]._xRatio;
+    yRatio = r4aCameraFrameFormats[r4aFrameFormat]._yRatio;
+
+    xPixels = r4aCameraFrameFormats[r4aFrameFormat]._xPixels;
+    yPixels = r4aCameraFrameFormats[r4aFrameFormat]._yPixels;
+
+    // Translate the pixel format
+    pixelFormat = (pixformat_t)r4aCameraGetPixelFormat();
+    r4aPixelFormat = r4aCameraPixelFormat[pixelFormat]._r4aPixelFormat;
+
+    // Format the clock frequency
+    khz = r4aCameraGetClockHz() / 1000;
+    mhz = khz / 1000;
+    khz -= mhz * 1000;
+    sprintf(mhzString, "%d.%03d MHz", mhz, khz);
+
+    // Display the image attributes
+    webPage += "<ul>";
+    webPage += "<li>Frame Size: "
+            + String((int)frameSize)
+            + ", "
+            + r4aCameraFrameFormats[r4aFrameFormat]._name
+            + ", "
+            + String(xRatio) + " x "
+            + String(yRatio) + ", ("
+            + String(xPixels) + " x "
+            + String(yPixels) + " pixels)</li>";
+    webPage += "<li>Pixel Format: "
+            + String((int)r4aCameraGetPixelFormat())
+            + ", "
+            + r4aCameraPixelFormats[r4aPixelFormat]._name
+            + "</li>";
+    webPage += "<li>Quality: " + String(r4aCameraGetQuality()) + "</li>";
+    webPage += "<li>Automatic Exposure Correction: " + String(r4aCameraGetAutomaticExposureCorrection()) + "</li>";
+    webPage += "<li>Automatic Exposure Enable: " + String(r4aCameraGetAutomaticExposureEnable()) + "</li>";
+    webPage += "<li>Automatic Exposure Level: " + String(r4aCameraGetAutomaticExposureLevel()) + "</li>";
+    webPage += "<li>Automatic Gain Control: " + String(r4aCameraGetAutomaticGainControl()) + "</li>";
+    webPage += "<li>Automatic White Balance Enable: " + String(r4aCameraGetAutomaticWhiteBalanceEnable()) + "</li>";
+    webPage += "<li>BPC: " + String(r4aCameraGetBpc()) + "</li>";
+    webPage += "<li>Brightness: " + String(r4aCameraGetBrightness()) + "</li>";
+    webPage += "<li>Color Bar Enable: " + String(r4aCameraGetColorBarEnable()) + "</li>";
+    webPage += "<li>Contrast: " + String(r4aCameraGetContrast()) + "</li>";
+    webPage += "<li>DCW: " + String(r4aCameraGetDcw()) + "</li>";
+//    webPage += "<li>Denoise: " + String(r4aCameraGetDenoise()) + "</li>";
+    webPage += "<li>Exposure Control Enable: " + String(r4aCameraGetExposureControlEnable()) + "</li>";
+    webPage += "<li>Gain Ceiling: " + String(r4aCameraGetGainCeiling()) + "</li>";
+    webPage += "<li>Gain Control Enable: " + String(r4aCameraGetGainControlEnable()) + "</li>";
+    webPage += "<li>GMA Raw: " + String(r4aCameraGetRawGmaEnable()) + "</li>";
+    webPage += "<li>Horizontal Mirror: " + String(r4aCameraGetHorizontalMirror()) + "</li>";
+    webPage += "<li>Lens Control Enable: " + String(r4aCameraGetLensControlEnable()) + "</li>";
+    webPage += "<li>Saturation: " + String(r4aCameraGetSaturation()) + "</li>";
+    webPage += "<li>Special Effect: " + String(r4aCameraGetSpecialEffect()) + "</li>";
+//    webPage += "<li>Sharpness: " + String(r4aCameraGetSharpness()) + "</li>";
+    webPage += "<li>Vertical Flip: " + String(r4aCameraGetVerticalFlip()) + "</li>";
+    webPage += "<li>White Balance Mode: " + String(r4aCameraGetWhiteBalanceMode()) + "</li>";
+    webPage += "<li>WPC: " + String(r4aCameraGetWpc()) + "</li>";
+    webPage += "<li>XCLK: " + String(mhzString) + "</li>";
+    webPage += "</ul>";
+}
+
+//*********************************************************************
+// Add an enable line
+void r4aOv2640WebPageAddEnable(String &webPage,
+                               const char * currentWebPage,
+                               const char * titleString,
+                               const char * tagString,
+                               const char * buttonString,
+                               int currentValue)
+{
+    webPage += "        <tr>\n";
+    webPage += "          <form action=\"";
+    webPage +=  currentWebPage;
+    webPage += "\" method=\"get\">\n";
+    webPage += "            <td>";
+    webPage += titleString;
+    webPage += "</td>\n";
+
+    webPage += "            <td>\n";
+    webPage += "              <select name=\"";
+    webPage += tagString;
+    webPage += "\">\n";
+    webPage += "                <option";
+    webPage += currentValue ? " selected" : "";
+    webPage += " value=\"0\">0</option>\n";
+    webPage += "                <option";
+    webPage += currentValue ? "" : " selected";
+    webPage += " value=\"1\">1</option>\n";
+    webPage += "              </select>\n";
+    webPage += "            </td>\n";
+
+    webPage += "            <td><input type=\"submit\" value=\"";
+    webPage += buttonString;
+    webPage += "\"></td>\n";
+    webPage += "          </form>\n";
+    webPage += "        </tr>\n";
+}
+
+//*********************************************************************
+// Add a value line
+void r4aOv2640WebPageAddValue(String &webPage,
+                              const char * currentWebPage,
+                              const char * titleString,
+                              const char * tagString,
+                              const char * buttonString,
+                              int minValue,
+                              int maxValue,
+                              int currentValue)
+{
+    webPage += "        <tr>\n";
+    webPage += "          <form action=\"";
+    webPage +=  currentWebPage;
+    webPage += "\" method=\"get\">\n";
+    webPage += "            <td>";
+    webPage += titleString;
+    webPage += "</td>\n";
+
+    webPage += "            <td>\n";
+    webPage += "              <select name=\"";
+    webPage += tagString;
+    webPage += "\">\n";
+    for (int value = minValue; value <= maxValue; value++)
     {
-        webPage += "</p>";
-        webPage += "<ul>";
-        for (int index = 0; index < (sizeof(r4aOv2640SupportedPixelFormats) << 2); index++)
-            if (r4aOv2640SupportedPixelFormats & (1 << index))
-            {
-                const R4A_CAMERA_PIXEL * pixelDetails;
+        webPage += "                <option";
+        if (value == currentValue)
+            webPage += " selected";
+        webPage += " value=\"";
+        webPage += String(value);
+        webPage += "\">";
+        webPage += String(value);
+        webPage += "</option>\n";
+    }
+    webPage += "              </select>\n";
+    webPage += "            </td>\n";
 
-                // Get the frame format details
-                pixelDetails = r4aCameraFindPixelDetails((pixformat_t)index);
-                if (pixelDetails)
-                {
-                    // Add the PIXFORMAT_t value
-                    webPage += "<li>";
-                    webPage += String(index);
-                    webPage += ": ";
+    webPage += "            <td><input type=\"submit\" value=\"";
+    webPage += buttonString;
+    webPage += "\"></td>\n";
+    webPage += "          </form>\n";
+    webPage += "        </tr>\n";
+}
 
-                    // Add the name
-                    webPage += pixelDetails->_name;
-                    webPage += ", bits per pixel: ";
-                    webPage += String(pixelDetails->_bitsPerPixel);
-                    webPage += "</li>";
-                }
-            }
-        webPage += "</ul>";
+//*********************************************************************
+// Add refresh button
+void r4aOv2640WebPageAddRefreshButton(String &webPage,
+                                      const char * currentWebPage)
+{
+    webPage += "      <form action=\"";
+    webPage +=  currentWebPage;
+    webPage += "\" method=\"get\">\n";
+    webPage += "        <input type=\"submit\" value=\"Refresh\">\n";
+    webPage += "      </form>\n";
+    webPage += "      <br>\r\n\n";
+}
+
+//*********************************************************************
+// Build the OV2640 details web page
+esp_err_t r4aOv2640WebPage(httpd_req_t *request)
+{
+    const R4A_WEB_PAGE_ENABLES enables[] =
+    { //   ID              tag          title
+        {EID_AECE,      "AEC",    "Automatic Exposure Control"},
+        {EID_AWB,       "AWB",      "Automatic White Balance"},
+        {EID_BPC,       "BPC",      "BPC"},
+        {EID_COLORBAR,  "CBE",      "Color Bar"},
+        {EID_DCW,       "DCW",      "DCW"},
+        {EID_ECE,       "ECE",      "Exposure Control"},
+        {EID_GCE,       "GCE",      "Gain Control"},
+        {EID_GMA,       "GMA",      "GMA Raw"},
+        {EID_HMIRROR,   "HMIRROR",  "Horizontal Mirror"},
+        {EID_LENS,      "LENS",     "Lens Control"},
+        {EID_VFLIP,     "VFLIP",    "Vertical Flip"},
+        {EID_WPC,       "WPC",      "WPC"},
+    };
+    const int enableCount = sizeof(enables) / sizeof(enables[0]);
+    const R4A_WEB_PAGE_VALUES valueList[] =
+    { //    ID                 tag             title            min  max
+        {VID_AE_LEVEL,      "AE_LEVEL",     "Auto Exposure",    -2,  2},
+//        {VID_AEC_VALUE,     "AEC_VALUE",    "AEC Value",         0,  1200},
+        {VID_AGC_GAIN,      "AGC_GAIN",     "AGC Gain",          0, 30},
+        {VID_BRIGHTNESS,    "BRIGHTNESS",   "Brightness",       -2,  2},
+        {VID_CONTRAST,      "CONTRAST",     "Contrast",         -2,  2},
+//        {VID_DENOISE,       "DENOISE",      "Denoise",           0,  6},
+        {VID_GAIN_CEILING,  "GAIN_CEILING", "Gain Ceiling",      0,  6},
+        {VID_QUALITY,       "QUALITY",      "Quality",           3, 63}, // 0 - 2 cause crashes
+        {VID_SATURATION,    "SATURATION",   "Saturation",       -2,  2},
+//        {VID_SHARPNESS,     "SHARPNESS",    "Sharpness",        -2,  2},
+        {VID_EFFECTS,       "EFFECTS",      "Special Effects",   0,  6},
+        {VID_WB_MODE,       "WB_MODE",      "White Balance Mode",0,  4},
+    };
+    const int valueListCount = sizeof(valueList) / sizeof(valueList[0]);
+    const char * currentWebPage = "OV2640";
+    int index;
+    sensor_t * sensor;
+    String webPage("");
+
+    // Build the web page
+    webPage += "<!DOCTYPE html>\n";
+    webPage += "<html lang=\"en\">\n";
+    webPage += "  <head>\n";
+    webPage += "    <meta charset=\"utf-8\">\n";
+    webPage += "    <title>OV2640 Details</title>\n";
+    webPage += "  </head>\n";
+    webPage += "  <body>\n";
+    webPage += "<h1>OV2640 Image</h1>\n";
+
+    // Time stamp the image
+    if (r4aNtpIsTimeValid())
+    {
+        uint32_t seconds = r4aNtpGetEpochTime();
+        webPage += "<p>" + r4aNtpGetDate(seconds)
+                + " " + r4aNtpGetTime24(seconds)
+                + "</p>\n";
     }
 
     // Display the current image
     sensor = r4aCameraGetSensor();
     if (sensor)
     {
-        framesize_t frameSize;
-        int khz;
-        int mhz;
-        char mhzString[16];
-        R4A_FRAME_SIZE_t r4aFrameFormat;
-        int xPixels;
-        int xRatio;
-        int yPixels;
-        int yRatio;
+        const char * endOfValue;
+        char * fieldName;
+        size_t length;
+        size_t nameLength;
+        const char * options;
+        char * valueText;
+        size_t valueLength;
+        int value;
 
-        frameSize = sensor->status.framesize;
-        r4aFrameFormat = r4aCameraFrameFormat[frameSize]._r4aFrameFormat;
+        // Get the values
+        int enableValues[EID_MAX_EID];
+        enableValues[EID_AECE] = r4aCameraGetAutomaticExposureEnable();
+        enableValues[EID_AWB] = r4aCameraGetAutomaticWhiteBalanceEnable();
+        enableValues[EID_BPC] = r4aCameraGetBpc();
+        enableValues[EID_COLORBAR] = r4aCameraGetColorBarEnable();
+        enableValues[EID_DCW] = r4aCameraGetDcw();
+        enableValues[EID_ECE] = r4aCameraGetExposureControlEnable();
+        enableValues[EID_GCE] = r4aCameraGetGainControlEnable();
+        enableValues[EID_GMA] = r4aCameraGetRawGmaEnable();
+        enableValues[EID_HMIRROR] = r4aCameraGetHorizontalMirror();
+        enableValues[EID_LENS] = r4aCameraGetLensControlEnable();
+        enableValues[EID_VFLIP] = r4aCameraGetVerticalFlip();
+        enableValues[EID_WPC] = r4aCameraGetWpc();
 
-        xRatio = r4aCameraFrameFormats[r4aFrameFormat]._xRatio;
-        yRatio = r4aCameraFrameFormats[r4aFrameFormat]._yRatio;
+        int values[VID_MAX_VID];
+        values[VID_AE_LEVEL] = r4aCameraGetAutomaticExposureLevel();
+        values[VID_AEC_VALUE] = r4aCameraGetAutomaticExposureCorrection();
+        values[VID_AGC_GAIN] = r4aCameraGetAutomaticGainControl();
+        values[VID_BRIGHTNESS] = r4aCameraGetBrightness();
+        values[VID_CONTRAST] = r4aCameraGetContrast();
+        values[VID_DENOISE] = r4aCameraGetDenoise();
+        values[VID_GAIN_CEILING] = r4aCameraGetGainCeiling();
+        values[VID_QUALITY] = r4aCameraGetQuality();
+        values[VID_SATURATION] = r4aCameraGetSaturation();
+        values[VID_SHARPNESS] = r4aCameraGetSharpness();
+        values[VID_EFFECTS] = r4aCameraGetSpecialEffect();
+        values[VID_WB_MODE] = r4aCameraGetWhiteBalanceMode();
 
-        xPixels = r4aCameraFrameFormats[r4aFrameFormat]._xPixels;
-        yPixels = r4aCameraFrameFormats[r4aFrameFormat]._yPixels;
+        // Parse the URI to locate the field
+        options = request->uri;
+        while (*options && (*options != '?'))
+            options += 1;
+        if (*options)
+            options += 1;
 
-        khz = sensor->xclk_freq_hz / 1000;
-        mhz = khz / 1000;
-        khz -= mhz * 1000;
-        sprintf(mhzString, "%d.%03d MHz", mhz, khz);
+        // Allocate space for the options string
+        length = strlen(options);
+        if (length)
+        {
+            fieldName = (char *)r4aMalloc(length + 1, "HTTP options");
+            if (fieldName)
+            {
+                // Copy the options
+                strcpy(fieldName, options);
 
-        webPage += "<h2>Image</h2>";
-        webPage += "<ul>";
-        webPage += "<li>XCLK: ";
-        webPage += String(mhzString);
-        webPage += "</li>";
-        webPage += "<li>Frame Size: " + String(frameSize) + "</li>";
-        webPage += "<li>Pixel Format: " + String(sensor->pixformat) + "</li>";
-        webPage += "<li>Quality: " + String(sensor->status.quality) + "</li>";
-        webPage += "<li>Aspect Ratio: "
-                + String(xRatio) + " x "
-                + String(yRatio) + ", ("
-                + String(xPixels) + " x "
-                + String(yPixels) + " pixels)</li>";
-        webPage += "</ul>";
-        webPage += "<img src=\"../jpeg\">";
+                // Get the field value
+                valueText = fieldName;
+                while (*valueText && (*valueText != '='))
+                    valueText += 1;
+                nameLength = valueText - fieldName;
+                if (*valueText)
+                    valueText += 1;
+
+                // Zero terminate the field name
+                fieldName[nameLength] = 0;
+
+                // Determine the end if the value
+                endOfValue = valueText;
+                while (*endOfValue && (*endOfValue != '&'))
+                    endOfValue += 1;
+                valueLength = endOfValue - valueText;
+                valueText[valueLength] = 0;
+
+                // Get the value
+                if (sscanf(valueText, "%d", &value) != 1)
+                {
+                    webPage += "<p>ERROR: Invalid value for option ";
+                    webPage += fieldName;
+                    webPage += "\n</p>";
+                }
+                else
+                {
+                    // Walk the list of supported enable options
+                    for (index = 0; index < enableCount; index++)
+                    {
+                        const char * field;
+
+                        // Determine if this option was specified
+                        field = enables[index]._tagText;
+                        if (strcmp(field, fieldName) == 0)
+                        {
+                            // Process the option
+                            switch (enables[index]._valueId)
+                            {
+                            case EID_AECE:
+                                r4aCameraSetAutomaticExposureControlEnable(value);
+                                enableValues[EID_AECE] = r4aCameraGetAutomaticExposureEnable();
+                                break;
+
+                            case EID_AWB:
+                                r4aCameraSetAutomaticWhiteBalance(value);
+                                enableValues[EID_AWB] = r4aCameraGetAutomaticWhiteBalanceEnable();
+                                break;
+
+                            case EID_BPC:
+                                r4aCameraSetBpc(value);
+                                enableValues[EID_BPC] = r4aCameraGetBpc();
+                                break;
+
+                            case EID_COLORBAR:
+                                r4aCameraSetColorBar(value);
+                                enableValues[EID_COLORBAR] = r4aCameraGetColorBarEnable();
+                                break;
+
+                            case EID_DCW:
+                                r4aCameraSetDcw(value);
+                                enableValues[EID_DCW] = r4aCameraGetDcw();
+                                break;
+
+                            case EID_ECE:
+                                r4aCameraSetExposureControl(value);
+                                enableValues[EID_ECE] = r4aCameraGetExposureControlEnable();
+                                break;
+
+                            case EID_GCE:
+                                r4aCameraSetGainControlEnable(value);
+                                enableValues[EID_GCE] = r4aCameraGetGainControlEnable();
+                                break;
+
+                            case EID_GMA:
+                                r4aCameraSetRawGmaEnable(value);
+                                enableValues[EID_GMA] = r4aCameraGetRawGmaEnable();
+                                break;
+
+                            case EID_LENS:
+                                r4aCameraSetLensControlEnable(value);
+                                enableValues[EID_LENS] = r4aCameraGetLensControlEnable();
+                                break;
+
+                            case EID_HMIRROR:
+                                r4aCameraSetHorizontalMirror(value);
+                                enableValues[EID_HMIRROR] = r4aCameraGetHorizontalMirror();
+                                break;
+
+                            case EID_VFLIP:
+                                r4aCameraSetVerticalFlip(value);
+                                enableValues[EID_VFLIP] = r4aCameraGetVerticalFlip();
+                                break;
+
+                            case EID_WPC:
+                                r4aCameraSetWpcEnable(value);
+                                enableValues[EID_WPC] = r4aCameraGetWpc();
+                                break;
+                            }
+                            break;
+                        }
+                    }
+
+                    // Walk the list of supported value options
+                    for (index = 0; index < valueListCount; index++)
+                    {
+                        const char * field;
+
+                        // Determine if this option was specified
+                        field = valueList[index]._tagText;
+                        if (strcmp(field, fieldName) == 0)
+                        {
+                            // Process the option
+                            switch (valueList[index]._valueId)
+                            {
+                            case VID_AE_LEVEL:
+                                r4aCameraSetAutomaticExposureLevel(value);
+                                values[VID_AE_LEVEL] = r4aCameraGetAutomaticExposureLevel();
+                                break;
+
+                            case VID_AEC_VALUE:
+                                r4aCameraSetAutomaticExposureControl(value);
+                                values[VID_AEC_VALUE] = r4aCameraGetAutomaticExposureCorrection();
+                                break;
+
+                            case VID_AGC_GAIN:
+                                r4aCameraSetAutomaticGainControl(value);
+                                values[VID_AGC_GAIN] = r4aCameraGetAutomaticGainControl();
+                                break;
+
+                            case VID_BRIGHTNESS:
+                                r4aCameraSetBrightness(value);
+                                values[VID_BRIGHTNESS] = r4aCameraGetBrightness();
+                                break;
+
+                            case VID_CONTRAST:
+                                r4aCameraSetContrast(value);
+                                values[VID_CONTRAST] = r4aCameraGetContrast();
+                                break;
+
+                            case VID_DENOISE:
+                                r4aCameraSetDenoise(value);
+                                values[VID_DENOISE] = r4aCameraGetDenoise();
+                                break;
+
+                            case VID_GAIN_CEILING:
+                                r4aCameraSetGainCeiling((gainceiling_t)value);
+                                values[VID_GAIN_CEILING] = r4aCameraGetGainCeiling();
+                                break;
+
+                            case VID_QUALITY:
+                                r4aCameraSetQuality(value);
+                                values[VID_QUALITY] = r4aCameraGetQuality();
+                                break;
+
+                            case VID_SATURATION:
+                                r4aCameraSetSaturation(value);
+                                values[VID_SATURATION] = r4aCameraGetSaturation();
+                                break;
+
+                            case VID_SHARPNESS:
+                                r4aCameraSetSharpness(value);
+                                values[VID_SHARPNESS] = r4aCameraGetSharpness();
+                                break;
+
+                            case VID_EFFECTS:
+                                r4aCameraSetSpecialEffect(value);
+                                values[VID_EFFECTS] = r4aCameraGetSpecialEffect();
+                                break;
+
+                            case VID_WB_MODE:
+                                r4aCameraSetWhiteBalanceMode(value);
+                                values[VID_WB_MODE] = r4aCameraGetWhiteBalanceMode();
+                                break;
+                            }
+                            break;
+                        }
+                    }
+
+                    // Discard some frames
+                    r4aCameraFrameBufferDiscard(4);
+                }
+
+                // Done with the options
+                r4aFree(fieldName, "HTTP options");
+            }
+        }
+
+        // Divide the page into three parts
+        webPage += "<table>\n";
+
+        // Display the image
+        webPage += "  <tr><td colspan=3><img src=\"../jpeg\"></td></tr>\n";
+
+        // Start the left half of the page
+        webPage += "  <tr>\n";
+        webPage += "    <td>\n";
+
+        // Add the refresh button
+        r4aOv2640WebPageAddRefreshButton(webPage, currentWebPage);
+
+        // Display the image attributes
+        r4aOv2640WebPageAddImageAttributes(webPage);
+
+        // End the left half of the page
+        webPage += "    </td>\n";
+
+        // Separate the two halves (width in pixels)
+        webPage += "    <td width=25>&nbsp;</td>\n";
+
+        // Start the right half of the page
+        webPage += "    <td>\n";
+        webPage += "      <table>\n";
+
+        // Add the controls to change the image enables
+        webPage += "        <tr><td colspan=3><h3>Enables</h3></td></tr>\n";
+        for (index = 0; index < enableCount; index++)
+            r4aOv2640WebPageAddEnable(webPage,
+                                      currentWebPage,
+                                      enables[index]._titleText,
+                                      enables[index]._tagText,
+                                      "Toggle",
+                                      enableValues[enables[index]._valueId]);
+
+        // Add the controls to change the image values
+        webPage += "        <tr><td colspan=3><h3>Values</h3></td></tr>\n";
+        for (index = 0; index < valueListCount; index++)
+            r4aOv2640WebPageAddValue(webPage,
+                                     currentWebPage,
+                                     valueList[index]._titleText,
+                                     valueList[index]._tagText,
+                                     "Select",
+                                     valueList[index]._minValue,
+                                     valueList[index]._maxValue,
+                                     values[valueList[index]._valueId]);
+
+        // End the right half of the page
+        webPage += "      </table>\n";
+        webPage += "    </td>\n";
+        webPage += "  </tr>\n";
+        webPage += "</table>\n";
     }
 
-    webPage += "</body>";
-    webPage += "</html>";
+    // Display the supported frame sizes
+    r4aOv2640WebPageAddFrameSizes(webPage);
+
+    // Display the supported pixel formats
+    r4aOv2640WebPageAddPixelFormats(webPage);
+
+    // End the page
+    webPage += "  </body>\n";
+    webPage += "</html>\n";
 
     // Respond to the request with the web page
     httpd_resp_send(request, webPage.c_str(), HTTPD_RESP_USE_STRLEN);
