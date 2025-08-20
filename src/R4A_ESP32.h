@@ -1439,8 +1439,10 @@ bool r4aOv2640Setup(const R4A_OV2640_SETUP * parameters,
 
 // Update the camera processing state
 // Inputs:
+//   parameters: Address of a R4A_OV2640_SETUP data structure
 //   display: Address of Print object for debug output, may be nullptr
-void r4aOv2640Update(Print * display = nullptr);
+void r4aOv2640Update(const R4A_OV2640_SETUP * parameters,
+                     Print * display = nullptr);
 
 // Verify the camera tables
 void r4aEsp32Ov2640VerifyTables();

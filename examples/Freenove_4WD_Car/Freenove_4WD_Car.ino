@@ -82,11 +82,8 @@ void wpfStart(Print * display);
 
 #ifdef  USE_OV2640
 // Forward routine declarations
-bool ov2640ProcessFrameBuffer(R4A_OV2640 * object,
-                              camera_fb_t * frameBuffer,
-                              Print * display);
-bool ov2640ProcessWebServerFrameBuffer(R4A_OV2640 * object,
-                                       camera_fb_t * frameBuffer);
+bool ov2640ProcessFrameBuffer(camera_fb_t * frameBuffer, Print * display);
+bool ov2640ProcessWebServerFrameBuffer(camera_fb_t * frameBuffer, Print * display);
 #endif  // USE_OV2640
 
 //****************************************
@@ -146,14 +143,19 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
         R4A_PCA9685_MOTOR motorFrontLeft(&pca9685, 14, 15);
     R4A_PCF8574 pcf8574(&esp32I2cBus._i2cBus, PCF8574_I2C_ADDRESS);
 #ifdef  USE_OV2640
-    R4A_OV2640 ov2640 =
+    const R4A_OV2640_SETUP ov2640 =
     {
-        ov2640ProcessFrameBuffer,           // _processFrameBuffer
-        ov2640ProcessWebServerFrameBuffer,  // _processWebServerFrameBuffer
-        20 * 1000 * 1000,       // _clockHz
-        &i2cBus,                // _i2cBus
-        OV2640_I2C_ADDRESS,     // _i2cAddress
-        &r4aOV2640Pins,         // _pins
+        ov2640ProcessFrameBuffer,
+        ov2640ProcessWebServerFrameBuffer,
+        &r4a4wdCarOv2640Pins,   // ESP32 GPIO pins for the 0V2640 camera
+        20 * 1000 * 1000,       // Input clock frequency for the OV2640
+        LEDC_TIMER_0,           // Timer producing the 2x clock frequency
+        LEDC_CHANNEL_0,         // Channel dividing the clock frequency to 1x
+        OV2640_I2C_ADDRESS,     // Device address of the OV2640 on the SCCB bus
+        10,                     // Value for JPEG quality
+        PIXFORMAT_JPEG,         // Value specifying the pixel format
+        FRAMESIZE_CIF,          // Value specifying the frame size
+        3                       // Number of frame buffers to allocate
     };
 #endif  // USE_OV2640
 #ifdef  USE_SPARKFUN_SEN_13582
@@ -635,12 +637,15 @@ void setupCore0(void *parameter)
     if (ov2640Present)
     {
         if (ov2640Enable == false)
+        {
             ov2640Present = false;
+            Serial.printf("WARNING: OV2640 camera is disabled!\r\n");
+        }
         else
         {
             log_v("Calling r4aOv2640Setup");
             Serial.printf("Initializing the OV2640 camera\r\n");
-            r4aOv2640Setup(&ov2640, PIXFORMAT_RGB565);
+            r4aOv2640Setup(&ov2640);
         }
     }
 #endif  // USE_OV2640

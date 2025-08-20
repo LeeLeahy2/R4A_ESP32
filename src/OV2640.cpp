@@ -1072,7 +1072,7 @@ esp_err_t r4aOv2640WebPage(httpd_req_t *request)
 
 //*********************************************************************
 // Update the camera processing state
-void r4aOv2640Update(R4A_OV2640_SETUP * ov2640Parameters,
+void r4aOv2640Update(const R4A_OV2640_SETUP * ov2640Parameters,
                      Print * display)
 {
     camera_fb_t * frameBuffer;
