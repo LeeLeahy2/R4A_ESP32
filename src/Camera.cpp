@@ -57,10 +57,6 @@ const R4A_PIXEL_FORMAT_TO_FORMAT r4aCameraPixelFormat[] =
 const int r4aCameraPixelFormatEntries = sizeof(r4aCameraPixelFormat)
                                       / sizeof(r4aCameraPixelFormat[0]);
 
-//****************************************
-// Locals
-//****************************************
-
 //*********************************************************************
 // Lookup the frame size details
 const R4A_CAMERA_FRAME * r4aCameraFindFrameDetails(framesize_t frameSize)
@@ -99,16 +95,364 @@ const R4A_CAMERA_PIXEL * r4aCameraFindPixelDetails(pixformat_t pixelFormat)
 }
 
 //*********************************************************************
-// Get the initialization status
-sensor_t * r4aCameraGetSensor(Print * display)
+// Discard multiple frame buffers
+void r4aCameraFrameBufferDiscard(int framesToDiscard)
+{
+    camera_fb_t * frameBuffer;
+    int frameCount;
+    uint32_t startMsec;
+
+    frameCount = 0;
+    startMsec = millis();
+    while (((millis() - startMsec) < 1000) && (frameCount < framesToDiscard))
+    {
+        frameBuffer = r4aCameraFrameBufferGet();
+        if (frameBuffer)
+        {
+            r4aCameraFrameBufferFree(frameBuffer);
+            frameCount += 1;
+        }
+    }
+}
+
+//*********************************************************************
+// Free the frame buffer
+void r4aCameraFrameBufferFree(camera_fb_t * frameBuffer)
+{
+    esp_camera_fb_return(frameBuffer);
+}
+
+//*********************************************************************
+// Get a frame buffer
+camera_fb_t * r4aCameraFrameBufferGet()
+{
+    camera_fb_t * frameBuffer;
+    int frameCount;
+    uint32_t startMsec;
+
+    startMsec = millis();
+    while ((millis() - startMsec) < 1000)
+    {
+        frameBuffer = esp_camera_fb_get();
+        if (frameBuffer)
+            break;
+    }
+    return frameBuffer;
+}
+
+//*********************************************************************
+// Get the automatic exposure correction value
+int r4aCameraGetAutomaticExposureCorrection()
 {
     sensor_t * sensor;   // Sensor routine pointers
 
     // Get access to the sensor structure
-    sensor = esp_camera_sensor_get();
+    sensor = r4aCameraGetSensor(nullptr);
     if (sensor == nullptr)
-        display->printf("ERROR: Failed to locate sensor structure!\r\n");
-    return sensor;
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the automatic exposure correction value
+    return (int)sensor->status.aec;
+}
+
+//*********************************************************************
+// Get the automatic exposure enable/disable
+int r4aCameraGetAutomaticExposureEnable()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the automatic exposure enable/disable value
+    return (int)sensor->status.aec2;
+}
+
+//*********************************************************************
+// Get the automatic exposure level
+int r4aCameraGetAutomaticExposureLevel()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the automatic exposure level
+    return (int)sensor->status.ae_level;
+}
+
+//*********************************************************************
+// Get the automatic gain control value
+int r4aCameraGetAutomaticGainControl()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the automatic gain control value
+    return (int)sensor->status.agc_gain;
+}
+
+//*********************************************************************
+// Get the automatic white balance enable/disable value
+int r4aCameraGetAutomaticWhiteBalanceEnable()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the automatic white balance value
+    return (int)sensor->status.awb;
+}
+
+//*********************************************************************
+// Get the bpc value
+int r4aCameraGetBpc()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the bpc value
+    return (int)sensor->status.bpc;
+}
+
+//*********************************************************************
+// Get the brightness value
+int r4aCameraGetBrightness()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the brightness value
+    return (int)sensor->status.brightness;
+}
+
+//*********************************************************************
+// Get the external clock (XCLK) frequency
+int r4aCameraGetClockHz()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the XCLK frequency in Hertz
+    return (int)sensor->xclk_freq_hz;
+}
+
+//*********************************************************************
+// Get the color bar enable/disable value
+int r4aCameraGetColorBarEnable()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the color bar value
+    return (int)sensor->status.colorbar;
+}
+
+//*********************************************************************
+// Get the contrast value
+int r4aCameraGetContrast()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the contrast
+    return (int)sensor->status.contrast;
+}
+
+//*********************************************************************
+// Get the dcw value
+int r4aCameraGetDcw()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the dcw value
+    return (int)sensor->status.dcw;
+}
+
+//*********************************************************************
+// Get the denoise value
+int r4aCameraGetDenoise()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the denoise value
+    return (int)sensor->status.denoise;
+}
+
+//*********************************************************************
+// Get the exposure control enable value
+int r4aCameraGetExposureControlEnable()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the exposure control enable value
+    return (int)sensor->status.aec;
+}
+
+//*********************************************************************
+// Get the frame size
+int r4aCameraGetFrameSize()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the frame size value
+    return (int)sensor->status.framesize;
+}
+
+//*********************************************************************
+// Get the gain ceiling
+int r4aCameraGetGainCeiling()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the gain ceiling value
+    return (int)sensor->status.gainceiling;
+}
+
+//*********************************************************************
+// Get the gain control enable value
+int r4aCameraGetGainControlEnable()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the gain control enable value
+    return (int)sensor->status.agc;
+}
+
+//*********************************************************************
+// Get the horizontal mirror state
+int r4aCameraGetHorizontalMirror()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the horizontal mirror value
+    return (int)sensor->status.hmirror;
+}
+
+//*********************************************************************
+// Get the lens control enable value
+int r4aCameraGetLensControlEnable()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the lens control enable value
+    return (int)sensor->status.lenc;
+}
+
+//*********************************************************************
+// Get the pixel format
+int r4aCameraGetPixelFormat()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the pixel format value
+    return (int)sensor->pixformat;
+}
+
+//*********************************************************************
+// Get the quality
+int r4aCameraGetQuality()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the quality value
+    return (int)sensor->status.quality;
+}
+
+//*********************************************************************
+// Get the raw GMA enable value
+int r4aCameraGetRawGmaEnable()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the raw GMA enable value
+    return (int)sensor->status.raw_gma;
 }
 
 //*********************************************************************
@@ -121,13 +465,625 @@ int r4aCameraGetRegister(int regAddress, Print * display)
     // Get access to the sensor structure
     sensor = r4aCameraGetSensor(display);
     if (sensor == nullptr)
-        return -1;
+        return R4A_ERROR_NO_SENSOR;
 
     // Return the initialization status
     status = sensor->get_reg(sensor, regAddress, 0xff);
     if ((status < 0) && display)
         display->printf("Failed to initialize sensor status structure!\r\n");
     return status;
+}
+
+//*********************************************************************
+// Get the saturation level
+int r4aCameraGetSaturation()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the saturation level
+    return (int)sensor->status.saturation;
+}
+
+//*********************************************************************
+// Get the sensor data structure
+sensor_t * r4aCameraGetSensor(Print * display)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = esp_camera_sensor_get();
+    if (sensor == nullptr)
+        display->printf("ERROR: Failed to locate sensor structure!\r\n");
+    return sensor;
+}
+
+//*********************************************************************
+// Get the sharpness
+int r4aCameraGetSharpness()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the sharpness
+    return (int)sensor->status.sharpness;
+}
+
+//*********************************************************************
+// Get the special effect
+int r4aCameraGetSpecialEffect()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the special effect value
+    return (int)sensor->status.special_effect;
+}
+
+//*********************************************************************
+// Get the vertical flip state
+int r4aCameraGetVerticalFlip()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the vertical flip value
+    return (int)sensor->status.vflip;
+}
+
+//*********************************************************************
+// Get the white balance mode
+int r4aCameraGetWhiteBalanceMode()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the white balance mode
+    return (int)sensor->status.wb_mode;
+}
+
+//*********************************************************************
+// Get the WPC value
+int r4aCameraGetWpc()
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Return the WPC value
+    return (int)sensor->status.wpc;
+}
+
+//*********************************************************************
+// Get the initialization status
+int r4aCameraInitStatus(Print * display)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+    int status;
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(display);
+    if (sensor == nullptr)
+        return -1;
+
+    // Return the initialization status
+    status = sensor->init_status(sensor);
+    if (status == 0)
+        display->printf("Sensor status initialized!\r\n");
+    else
+        display->printf("Failed to initialize sensor status structure!\r\n");
+    return status;
+}
+
+//*********************************************************************
+// Set the automatic exposure control gain value
+int r4aCameraSetAutomaticExposureControl(int gain)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the automatic exposure control gain value
+    return sensor->set_aec_value(sensor, gain);
+}
+
+//*********************************************************************
+// Enable or disable automatic exposure control
+int r4aCameraSetAutomaticExposureControlEnable(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the automatic exposure control 2
+    return sensor->set_aec2(sensor, enable);
+}
+
+//*********************************************************************
+// Set the automatic exposure level
+int r4aCameraSetAutomaticExposureLevel(int level)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the automatic exposure level
+    return sensor->set_ae_level(sensor, level);
+}
+
+//*********************************************************************
+// Set the automatic gain control
+int r4aCameraSetAutomaticGainControl(int gain)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the automatic gain control
+    return sensor->set_agc_gain(sensor, gain);
+}
+
+//*********************************************************************
+// Enable or disable automatic white balance
+int r4aCameraSetAutomaticWhiteBalance(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the automatic white balance
+    return sensor->set_whitebal(sensor, enable);
+}
+
+//*********************************************************************
+// Enable or disable bpc
+int r4aCameraSetBpc(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the bpc
+    return sensor->set_bpc(sensor, enable);
+}
+
+//*********************************************************************
+// Set the brightness
+int r4aCameraSetBrightness(int level)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the brightness
+    return sensor->set_brightness(sensor, level);
+}
+
+//*********************************************************************
+// Enable or disable color bar
+int r4aCameraSetColorBar(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the color bar
+    return sensor->set_colorbar(sensor, enable);
+}
+
+//*********************************************************************
+// Set the contrast
+int r4aCameraSetContrast(int level)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the contrast
+    return sensor->set_contrast(sensor, level);
+}
+
+//*********************************************************************
+// Enable or disable dcw
+int r4aCameraSetDcw(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the dcw
+    return sensor->set_dcw(sensor, enable);
+}
+
+//*********************************************************************
+// Set the denoise
+int r4aCameraSetDenoise(int level)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the denoise level
+    return sensor->set_denoise(sensor, level);
+}
+
+//*********************************************************************
+// Enable or disable exposure control
+int r4aCameraSetExposureControl(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the exposure control
+    return sensor->set_exposure_ctrl(sensor, enable);
+}
+
+//*********************************************************************
+// Set the external clock frequency
+int r4aCameraSetExternalClockFrequency(int timer, int xclk)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the external clock frequency
+    return sensor->set_xclk(sensor, timer, xclk);
+}
+
+//*********************************************************************
+// Set frame size
+int r4aCameraSetFrameSize(framesize_t framesize)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the frame size
+    return sensor->set_framesize(sensor, framesize);
+}
+
+//*********************************************************************
+// Set gain ceiling
+int r4aCameraSetGainCeiling(gainceiling_t gainceiling)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the gain ceiling
+    return sensor->set_gainceiling(sensor, gainceiling);
+}
+
+//*********************************************************************
+// Enable or disable gain control
+int r4aCameraSetGainControlEnable(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the gain control enable
+    return sensor->set_gain_ctrl(sensor, enable);
+}
+
+//*********************************************************************
+// Enable or disable horizontal mirror
+int r4aCameraSetHorizontalMirror(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the horizontal mirror
+    return sensor->set_hmirror(sensor, enable);
+}
+
+//*********************************************************************
+// Enable or disable lens control
+int r4aCameraSetLensControlEnable(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the lens control enable
+    return sensor->set_lenc(sensor, enable);
+}
+
+//*********************************************************************
+// Set pixel format
+int r4aCameraSetPixelFormat(pixformat_t pixformat)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the pixel format
+    return sensor->set_pixformat(sensor, pixformat);
+}
+
+//*********************************************************************
+// Set PLL frequency
+int r4aCameraSetPllFrequency(int bypass,
+                             int mul,
+                             int sys,
+                             int root,
+                             int pre,
+                             int seld5,
+                             int pclken,
+                             int pclk)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the PLL frequency
+    return sensor->set_pll(sensor,
+                           bypass,
+                           mul,
+                           sys,
+                           root,
+                           pre,
+                           seld5,
+                           pclken,
+                           pclk);
+}
+
+//*********************************************************************
+// Set quality
+int r4aCameraSetQuality(int quality)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the quality
+    return sensor->set_quality(sensor, quality);
+}
+
+//*********************************************************************
+// Enable or disable raw GMA
+int r4aCameraSetRawGmaEnable(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the raw GMA enable
+    return sensor->set_raw_gma(sensor, enable);
+}
+
+//*********************************************************************
+// Set raw resolution
+int r4aCameraSetRawResolution(int startX,
+                              int startY,
+                              int endX,
+                              int endY,
+                              int offsetX,
+                              int offsetY,
+                              int totalX,
+                              int totalY,
+                              int outputX,
+                              int outputY,
+                              bool scale,
+                              bool binning)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the raw resolution
+    return sensor->set_res_raw(sensor,
+                               startX,
+                               startY,
+                               endX,
+                               endY,
+                               offsetX,
+                               offsetY,
+                               totalX,
+                               totalY,
+                               outputX,
+                               outputY,
+                               scale,
+                               binning);
+}
+
+//*********************************************************************
+// Set register
+int r4aCameraSetRegister(int reg, int mask, int value)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the register
+    return sensor->set_reg(sensor, reg, mask, value);
+}
+
+//*********************************************************************
+// Set saturation
+int r4aCameraSetSaturation(int level)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the saturation
+    return sensor->set_saturation(sensor, level);
+}
+
+//*********************************************************************
+// Set sharpness
+int r4aCameraSetSharpness(int level)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the sharpness
+    return sensor->set_sharpness(sensor, level);
+}
+
+//*********************************************************************
+// Set special effect
+int r4aCameraSetSpecialEffect(int effect)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the special effect
+    return sensor->set_special_effect(sensor, effect);
+}
+
+//*********************************************************************
+// Enable or disable vertical flip
+int r4aCameraSetVerticalFlip(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the vertical flip
+    return sensor->set_vflip(sensor, enable);
+}
+
+//*********************************************************************
+// Set white balance mode
+int r4aCameraSetWhiteBalanceMode(int mode)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the white balance mode
+    return sensor->set_wb_mode(sensor, mode);
+}
+
+//*********************************************************************
+// Enable or disable WPC
+int r4aCameraSetWpcEnable(int enable)
+{
+    sensor_t * sensor;   // Sensor routine pointers
+
+    // Get access to the sensor structure
+    sensor = r4aCameraGetSensor(nullptr);
+    if (sensor == nullptr)
+        return R4A_ERROR_NO_SENSOR;
+
+    // Set the WPC enable
+    return sensor->set_wpc(sensor, enable);
 }
 
 //*********************************************************************
