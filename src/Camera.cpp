@@ -11,7 +11,7 @@
 // Constants
 //****************************************
 
-const R4A_FRAME_SIZE_TO_FORMAT r4aCameraFrameFormat[] =
+const R4A_FRAME_SIZE_TO_FORMAT r4aEsp32CameraFrameFormat[] =
 {
     {FRAMESIZE_96X96,   R4A_FRAME_SIZE_96x96},      //   96 x   96
     {FRAMESIZE_QQVGA,   R4A_FRAME_SIZE_QQVGA},      //  160 x  120
@@ -39,10 +39,10 @@ const R4A_FRAME_SIZE_TO_FORMAT r4aCameraFrameFormat[] =
     {FRAMESIZE_QSXGA,   R4A_FRAME_SIZE_QSXGA},      // 2560 x 1920
     {FRAMESIZE_5MP,     R4A_FRAME_SIZE_5MP},        // 2592 x 1944
 };
-const int r4aCameraFrameFormatEntries = sizeof(r4aCameraFrameFormat)
-                                      / sizeof(r4aCameraFrameFormat[0]);
+const int r4aEsp32CameraFrameFormatEntries = sizeof(r4aEsp32CameraFrameFormat)
+                                           / sizeof(r4aEsp32CameraFrameFormat[0]);
 
-const R4A_PIXEL_FORMAT_TO_FORMAT r4aCameraPixelFormat[] =
+const R4A_PIXEL_FORMAT_TO_FORMAT r4aEsp32CameraPixelFormat[] =
 {
     {PIXFORMAT_RGB565,      R4A_PIXEL_FORMAT_RGB565},       // 2BPP/RGB565
     {PIXFORMAT_YUV422,      R4A_PIXEL_FORMAT_YUV422},       // 2BPP/YUV422
@@ -54,8 +54,8 @@ const R4A_PIXEL_FORMAT_TO_FORMAT r4aCameraPixelFormat[] =
     {PIXFORMAT_RGB444,      R4A_PIXEL_FORMAT_RGB444},       // 3BP2P/RGB444
     {PIXFORMAT_RGB555,      R4A_PIXEL_FORMAT_RGB555},       // 3BP2P/RGB555
 };
-const int r4aCameraPixelFormatEntries = sizeof(r4aCameraPixelFormat)
-                                      / sizeof(r4aCameraPixelFormat[0]);
+const int r4aEsp32CameraPixelFormatEntries = sizeof(r4aEsp32CameraPixelFormat)
+                                           / sizeof(r4aEsp32CameraPixelFormat[0]);
 
 //*********************************************************************
 // Lookup the frame size details
@@ -65,13 +65,10 @@ const R4A_CAMERA_FRAME * r4aCameraFindFrameDetails(framesize_t frameSize)
     if ((frameSize >= 0) && (frameSize < FRAMESIZE_INVALID))
     {
         // Walk the translation table
-        for (int index = 0; index < r4aCameraFrameFormatsEntries; index++)
+        for (int index = 0; index < r4aEsp32CameraFrameFormatEntries; index++)
             // Check for a matching frame size
-            if (frameSize == r4aCameraFrameFormat[index]._frameSize)
-            {
-                index = r4aCameraFrameFormat[index]._r4aFrameFormat;
-                return &r4aCameraFrameFormats[index];
-            }
+            if (frameSize == r4aEsp32CameraFrameFormat[index]._frameSize)
+                return r4aCameraFindFrameSize(r4aEsp32CameraFrameFormat[index]._r4aFrameFormat);
     }
     return nullptr;
 }
@@ -81,15 +78,12 @@ const R4A_CAMERA_FRAME * r4aCameraFindFrameDetails(framesize_t frameSize)
 const R4A_CAMERA_PIXEL * r4aCameraFindPixelDetails(pixformat_t pixelFormat)
 {
     // Verify the frameSize
-    if ((pixelFormat >= 0) && (pixelFormat < r4aCameraPixelFormatEntries))
+    if ((pixelFormat >= 0) && (pixelFormat < r4aEsp32CameraPixelFormatEntries))
     {
         // Walk the translation table
-        for (int index = 0; index < r4aCameraPixelFormatEntries; index++)
-            if (pixelFormat == r4aCameraPixelFormat[index]._pixelFormat)
-            {
-                index = r4aCameraPixelFormat[index]._r4aPixelFormat;
-                return &r4aCameraPixelFormats[index];
-            }
+        for (int index = 0; index < r4aEsp32CameraPixelFormatEntries; index++)
+            if (pixelFormat == r4aEsp32CameraPixelFormat[index]._pixelFormat)
+                return r4aCameraFindPixelFormat(r4aEsp32CameraPixelFormat[index]._r4aPixelFormat);
     }
     return nullptr;
 }
@@ -1090,26 +1084,72 @@ int r4aCameraSetWpcEnable(int enable)
 // Verify the camera tables
 void r4aEsp32CameraVerifyTables()
 {
+    uint64_t foundEsp32;
+    uint64_t foundR4a;
     int index;
 
     // Verify the camera tables
     r4aCameraVerifyTables();
 
-    // Verify the r4aCameraFrameFormat table
-    if (FRAMESIZE_INVALID != r4aCameraFrameFormatEntries)
-        r4aReportFatalError("Fix r4aCameraFrameFormat to match R4A_FRAME_SIZE_t!");
-    for (index = 0; index < FRAMESIZE_INVALID; index++)
-        if (index != r4aCameraFrameFormat[index]._frameSize)
+    // Check for duplicates in the r4aEsp32CameraFrameFormat table
+    foundEsp32 = 0;
+    foundR4a = 0;
+    for (index = 0; index < r4aEsp32CameraFrameFormatEntries; index++)
+    {
+        if (foundEsp32 & (1 << r4aEsp32CameraFrameFormat[index]._frameSize))
         {
-            Serial.printf("r4aCameraFrameFormat[%d]._frameSize != %d\r\n", index, index);
-            r4aReportFatalError("Fix r4aCameraFrameFormat table entries!");
+            Serial.printf("ERROR: Duplicate _frameSize entry at r4aEsp32CameraFrameFormat[%d]\r\n", index);
+            r4aReportFatalError("Duplicate _frameSize entry in r4aEsp32CameraFrameFormat table!");
         }
+        else if (foundR4a & (1 << r4aEsp32CameraFrameFormat[index]._r4aFrameFormat))
+        {
+            Serial.printf("ERROR: Duplicate _r4aFrameFormat entry at r4aEsp32CameraFrameFormat[%d]\r\n", index);
+            r4aReportFatalError("Duplicate _r4aFrameFormat entry in r4aEsp32CameraFrameFormat table!");
+        }
+        else
+        {
+            foundEsp32 |= 1 << r4aEsp32CameraFrameFormat[index]._frameSize;
+            foundR4a |= 1 << r4aEsp32CameraFrameFormat[index]._r4aFrameFormat;
+        }
+    }
 
-    // Verify the r4aCameraPixelFormat table
-    for (index = 0; index < r4aCameraPixelFormatEntries; index++)
-        if (index != r4aCameraPixelFormat[index]._pixelFormat)
+    // Verify the r4aEsp32CameraFrameFormat table size
+    framesize_t frameMax = FRAMESIZE_INVALID;
+    if (r4aEsp32CameraFrameFormatEntries != frameMax)
+    {
+        Serial.printf("ERROR: Too %s entries in r4aEsp32CameraFrameFormat table!\r\n",
+                      r4aEsp32CameraFrameFormatEntries > frameMax ? "many" : "few");
+        r4aReportFatalError("Fix r4aEsp32CameraFrameFormat table entries to match framesize_t!");
+    }
+
+    // Verify the r4aEsp32CameraPixelFormat table
+    foundEsp32 = 0;
+    foundR4a = 0;
+    for (index = 0; index < r4aEsp32CameraPixelFormatEntries; index++)
+    {
+        if (foundEsp32 & (1 << r4aEsp32CameraPixelFormat[index]._pixelFormat))
         {
-            Serial.printf("r4aCameraPixelFormat[%d]._frameSize != %d\r\n", index, index);
-            r4aReportFatalError("Fix r4aCameraPixelFormat table entries!");
+            Serial.printf("ERROR: Duplicate _pixelFormat entry at r4aEsp32CameraPixelFormat[%d]\r\n", index);
+            r4aReportFatalError("Duplicate _pixelFormat entry in r4aEsp32CameraPixelFormat table!");
         }
+        else if (foundR4a & (1 << r4aEsp32CameraPixelFormat[index]._r4aPixelFormat))
+        {
+            Serial.printf("ERROR: Duplicate _r4aPixelFormat entry at r4aEsp32CameraPixelFormat[%d]\r\n", index);
+            r4aReportFatalError("Duplicate _r4aPixelFormat entry in r4aEsp32CameraPixelFormat table!");
+        }
+        else
+        {
+            foundEsp32 |= 1 << r4aEsp32CameraPixelFormat[index]._pixelFormat;
+            foundR4a |= 1 << r4aEsp32CameraPixelFormat[index]._r4aPixelFormat;
+        }
+    }
+
+    // Verify the r4aEsp32CameraPixelFormat table size
+    int pixelMax = (int)PIXFORMAT_RGB555 + 1;
+    if (r4aEsp32CameraPixelFormatEntries != pixelMax)
+    {
+        Serial.printf("ERROR: Too %s entries in r4aEsp32CameraPixelFormat table!\r\n",
+                      r4aEsp32CameraPixelFormatEntries > pixelMax ? "many" : "few");
+        r4aReportFatalError("Fix r4aEsp32CameraPixelFormat table entries to match pixformat_t!");
+    }
 }

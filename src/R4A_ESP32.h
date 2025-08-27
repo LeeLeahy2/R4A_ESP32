@@ -103,12 +103,6 @@ typedef struct _R4A_PIXEL_FORMAT_TO_FORMAT
     R4A_PIXEL_FORMAT_t _r4aPixelFormat;
 } R4A_PIXEL_FORMAT_TO_FORMAT;
 
-extern const R4A_FRAME_SIZE_TO_FORMAT r4aCameraFrameFormat[];
-extern const int r4aCameraFrameFormatEntries;
-
-extern const R4A_PIXEL_FORMAT_TO_FORMAT r4aCameraPixelFormat[];
-extern const int r4aCameraPixelFormatEntries;
-
 // Lookup the frame size details
 // Inputs:
 //   frameSize: ESP32 frame size value

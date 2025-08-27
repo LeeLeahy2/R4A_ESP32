@@ -523,13 +523,13 @@ void r4aOv2640WebPageAddFrameSizes(String &webPage)
 // Add the images sizes
 void r4aOv2640WebPageAddImageAttributes(String &webPage)
 {
+    const R4A_CAMERA_FRAME * cameraFrame;
+    const R4A_CAMERA_PIXEL * cameraPixelFormat;
     framesize_t frameSize;
     int khz;
     int mhz;
     char mhzString[16];
     pixformat_t pixelFormat;
-    R4A_FRAME_SIZE_t r4aFrameFormat;
-    R4A_PIXEL_FORMAT_t r4aPixelFormat;
     int xPixels;
     int xRatio;
     int yPixels;
@@ -537,17 +537,17 @@ void r4aOv2640WebPageAddImageAttributes(String &webPage)
 
     // Translate the frame size
     frameSize = (framesize_t)r4aCameraGetFrameSize();
-    r4aFrameFormat = r4aCameraFrameFormat[frameSize]._r4aFrameFormat;
+    cameraFrame = r4aCameraFindFrameDetails(frameSize);
 
-    xRatio = r4aCameraFrameFormats[r4aFrameFormat]._xRatio;
-    yRatio = r4aCameraFrameFormats[r4aFrameFormat]._yRatio;
+    xRatio = cameraFrame->_xRatio;
+    yRatio = cameraFrame->_yRatio;
 
-    xPixels = r4aCameraFrameFormats[r4aFrameFormat]._xPixels;
-    yPixels = r4aCameraFrameFormats[r4aFrameFormat]._yPixels;
+    xPixels = cameraFrame->_xPixels;
+    yPixels = cameraFrame->_yPixels;
 
     // Translate the pixel format
     pixelFormat = (pixformat_t)r4aCameraGetPixelFormat();
-    r4aPixelFormat = r4aCameraPixelFormat[pixelFormat]._r4aPixelFormat;
+    cameraPixelFormat = r4aCameraFindPixelDetails(pixelFormat);
 
     // Format the clock frequency
     khz = r4aCameraGetClockHz() / 1000;
@@ -560,7 +560,7 @@ void r4aOv2640WebPageAddImageAttributes(String &webPage)
     webPage += "<li>Frame Size: "
             + String((int)frameSize)
             + ", "
-            + r4aCameraFrameFormats[r4aFrameFormat]._name
+            + cameraFrame->_name
             + ", "
             + String(xRatio) + " x "
             + String(yRatio) + ", ("
@@ -569,7 +569,7 @@ void r4aOv2640WebPageAddImageAttributes(String &webPage)
     webPage += "<li>Pixel Format: "
             + String((int)r4aCameraGetPixelFormat())
             + ", "
-            + r4aCameraPixelFormats[r4aPixelFormat]._name
+            + cameraPixelFormat->_name
             + "</li>";
     webPage += "<li>Quality: " + String(r4aCameraGetQuality()) + "</li>";
     webPage += "<li>Automatic Exposure Correction: " + String(r4aCameraGetAutomaticExposureCorrection()) + "</li>";
