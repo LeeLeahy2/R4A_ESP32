@@ -12,6 +12,7 @@
 #include "ESPmDNS.h"            // Built-in
 #include <HTTPClient.h>         // Built-in
 #include <LittleFS.h>           // Built-in, load and store files in flash
+#include <stdlib.h>
 
 #include <esp_camera.h>         // IDF built-in, needed for OV2640 camera
 #include <esp_http_server.h>    // IDF built-in, needed for camera web server
