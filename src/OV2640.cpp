@@ -1067,7 +1067,5 @@ esp_err_t r4aOv2640WebPage(httpd_req_t *request)
     webPage += "</html>\n";
 
     // Respond to the request with the web page
-    httpd_resp_send(request, webPage.c_str(), HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
+    return httpd_resp_send(request, webPage.c_str(), HTTPD_RESP_USE_STRLEN);
 }
-
