@@ -1637,10 +1637,12 @@ R4A_WIFI_CHANNEL_t r4aWifiStationSelectAP(uint8_t apCount, bool list)
             for (authIndex = 0; authIndex < r4aWifiSsidPasswordEntries; authIndex++)
             {
                 // Determine if this authorization matches the AP's SSID
-                if (strlen(*r4aWifiSsidPassword[authIndex].ssid)
+                if (*r4aWifiSsidPassword[authIndex].ssid
+                    && strlen(*r4aWifiSsidPassword[authIndex].ssid)
                     && (strcmp(ssid, *r4aWifiSsidPassword[authIndex].ssid) == 0)
                     && ((type == WIFI_AUTH_OPEN)
-                        || (strlen(*r4aWifiSsidPassword[authIndex].password))))
+                        || (*r4aWifiSsidPassword[authIndex].password
+                            && (strlen(*r4aWifiSsidPassword[authIndex].password)))))
                 {
                     if (r4aWifiDebug)
                         Serial.printf("WiFi: Found remote AP: %s\r\n", ssid);
