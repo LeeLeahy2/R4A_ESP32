@@ -16,6 +16,25 @@ bool r4aWebServerEnable = true;
 const char * r4aWebServerDownloadArea;
 const char * r4aWebServerNvmArea;
 uint8_t r4aWebServerCameraUser;
+volatile int32_t r4aWebServerCameraUserCount;
+
+//*********************************************************************
+// Add a camera user
+void r4aWebServerCameraUserAdd()
+{
+    // Account for this camera user
+    if (r4aAtomicAdd32((int32_t *)&r4aWebServerCameraUserCount, 1, __ATOMIC_RELAXED) == 0)
+        r4aCameraUserAdd(r4aWebServerCameraUser);
+}
+
+//*********************************************************************
+// Remove a camera user
+void r4aWebServerCameraUserRemove()
+{
+    // Account for this camera user
+    if (r4aAtomicSub32((int32_t *)&r4aWebServerCameraUserCount, 1, __ATOMIC_RELAXED) == 1)
+        r4aCameraUserRemove(r4aWebServerCameraUser);
+}
 
 //*********************************************************************
 // Check for extension

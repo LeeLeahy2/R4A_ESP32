@@ -1646,6 +1646,12 @@ extern Print * r4aWebServerDebug;   // Address of a Print object for web server 
 extern const char * r4aWebServerDownloadArea;   // Directory path for the download area
 extern const char * r4aWebServerNvmArea;   // Directory path for the NVM download area
 
+// Add a camera user
+void r4aWebServerCameraUserAdd();
+
+// Remove a camera user
+void r4aWebServerCameraUserRemove();
+
 // Check for extension
 // Inputs:
 //   object: Address of a R4A_WEB_SERVER data structure

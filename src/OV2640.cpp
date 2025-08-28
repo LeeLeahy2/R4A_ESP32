@@ -251,8 +251,14 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
         frameBuffer = nullptr;
         status = ESP_FAIL;
 
+        // Claim the camera
+        r4aWebServerCameraUserAdd();
+
         // Wait for a frame buffer
         frameBuffer = r4aCameraFrameBufferGet();
+
+        // Release the camera
+        r4aWebServerCameraUserRemove();
 
         // Handle the timeout error
         if (!frameBuffer)
