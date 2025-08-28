@@ -681,14 +681,17 @@ void r4aOv2640WebPageAddValue(String &webPage,
 }
 
 //*********************************************************************
-// Add refresh button
-void r4aOv2640WebPageAddRefreshButton(String &webPage,
-                                      const char * currentWebPage)
+// Add a button
+void r4aOv2640WebPageAddButton(String &webPage,
+                               const char * currentWebPage,
+                               const char * buttonText)
 {
     webPage += "      <form action=\"";
     webPage +=  currentWebPage;
     webPage += "\" method=\"get\">\n";
-    webPage += "        <input type=\"submit\" value=\"Refresh\">\n";
+    webPage += "        <input type=\"submit\" value=\"";
+    webPage += buttonText;
+    webPage += "\">\n";
     webPage += "      </form>\n";
     webPage += "      <br>\r\n\n";
 }
@@ -1011,7 +1014,7 @@ esp_err_t r4aOv2640WebPage(httpd_req_t *request)
         webPage += "    <td>\n";
 
         // Add the refresh button
-        r4aOv2640WebPageAddRefreshButton(webPage, currentWebPage);
+        r4aOv2640WebPageAddButton(webPage, currentWebPage, "Refresh");
 
         // Display the image attributes
         r4aOv2640WebPageAddImageAttributes(webPage);

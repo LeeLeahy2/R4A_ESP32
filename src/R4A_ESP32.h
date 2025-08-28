@@ -1431,6 +1431,15 @@ void r4aEsp32Ov2640VerifyTables();
 //   Returns the request processing status
 esp_err_t r4aOv2640WebPage(httpd_req_t *request);
 
+// Add a button to the webpage
+// Inputs:
+//   webPage: String containing the webpage text
+//   currentWebPage: File name of the web page on the server
+//   buttonText: Text for the button that is added to the webpage
+void r4aOv2640WebPageAddButton(String &webPage,
+                               const char * currentWebPage,
+                               const char * buttonText);
+
 extern bool r4aOv2640JpegDisplayTime;   // Set to true to display the JPEG conversion time
 
 // Supported frame sizes and pixel formats
