@@ -232,6 +232,14 @@ void loop()
         server_Cmd.stop();
     }
 
+        // Discard frame buffers
+    if (r4aCameraUsers == 0)
+    {
+        camera_fb_t * frameBuffer = r4aCameraFrameBufferGet();
+        if (frameBuffer)
+            r4aCameraFrameBufferFree(frameBuffer);
+    }
+
     // Process serial commands
     r4aSerialMenu(&serialMenu);
 }

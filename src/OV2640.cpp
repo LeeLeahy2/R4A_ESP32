@@ -999,9 +999,6 @@ esp_err_t r4aOv2640WebPage(httpd_req_t *request)
                             break;
                         }
                     }
-
-                    // Discard some frames
-                    r4aCameraFrameBufferDiscard(4);
                 }
 
                 // Done with the options

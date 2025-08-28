@@ -577,13 +577,19 @@ void loop()
         r4aWebServerUpdate(&webServer, r4aWifiStationOnline && webServerEnable);
     }
 
-    // Process the next image
 #ifdef  USE_OV2640
-    if (ov2640Present)
+    // Discard frame buffers
+    if (r4aCameraUsers == 0)
     {
         if (DEBUG_LOOP_CORE_1)
-            callingRoutine("r4aOv2640Update");
-        r4aOv2640Update(&ov2640);
+            callingRoutine("r4aCameraFrameBufferGet");
+        camera_fb_t * frameBuffer = r4aCameraFrameBufferGet();
+        if (frameBuffer)
+        {
+            if (DEBUG_LOOP_CORE_1)
+                callingRoutine("r4aCameraFrameBufferFree");
+            r4aCameraFrameBufferFree(frameBuffer);
+        }
     }
 #endif  // USE_OV2640
 
