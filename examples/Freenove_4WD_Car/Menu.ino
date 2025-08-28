@@ -284,6 +284,22 @@ const R4A_MENU_ENTRY robotMenuTable[] =
 };
 #define ROBOT_MENU_ENTRIES      sizeof(robotMenuTable) / sizeof(robotMenuTable[0])
 
+// Define the table index values
+#define SERVO_PAN       0
+#define SERVO_TILT      1
+
+// Servo menu
+const R4A_MENU_ENTRY servoMenuTable[] =
+{
+    // Command  menuRoutine                 menuParam       HelpRoutine                     align   HelpText
+    {"d",       r4aPca9685ServoMenuDisplay, 0,              nullptr,                        0,      "Display the servo states"},    // 1
+    {"p",       r4aPca9685ServoMenuMove,    SERVO_PAN,      r4aPca9685ServoMenuHelpDdd,     4,      "Pan to ddd degrees"},          // 2
+    {"s",       r4aPca9685ServoMenuSet,     0,              r4aPca9685ServoMenuHelpSDdd,    6,      "Set servo s to ddd degrees"},  // 3
+    {"t",       r4aPca9685ServoMenuMove,    SERVO_TILT,     r4aPca9685ServoMenuHelpDdd,     4,      "Tilt to ddd degrees"},         // 4
+    {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,                        0,      "Return to the main menu"},     // 5
+};                                                                                                                                  // 6
+#define SERVO_MENU_ENTRIES      sizeof(servoMenuTable) / sizeof(servoMenuTable[0])
+
 // Start menu
 const R4A_MENU_ENTRY startMenuTable[] =
 {
@@ -390,6 +406,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 };
 #define MAIN_MENU_ENTRIES       sizeof(mainMenuTable) / sizeof(mainMenuTable[0])
 
+// List of menus
 const R4A_MENU_TABLE menuTable[] =
 {
     // menuName         preMenu routine firstEntry          entryCount
@@ -410,7 +427,7 @@ const R4A_MENU_TABLE menuTable[] =
 #ifdef  USE_SPARKFUN_SEN_13582
     {"SEN-13582 Menu",  nullptr,      sfeSen13582MenuTable, SFE_SEN13582_MENU_ENTRIES},
 #endif  // USE_SPARKFUN_SEN_13582
-    {"Servo Menu",      nullptr,  r4aPca9685ServoMenuTable, R4A_PCA9685_SERVO_MENU_ENTRIES},
+    {"Servo Menu",      nullptr,        servoMenuTable,     SERVO_MENU_ENTRIES},
     {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
 #ifdef  USE_ZED_F9P
