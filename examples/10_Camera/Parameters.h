@@ -14,6 +14,13 @@
 const char * parameterFilePath;
 
 //****************************************
+// Servos
+//****************************************
+
+uint8_t servoPanStartDegrees;
+uint8_t servoTiltStartDegrees;
+
+//****************************************
 // Web server
 //****************************************
 
@@ -42,6 +49,11 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
     // NVM parameters
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &parameterFilePath,         "ParamFile",    R4A_ESP32_NVM_STRING("/Parameters.txt")},
+
+    // Servos
+// Required    Type                  Minimum     Maximum        Address                     Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &servoPanStartDegrees,      "PanDegrees",   SERVO_PAN_START},
+    {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &servoTiltStartDegrees,     "TiltDegrees",  SERVO_TILT_START},
 
     // Web server
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value

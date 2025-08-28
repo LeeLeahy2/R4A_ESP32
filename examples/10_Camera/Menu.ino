@@ -51,6 +51,7 @@ enum MENU_TABLE_INDEX
     MTI_DEBUG = R4A_MENU_MAIN + 1,
     MTI_I2C,
     MTI_NVM,
+    MTI_SERVO,
 };
 
 // Debug menu
@@ -64,9 +65,26 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     {"i2s1",    r4aEsp32MenuI2s1Display,    0,              nullptr,    0,      "Display the I2S 1 controller registers"},
     {"l",   r4aEsp32MenuLedCDisplaySummary, 0,              nullptr,    0,      "Display the LED controller registers"},
     {"p",    r4aEsp32MenuDisplayPartitions, 0,              nullptr,    0,      "Display the partitions"},
+    {"s",       nullptr,                    MTI_SERVO,      nullptr,    0,      "Servo menu"},
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define DEBUG_MENU_ENTRIES      sizeof(debugMenuTable) / sizeof(debugMenuTable[0])
+
+// Define the table index values
+#define SERVO_PAN       0
+#define SERVO_TILT      1
+
+// Servo menu
+const R4A_MENU_ENTRY servoMenuTable[] =
+{
+    // Command  menuRoutine                 menuParam       HelpRoutine                     align   HelpText
+    {"d",       r4aPca9685ServoMenuDisplay, 0,              nullptr,                        0,      "Display the servo states"},    // 1
+    {"p",       r4aPca9685ServoMenuMove,    SERVO_PAN,      r4aPca9685ServoMenuHelpDdd,     4,      "Pan to ddd degrees"},          // 2
+    {"s",       r4aPca9685ServoMenuSet,     0,              r4aPca9685ServoMenuHelpSDdd,    6,      "Set servo s to ddd degrees"},  // 3
+    {"t",       r4aPca9685ServoMenuMove,    SERVO_TILT,     r4aPca9685ServoMenuHelpDdd,     4,      "Tilt to ddd degrees"},         // 4
+    {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,                        0,      "Return to the main menu"},     // 5
+};                                                                                                                                  // 6
+#define SERVO_MENU_ENTRIES      sizeof(servoMenuTable) / sizeof(servoMenuTable[0])
 
 // Main menu
 const R4A_MENU_ENTRY mainMenuTable[] =
@@ -88,5 +106,6 @@ const R4A_MENU_TABLE menuTable[] =
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
+    {"Servo Menu",      nullptr,        servoMenuTable,     SERVO_MENU_ENTRIES},
 };
 const int menuTableEntries = sizeof(menuTable) / sizeof(menuTable[0]);

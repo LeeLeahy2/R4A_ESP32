@@ -18,11 +18,20 @@
 #include <WiFiClient.h>
 #include <WiFiAP.h>
 
+//****************************************
+// Constants
+//****************************************
+
+// Servo default starting position
+#define SERVO_PAN_START     90  // Degrees
+#define SERVO_TILT_START     2  // Degrees
+
 #define CMD_PORT        4000    // Connect with raw terminal
 #define CAMERA_PORT     7000
 
 #define DOWNLOAD_AREA       "/nvm/"
 
+// The constants above are used in Parameters.h
 #include "Parameters.h"
 
 //****************************************
@@ -63,6 +72,12 @@ const R4A_OV2640_SETUP ov2640Parameters =
     FRAMESIZE_CIF,          // Value specifying the frame size
     1                       // Number of frame buffers to allocate
 };
+
+//****************************************
+// Servos
+//****************************************
+
+USE_SERVO_TABLE;
 
 //****************************************
 // Serial menu support
@@ -153,6 +168,17 @@ void setup()
                         I2C_SCL,
                         R4A_I2C_FAST_MODE_HZ);
     r4aI2cBus = &esp32I2cBus._i2cBus;
+
+    // Initialize the PCA9685
+    log_v("Calling pca9685.begin");
+    if (pca9685.begin())
+    {
+        // Initialize the Pan/Tilt servos
+        log_v("Calling servoPan.positionSet");
+        servoPan.positionSet(servoPanStartDegrees);
+        log_v("Calling servoTilt.positionSet");
+        servoTilt.positionSet(servoTiltStartDegrees);
+    }
 
     // Initialize the camera
     log_d("Calling r4aOv2640Setup");
