@@ -114,7 +114,8 @@ void robotIdle(uint32_t currentMsec)
     static uint32_t previousMsec;
 
     // Update the LEDs on a regular interval
-    if (robotUseWS2812 && ((currentMsec - previousMsec) > 50))
+    if ((pcf8574Present || sx1509Present)
+        && robotUseWS2812 && ((currentMsec - previousMsec) > 50))
     {
         previousMsec = currentMsec;
 

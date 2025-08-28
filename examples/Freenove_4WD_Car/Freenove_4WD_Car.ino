@@ -183,7 +183,11 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
     R4A_ZED_F9P zedf9p(&esp32I2cBus._i2cBus, ZEDF9P_I2C_ADDRESS);
 #endif  // USE_ZED_F9P
 
+bool ak09916Present;
 bool ov2640Present;
+bool icm20948Present;
+bool pca9685Present;
+bool pcf8574Present;
 bool sx1509Present;
 bool vk16k33Present;
 bool zedf9pPresent;
@@ -630,7 +634,11 @@ void setupCore0(void *parameter)
 
     // Determine which devices are present
     log_v("Calling r4aI2cBusIsDevicePresent");
+    ak09916Present = r4aI2cBusIsDevicePresent(i2cBus, AK09916_I2C_ADDRESS);
+    icm20948Present = r4aI2cBusIsDevicePresent(i2cBus, ICM20948_I2C_ADDRESS);
     ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
+    pca9685Present = r4aI2cBusIsDevicePresent(i2cBus, PCA9685_I2C_ADDRESS);
+    pcf8574Present = r4aI2cBusIsDevicePresent(i2cBus, PCF8574_I2C_ADDRESS);
     sx1509Present = r4aI2cBusIsDevicePresent(i2cBus, SX1509_I2C_ADDRESS);
     vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
     zedf9pPresent = r4aI2cBusIsDevicePresent(i2cBus, ZEDF9P_I2C_ADDRESS);
