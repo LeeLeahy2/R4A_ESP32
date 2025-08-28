@@ -251,8 +251,10 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
         frameBuffer = nullptr;
         status = ESP_FAIL;
 
-        // Allocate the frame buffer
-        frameBuffer = esp_camera_fb_get();
+        // Wait for a frame buffer
+        frameBuffer = r4aCameraFrameBufferGet();
+
+        // Handle the timeout error
         if (!frameBuffer)
         {
             Serial.println("ERROR: Failed to capture the image");
@@ -305,7 +307,7 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
 
     // Return the frame buffer
     if (frameBuffer)
-        esp_camera_fb_return(frameBuffer);
+        r4aCameraFrameBufferFree(frameBuffer);
     return status;
 }
 
