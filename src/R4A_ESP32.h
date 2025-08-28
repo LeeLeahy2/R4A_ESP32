@@ -1421,9 +1421,6 @@ size_t r4aOv2640SendJpegChunk(void * arg,
 bool r4aOv2640Setup(const R4A_OV2640_SETUP * parameters,
                     Print * display = &Serial);
 
-// Verify the camera tables
-void r4aEsp32Ov2640VerifyTables();
-
 // Build web page describing the OV2640
 // Inputs:
 //   request: Address of a httpd_req_t data structure
