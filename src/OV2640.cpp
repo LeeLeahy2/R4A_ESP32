@@ -240,12 +240,12 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
 {
     int64_t endTime;
     camera_fb_t * frameBuffer;
+    R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER processFrame;
     int64_t startTime;
     esp_err_t status;
-    R4A_OV2640_SETUP * ov2640Parameters;
 
     // Get the OV2640 data structure address
-    ov2640Parameters = (R4A_OV2640_SETUP *)request->user_ctx;
+    processFrame = (R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER)request->user_ctx;
 
     do
     {
@@ -274,8 +274,8 @@ esp_err_t r4aOv2640JpegHandler(httpd_req_t *request)
         httpd_resp_set_hdr(request, "X-Timestamp", (const char *)timestamp);
 
         // Process the frame buffer
-        if (ov2640Parameters && (ov2640Parameters->_processWebServerFrameBuffer))
-            ov2640Parameters->_processWebServerFrameBuffer(frameBuffer, &Serial);
+        if (processFrame)
+            processFrame(frameBuffer, &Serial);
 
         // Send the captured image
         if (frameBuffer->format == PIXFORMAT_JPEG)
@@ -1070,24 +1070,3 @@ esp_err_t r4aOv2640WebPage(httpd_req_t *request)
     return ESP_OK;
 }
 
-//*********************************************************************
-// Update the camera processing state
-void r4aOv2640Update(const R4A_OV2640_SETUP * ov2640Parameters,
-                     Print * display)
-{
-    camera_fb_t * frameBuffer;
-
-    if (ov2640Parameters->_processFrameBuffer)
-    {
-        // Get a frame buffer
-        frameBuffer = esp_camera_fb_get();
-        if (!frameBuffer)
-            return;
-
-        // Process the frame buffer
-        ov2640Parameters->_processFrameBuffer(frameBuffer, display);
-
-        // Return the frame buffer
-        esp_camera_fb_return(frameBuffer);
-    }
-}

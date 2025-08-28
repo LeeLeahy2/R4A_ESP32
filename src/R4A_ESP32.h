@@ -1355,15 +1355,6 @@ bool r4aEsp32NvmWriteFileString(File &file, const char * string);
 // OV2640 API
 //****************************************
 
-// Process the frame buffer
-// Inputs:
-//   frameBuffer: Buffer containing the raw image data
-//   display: Address of Print object for output
-// Outputs:
-//   Returns true if the processing was successful and false upon error
-typedef bool (* R4A_OV2640_PROCESS_FRAME_BUFFER)(camera_fb_t * frameBuffer,
-                                                 Print * display);
-
 // Process the web server's frame buffer
 // Inputs:
 //   frameBuffer: Buffer containing the raw image data
@@ -1376,8 +1367,6 @@ typedef bool (* R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER)(camera_fb_t * frameB
 // OV2640 setup data structure declaration
 typedef struct _R4A_OV2640_SETUP
 {
-    R4A_OV2640_PROCESS_FRAME_BUFFER _processFrameBuffer;
-    R4A_OV2640_PROCESS_WEB_SERVER_FRAME_BUFFER _processWebServerFrameBuffer;
     const R4A_CAMERA_PINS * _pins;  // ESP32 GPIO pins for the 0V2640 camera
     uint32_t _clockHz;              // Input clock frequency for the OV2640
     ledc_timer_t _ledcTimer;        // Timer producing the 2x clock frequency
@@ -1431,13 +1420,6 @@ size_t r4aOv2640SendJpegChunk(void * arg,
 //   Returns true upon success and false upon failure
 bool r4aOv2640Setup(const R4A_OV2640_SETUP * parameters,
                     Print * display = &Serial);
-
-// Update the camera processing state
-// Inputs:
-//   parameters: Address of a R4A_OV2640_SETUP data structure
-//   display: Address of Print object for debug output, may be nullptr
-void r4aOv2640Update(const R4A_OV2640_SETUP * parameters,
-                     Print * display = nullptr);
 
 // Verify the camera tables
 void r4aEsp32Ov2640VerifyTables();

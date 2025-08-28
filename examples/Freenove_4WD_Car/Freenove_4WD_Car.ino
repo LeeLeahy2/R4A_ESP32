@@ -82,7 +82,6 @@ void wpfStart(Print * display);
 
 #ifdef  USE_OV2640
 // Forward routine declarations
-bool ov2640ProcessFrameBuffer(camera_fb_t * frameBuffer, Print * display);
 bool ov2640ProcessWebServerFrameBuffer(camera_fb_t * frameBuffer, Print * display);
 #endif  // USE_OV2640
 
@@ -145,8 +144,6 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 #ifdef  USE_OV2640
     const R4A_OV2640_SETUP ov2640 =
     {
-        ov2640ProcessFrameBuffer,
-        ov2640ProcessWebServerFrameBuffer,
         &r4a4wdCarOv2640Pins,   // ESP32 GPIO pins for the 0V2640 camera
         20 * 1000 * 1000,       // Input clock frequency for the OV2640
         LEDC_TIMER_0,           // Timer producing the 2x clock frequency
