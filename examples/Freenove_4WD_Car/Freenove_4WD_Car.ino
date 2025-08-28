@@ -80,6 +80,15 @@ void wpfStart(Print * display);
 // OV2640 camera
 //****************************************
 
+// List the users of the camera, one bit per user
+enum CAMERA_USERS
+{
+    CAMERA_USER_DISABLED = 0,
+    CAMERA_USER_CLF,
+    CAMERA_USER_SERVO,
+    CAMERA_USER_WEB_SERVER,
+};
+
 #ifdef  USE_OV2640
 // Forward routine declarations
 bool ov2640ProcessWebServerFrameBuffer(camera_fb_t * frameBuffer, Print * display);
@@ -388,6 +397,9 @@ void setup()
         log_v("Calling r4aNtpSetup");
         r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
     }
+
+    // Initialize the web server
+    r4aWebServerInit(CAMERA_USER_WEB_SERVER);
 
     // Enable web server debugging
     r4aWebServerDebug = webServerDebug ? &Serial : nullptr;

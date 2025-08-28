@@ -15,6 +15,7 @@ Print * r4aWebServerDebug;
 bool r4aWebServerEnable = true;
 const char * r4aWebServerDownloadArea;
 const char * r4aWebServerNvmArea;
+uint8_t r4aWebServerCameraUser;
 
 //*********************************************************************
 // Check for extension
@@ -202,6 +203,14 @@ esp_err_t r4aWebServerFileDownload(httpd_req_t *request)
 
     // Failed to access the requested page
     return ESP_FAIL;
+}
+
+//*********************************************************************
+// Initialize the web server
+void r4aWebServerInit(uint8_t cameraUser)
+{
+    // Save the camera user
+    r4aWebServerCameraUser = cameraUser;
 }
 
 //*********************************************************************

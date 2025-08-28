@@ -54,6 +54,13 @@ extern const int menuTableEntries;
 // OV2640 Camera
 //****************************************
 
+// List the users of the camera, one bit per user
+enum CAMERA_USERS
+{
+    CAMERA_USER_DISABLED = 0,
+    CAMERA_USER_WEB_SERVER,
+};
+
 // Forward routines
 bool ov2640ProcessWebServerFrameBuffer(camera_fb_t * frameBuffer, Print * display);
 
@@ -154,6 +161,9 @@ void setup()
     // Connect WiFi station to a remote WiFi access point
     log_d("Calling r4aWifiBegin");
     r4aWifiBegin();
+
+    // Initialize the web server
+    r4aWebServerInit(CAMERA_USER_WEB_SERVER);
 
     // Enable web server debugging
     r4aWebServerDebug = webServerDebug ? &Serial : nullptr;

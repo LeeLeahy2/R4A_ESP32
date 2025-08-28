@@ -1673,6 +1673,11 @@ esp_err_t r4aWebServerError (httpd_req_t *request, httpd_err_code_t error);
 //   Returns the file download status
 esp_err_t r4aWebServerFileDownload(httpd_req_t *request);
 
+// Initialize the web server
+// Inputs:
+//   cameraUser: Bit number of the camera user
+void r4aWebServerInit(uint8_t cameraUser);
+
 // Start the web server
 // Inputs:
 //   object: Address of a R4A_WEB_SERVER data structure
