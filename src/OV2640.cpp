@@ -102,8 +102,6 @@ const R4A_PIXEL_FORMAT_MASK_t r4aOv2640SupportedPixelFormats = 0
 // Locals
 //****************************************
 
-uint8_t r4aOV2640PixelFormat = PIXFORMAT_RGB565;
-
 bool r4aOV2640JpegDisplayTime;  // Set to true to display the JPEG conversion time
 
 //*********************************************************************
