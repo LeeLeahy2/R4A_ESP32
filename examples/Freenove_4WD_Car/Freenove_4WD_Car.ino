@@ -178,7 +178,7 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
                            r4aLedMatrixRowPixelMap,
                            16,
                            8,
-                           15};
+                           1}; // Brightness (0 - 15)
 #ifdef  USE_ZED_F9P
     R4A_ZED_F9P zedf9p(&esp32I2cBus._i2cBus, ZEDF9P_I2C_ADDRESS);
 #endif  // USE_ZED_F9P
