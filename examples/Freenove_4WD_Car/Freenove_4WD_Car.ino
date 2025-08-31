@@ -422,6 +422,24 @@ void setup()
     while (!core0Initialized)
         delayMicroseconds(1);
 
+    // Initialize the camera
+#ifdef USE_OV2640
+    if (ov2640Present)
+    {
+        if (ov2640Enable == false)
+        {
+            ov2640Present = false;
+            Serial.printf("WARNING: OV2640 camera is disabled!\r\n");
+        }
+        else
+        {
+            log_v("Calling r4aOv2640Setup");
+            Serial.printf("Initializing the OV2640 camera\r\n");
+            r4aOv2640Setup(&ov2640);
+        }
+    }
+#endif  // USE_OV2640
+
     //****************************************
     // Core 1 completed initialization
     //****************************************
@@ -640,24 +658,6 @@ void setupCore0(void *parameter)
         if (!r4aVk16k33Setup(&vk16k33))
             r4aReportFatalError("Failed to initialize the VK16K33 LED Matrix controller!");
     }
-
-    // Initialize the camera
-#ifdef USE_OV2640
-    if (ov2640Present)
-    {
-        if (ov2640Enable == false)
-        {
-            ov2640Present = false;
-            Serial.printf("WARNING: OV2640 camera is disabled!\r\n");
-        }
-        else
-        {
-            log_v("Calling r4aOv2640Setup");
-            Serial.printf("Initializing the OV2640 camera\r\n");
-            r4aOv2640Setup(&ov2640);
-        }
-    }
-#endif  // USE_OV2640
 
     // Initialize the GPS receiver
 #ifdef  USE_ZED_F9P
