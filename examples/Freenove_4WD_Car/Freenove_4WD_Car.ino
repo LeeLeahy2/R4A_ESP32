@@ -424,6 +424,7 @@ void setup()
 
     // Initialize the camera
 #ifdef USE_OV2640
+    r4aCameraUserAdd(CAMERA_USER_DISABLED);
     if (ov2640Present)
     {
         if (ov2640Enable == false)
@@ -435,7 +436,8 @@ void setup()
         {
             log_v("Calling r4aOv2640Setup");
             Serial.printf("Initializing the OV2640 camera\r\n");
-            r4aOv2640Setup(&ov2640);
+            if (r4aOv2640Setup(&ov2640))
+                r4aCameraUserRemove(CAMERA_USER_DISABLED);
         }
     }
 #endif  // USE_OV2640
