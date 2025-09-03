@@ -22,26 +22,6 @@ void clfInit(R4A_ROBOT_CHALLENGE * object)
 }
 
 //*********************************************************************
-// Start the robot
-void clfStart(R4A_ROBOT_CHALLENGE * object)
-{
-    // Set the camera position
-    servoPan.positionSet(clfPanStartDegrees);
-    servoTilt.positionSet(clfTiltStartDegrees);
-
-    // Set the initial state
-    challengeStart();
-}
-
-//*********************************************************************
-// Stop the robot
-void clfStop(R4A_ROBOT_CHALLENGE * object)
-{
-    // Stop the robot
-    challengeStop();
-}
-
-//*********************************************************************
 // Initialize the line following
 void clfStart(Print * display)
 {
@@ -72,12 +52,32 @@ void clfStart(Print * display)
 }
 
 //*********************************************************************
+// Start the robot
+void clfStart(R4A_ROBOT_CHALLENGE * object)
+{
+    // Set the camera position
+    servoPan.positionSet(clfPanStartDegrees);
+    servoTilt.positionSet(clfTiltStartDegrees);
+
+    // Set the initial state
+    challengeStart();
+}
+
+//*********************************************************************
 // Start the line following
 void clfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
                   const char * command,
                   Print * display)
 {
     clfStart(display);
+}
+
+//*********************************************************************
+// Stop the robot
+void clfStop(R4A_ROBOT_CHALLENGE * object)
+{
+    // Stop the robot
+    challengeStop();
 }
 
 //*********************************************************************
