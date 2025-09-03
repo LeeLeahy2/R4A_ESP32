@@ -50,28 +50,6 @@ void bltInit(R4A_ROBOT_CHALLENGE * object)
 }
 
 //*********************************************************************
-// The initial delay routine calls this routine just before calling
-// the challenge routine for the first time.
-void bltStart(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeStart();
-
-    // Set the reference voltage from the photo-resistor voltage divider
-    r4aEsp32VoltageGet(LIGHT_SENSOR_PIN,
-                       0,
-                       1,
-                       &lsAdcReference);
-}
-
-//*********************************************************************
-// The robot.stop routine calls this routine to stop the motors and
-// perform any other actions.
-void bltStop(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeStop();
-}
-
-//*********************************************************************
 // Start the light tracking
 void bltStart(Print * display)
 {
@@ -86,6 +64,13 @@ void bltStart(Print * display)
         ROBOT_LIGHT_TRACKING_DURATION_SEC,  // _duration
     };
     float voltage;
+
+    // Verify the I2C bus configuration
+    if (!pca9685Present)
+    {
+        display->printf("ERROR: PCA9685 (motors) not responding on I2C bus!\r\n");
+        return;
+    }
 
     // Only start the robot if the battery is on
     if (!robotCheckBatteryLevel())
@@ -102,12 +87,34 @@ void bltStart(Print * display)
 }
 
 //*********************************************************************
+// The initial delay routine calls this routine just before calling
+// the challenge routine for the first time.
+void bltStart(R4A_ROBOT_CHALLENGE * object)
+{
+    challengeStart();
+
+    // Set the reference voltage from the photo-resistor voltage divider
+    r4aEsp32VoltageGet(LIGHT_SENSOR_PIN,
+                       0,
+                       1,
+                       &lsAdcReference);
+}
+
+//*********************************************************************
 // Start the light following
 void bltStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
                   const char * command,
                   Print * display)
 {
     bltStart(display);
+}
+
+//*********************************************************************
+// The robot.stop routine calls this routine to stop the motors and
+// perform any other actions.
+void bltStop(R4A_ROBOT_CHALLENGE * object)
+{
+    challengeStop();
 }
 
 //*********************************************************************
