@@ -71,6 +71,99 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 }
 
 //*********************************************************************
+// The robotStart calls this routine before switching to the initial
+// delay state.
+void blfInit(R4A_ROBOT_CHALLENGE * object)
+{
+    challengeInit();
+}
+
+//*********************************************************************
+// Start the line following
+void blfStart(Print * display)
+{
+    static R4A_ROBOT_CHALLENGE basicLineFollowing =
+    {
+        blfChallenge,
+        blfInit,
+        blfStart,
+        blfStop,
+
+        "Basic Line Following",         // _name
+        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+    };
+#ifdef USE_SPARKFUN_SEN_13582
+    static R4A_ROBOT_CHALLENGE blfSx1509LineFollowing =
+    {
+        blfSx1509Challenge,
+        blfInit,
+        blfStart,
+        blfStop,
+
+        "Basic Line Following",         // _name
+        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+    };
+#endif  // USE_SPARKFUN_SEN_13582
+    R4A_ROBOT_CHALLENGE * challengeStructure;
+    float voltage;
+
+    // Verify the I2C bus configuration
+    if (!pca9685Present)
+    {
+        display->printf("ERROR: PCA9685 (motors) not responding on I2C bus!\r\n");
+        return;
+    }
+    if ((!sx1509Present) && (!pcf8574Present))
+    {
+        display->printf("ERROR: PCF8574 (line sensor) not responding on I2C bus!\r\n");
+        return;
+    }
+
+    // Only start the robot if the battery is on
+    if (!robotCheckBatteryLevel())
+    {
+        voltage = READ_BATTERY_VOLTAGE(nullptr);
+        display->printf("Battery: %f4.2V\r\n", voltage);
+        display->println("WARNING: Battery voltage to run the robot!");
+    }
+    else
+    {
+        // Start the robot challenge if the robot is not active
+        challengeStructure = &basicLineFollowing;
+#ifdef USE_SPARKFUN_SEN_13582
+        if (sx1509Present)
+            challengeStructure = &blfSx1509LineFollowing;
+#endif  // USE_SPARKFUN_SEN_13582
+        r4aRobotStart(&robot, challengeStructure, display);
+    }
+}
+
+//*********************************************************************
+// The initial delay routine calls this routine just before calling
+// the challenge routine for the first time.
+void blfStart(R4A_ROBOT_CHALLENGE * object)
+{
+    challengeStart();
+}
+
+//*********************************************************************
+// Start the line following
+void blfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    blfStart(display);
+}
+
+//*********************************************************************
+// The robot.stop routine calls this routine to stop the motors and
+// perform any other actions.
+void blfStop(R4A_ROBOT_CHALLENGE * object)
+{
+    challengeStop();
+}
+
+//*********************************************************************
 #ifdef USE_SPARKFUN_SEN_13582
 // The robotRunning routine calls this routine to actually perform
 // the challenge.  This routine typically reads a sensor and may
@@ -170,87 +263,6 @@ void blfSx1509Challenge(R4A_ROBOT_CHALLENGE * object)
     }
 }
 #endif  // USE_SPARKFUN_SEN_13582
-
-//*********************************************************************
-// The robotStart calls this routine before switching to the initial
-// delay state.
-void blfInit(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeInit();
-}
-
-//*********************************************************************
-// The initial delay routine calls this routine just before calling
-// the challenge routine for the first time.
-void blfStart(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeStart();
-}
-
-//*********************************************************************
-// The robot.stop routine calls this routine to stop the motors and
-// perform any other actions.
-void blfStop(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeStop();
-}
-
-//*********************************************************************
-// Start the line following
-void blfStart(Print * display)
-{
-    static R4A_ROBOT_CHALLENGE basicLineFollowing =
-    {
-        blfChallenge,
-        blfInit,
-        blfStart,
-        blfStop,
-
-        "Basic Line Following",         // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
-    };
-#ifdef USE_SPARKFUN_SEN_13582
-    static R4A_ROBOT_CHALLENGE blfSx1509LineFollowing =
-    {
-        blfSx1509Challenge,
-        blfInit,
-        blfStart,
-        blfStop,
-
-        "Basic Line Following",         // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
-    };
-#endif  // USE_SPARKFUN_SEN_13582
-    R4A_ROBOT_CHALLENGE * challengeStructure;
-    float voltage;
-
-    // Only start the robot if the battery is on
-    if (!robotCheckBatteryLevel())
-    {
-        voltage = READ_BATTERY_VOLTAGE(nullptr);
-        display->printf("Battery: %f4.2V\r\n", voltage);
-        display->println("WARNING: Battery voltage to run the robot!");
-    }
-    else
-    {
-        // Start the robot challenge if the robot is not active
-        challengeStructure = &basicLineFollowing;
-#ifdef USE_SPARKFUN_SEN_13582
-        if (sx1509Present)
-            challengeStructure = &blfSx1509LineFollowing;
-#endif  // USE_SPARKFUN_SEN_13582
-        r4aRobotStart(&robot, challengeStructure, display);
-    }
-}
-
-//*********************************************************************
-// Start the line following
-void blfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
-{
-    blfStart(display);
-}
 
 //*********************************************************************
 // Start the line following at boot
