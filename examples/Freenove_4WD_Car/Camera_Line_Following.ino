@@ -37,6 +37,25 @@ void clfStart(Print * display)
     };
     float voltage;
 
+    // Determine if the camera is present
+    if (ov2640Present == false)
+    {
+        display->printf("WARNING: Camera is not available!\r\n");
+        return;
+    }
+
+    // Verify the I2C bus configuration
+    if (!pca9685Present)
+    {
+        display->printf("ERROR: PCA9685 (motors & servos) not responding on I2C bus!\r\n");
+        return;
+    }
+    if (!pcf8574Present)
+    {
+        display->printf("ERROR: PCF8574 (line sensor) not responding on I2C bus!\r\n");
+        return;
+    }
+
     // Only start the robot if the battery is on
     if (!robotCheckBatteryLevel())
     {

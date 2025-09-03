@@ -30,7 +30,7 @@ const httpd_uri_t ov2640DetailsUri =
 {
     .uri       = OV2640_DETAILS_PAGE,
     .method    = HTTP_GET,
-    .handler   = r4aOv2640WebPage,
+    .handler   = ov2640WebPage,
     .user_ctx  = (void *)&webServer,
     .is_websocket = true,
     .handle_ws_control_frames = false,
@@ -82,6 +82,37 @@ bool ov2640RegisterUriHandlers(R4A_WEB_SERVER * object)
     if (r4aWebServerDebug)
         r4aWebServerDebug->printf("ERROR: Failed to register URI handler, error: %d!\r\n", error);
     return false;
+}
+
+//*********************************************************************
+// Display the camera web page
+esp_err_t ov2640WebPage(httpd_req_t *request)
+{
+    // Return the camera status web page if camera is online
+    if (ov2640Present)
+        return r4aOv2640WebPage(request);
+
+    // Return an error page
+
+    // Build the web page
+    String webPage("");
+    webPage += "<!DOCTYPE html>\n";
+    webPage += "<html lang=\"en\">\n";
+    webPage += "  <head>\n";
+    webPage += "    <meta charset=\"utf-8\">\n";
+    webPage += "    <title>OV2640 Details</title>\n";
+    webPage += "  </head>\n";
+    webPage += "  <body>\n";
+    webPage += "<h1>ERROR: OV2640 not responding to address ";
+    char i2cAddress[16];
+    sprintf(i2cAddress, "0x%x", OV2640_I2C_ADDRESS);
+    webPage += i2cAddress;
+    webPage += " on the I2C bus!</h1>\n";
+    webPage += "  </body>\n";
+    webPage += "</html>\n";
+
+    // Respond to the request with the web page
+    httpd_resp_send(request, webPage.c_str(), HTTPD_RESP_USE_STRLEN);
 }
 
 //*********************************************************************
