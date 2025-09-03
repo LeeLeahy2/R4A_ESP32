@@ -20,22 +20,6 @@ void alfInit(R4A_ROBOT_CHALLENGE * object)
 }
 
 //*********************************************************************
-// The initial delay routine calls this routine just before calling
-// the challenge routine for the first time.
-void alfStart(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeStart();
-}
-
-//*********************************************************************
-// Stop the robot and perform any other actions
-void alfStop(R4A_ROBOT_CHALLENGE * object)
-{
-    // Stop the robot
-    challengeStop();
-}
-
-//*********************************************************************
 // Start the line following
 void alfStart(Print * display)
 {
@@ -45,11 +29,22 @@ void alfStart(Print * display)
         alfInit,
         alfStart,
         alfStop,
-
         "Advanced Line Following",      // _name
         ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
     };
     float voltage;
+
+    // Verify the I2C bus configuration
+    if (!pca9685Present)
+    {
+        display->printf("ERROR: PCA9685 (motors) not responding on I2C bus!\r\n");
+        return;
+    }
+    if (!pcf8574Present)
+    {
+        display->printf("ERROR: PCF8574 (line sensor) not responding on I2C bus!\r\n");
+        return;
+    }
 
     // Only start the robot if the battery is on
     if (!robotCheckBatteryLevel())
@@ -66,12 +61,28 @@ void alfStart(Print * display)
 }
 
 //*********************************************************************
+// The initial delay routine calls this routine just before calling
+// the challenge routine for the first time.
+void alfStart(R4A_ROBOT_CHALLENGE * object)
+{
+    challengeStart();
+}
+
+//*********************************************************************
 // Start the line following
 void alfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
                   const char * command,
                   Print * display)
 {
     alfStart(display);
+}
+
+//*********************************************************************
+// Stop the robot and perform any other actions
+void alfStop(R4A_ROBOT_CHALLENGE * object)
+{
+    // Stop the robot
+    challengeStop();
 }
 
 //*********************************************************************
