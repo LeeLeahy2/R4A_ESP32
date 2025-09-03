@@ -34,6 +34,75 @@ typedef struct _WAYPOINT_FOLLOWING
 static WAYPOINT_FOLLOWING wpfData;
 
 //*********************************************************************
+// Start the waypoint following at boot
+void menuStartWpf(const struct _R4A_MENU_ENTRY * menuEntry,
+                  const char * command,
+                  Print * display)
+{
+    startIndex = CHALLENGE_WPF;
+    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
+}
+
+//*********************************************************************
+// Display the heading
+// Inputs:
+//   menuEntry: Address of the object describing the menu entry
+//   command: Zero terminated command string
+//   display: Device used for output
+void menuWpfDisplayHeading(const R4A_MENU_ENTRY * menuEntry,
+                           const char * command,
+                           Print * display)
+{
+    double altitude;
+    String comment;
+    double deltaLatitude;
+    double deltaLongitude;
+    File file;
+    double horizontalAccuracy;
+    double horizontalAccuracyStdDev;
+    double latitude;
+    double longitude;
+    uint8_t satellitesInView;
+
+    // Determine if a waypoint was set
+    if (wpfData._latitude || wpfData._longitude)
+    {
+        latitude = wpfData._latitude;
+        longitude = wpfData._longitude;
+    }
+    else
+    {
+        // No, get the first waypoint
+        if (r4aEsp32WpReadPoint(&file,
+                                &latitude,
+                                &longitude,
+                                &altitude,
+                                &horizontalAccuracy,
+                                &horizontalAccuracyStdDev,
+                                &satellitesInView,
+                                &comment,
+                                display))
+
+        // Done with the file
+        file.close();
+    }
+
+    // Compute the direction from the current location to the waypoint
+    deltaLatitude = latitude - zedf9p._latitude;
+    deltaLongitude = longitude - zedf9p._longitude;
+
+    // Display the heading
+    display->printf("   Latitude         Longitude\r\n");
+    display->printf("--------------   --------------\r\n");
+    display->printf("%14.9f   %14.9f   Target Waypoint\r\n",
+                    latitude, longitude);
+    display->printf("%14.9f   %14.9f   Current Position\r\n",
+                    zedf9p._latitude, zedf9p._longitude);
+    display->printf("%14.9f   %14.9f   Heading\r\n",
+                    deltaLatitude, deltaLongitude);
+}
+
+//*********************************************************************
 // The robotRunning routine calls this routine to actually perform
 // the challenge.  This routine typically reads a sensor and may
 // optionally adjust the motors based upon the sensor reading.  The
@@ -174,85 +243,6 @@ void wpfLogWayPoint()
 }
 
 //*********************************************************************
-// The initial delay routine calls this routine just before calling
-// the challenge routine for the first time.
-// Inputs:
-//   object: Address of an R4A_ROBOT_CHALLENGE instance
-void wpfStart(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeStart();
-}
-
-//*********************************************************************
-// The robot.stop routine calls this routine to stop the motors and
-// perform any other actions.
-// Inputs:
-//   object: Address of an R4A_ROBOT_CHALLENGE instance
-void wpfStop(R4A_ROBOT_CHALLENGE * object)
-{
-    challengeStop();
-}
-
-//*********************************************************************
-// Display the heading
-// Inputs:
-//   menuEntry: Address of the object describing the menu entry
-//   command: Zero terminated command string
-//   display: Device used for output
-void menuWpfDisplayHeading(const R4A_MENU_ENTRY * menuEntry,
-                           const char * command,
-                           Print * display)
-{
-    double altitude;
-    String comment;
-    double deltaLatitude;
-    double deltaLongitude;
-    File file;
-    double horizontalAccuracy;
-    double horizontalAccuracyStdDev;
-    double latitude;
-    double longitude;
-    uint8_t satellitesInView;
-
-    // Determine if a waypoint was set
-    if (wpfData._latitude || wpfData._longitude)
-    {
-        latitude = wpfData._latitude;
-        longitude = wpfData._longitude;
-    }
-    else
-    {
-        // No, get the first waypoint
-        if (r4aEsp32WpReadPoint(&file,
-                                &latitude,
-                                &longitude,
-                                &altitude,
-                                &horizontalAccuracy,
-                                &horizontalAccuracyStdDev,
-                                &satellitesInView,
-                                &comment,
-                                display))
-
-        // Done with the file
-        file.close();
-    }
-
-    // Compute the direction from the current location to the waypoint
-    deltaLatitude = latitude - zedf9p._latitude;
-    deltaLongitude = longitude - zedf9p._longitude;
-
-    // Display the heading
-    display->printf("   Latitude         Longitude\r\n");
-    display->printf("--------------   --------------\r\n");
-    display->printf("%14.9f   %14.9f   Target Waypoint\r\n",
-                    latitude, longitude);
-    display->printf("%14.9f   %14.9f   Current Position\r\n",
-                    zedf9p._latitude, zedf9p._longitude);
-    display->printf("%14.9f   %14.9f   Heading\r\n",
-                    deltaLatitude, deltaLongitude);
-}
-
-//*********************************************************************
 // Start the waypoint following
 // Inputs:
 //   display: Device used for output
@@ -272,6 +262,23 @@ void wpfStart(Print * display)
         "Waypoint Following",               // _name
         ROBOT_WAYPOINT_FOLLOW_DURATION_SEC, // _duration
     };
+
+    // Verify the I2C bus configuration
+    if (!pca9685Present)
+    {
+        display->printf("ERROR: PCA9685 (motors) not responding on I2C bus!\r\n");
+        return;
+    }
+    if (!pcf8574Present)
+    {
+        display->printf("ERROR: PCF8574 (line sensor) not responding on I2C bus!\r\n");
+        return;
+    }
+    if (!zedf9pPresent)
+    {
+        display->printf("ERROR: ZED-F9P (GNSS receiver) not responding on I2C bus!\r\n");
+        return;
+    }
 
     // Only start the robot if the battery is on
     if (!robotCheckBatteryLevel())
@@ -373,6 +380,16 @@ void wpfStart(Print * display)
 }
 
 //*********************************************************************
+// The initial delay routine calls this routine just before calling
+// the challenge routine for the first time.
+// Inputs:
+//   object: Address of an R4A_ROBOT_CHALLENGE instance
+void wpfStart(R4A_ROBOT_CHALLENGE * object)
+{
+    challengeStart();
+}
+
+//*********************************************************************
 // Start the line following
 void wpfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
                   const char * command,
@@ -382,13 +399,13 @@ void wpfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
-// Start the waypoint following at boot
-void menuStartWpf(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
+// The robot.stop routine calls this routine to stop the motors and
+// perform any other actions.
+// Inputs:
+//   object: Address of an R4A_ROBOT_CHALLENGE instance
+void wpfStop(R4A_ROBOT_CHALLENGE * object)
 {
-    startIndex = CHALLENGE_WPF;
-    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
+    challengeStop();
 }
 
 #endif  // USE_WAYPOINT_FOLLOWING
