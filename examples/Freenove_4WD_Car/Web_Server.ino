@@ -84,23 +84,9 @@ bool webServerRegisterUriHandlers(R4A_WEB_SERVER * object)
         // Verify that the camera is enabled and initialized
         if (ov2640Present)
         {
-            // Add the jpeg camera image page
-            error = httpd_register_uri_handler(object->_webServer, &ov2640JpegPage);
-            if (error != ESP_OK)
-            {
-                if (r4aWebServerDebug)
-                    r4aWebServerDebug->printf("ERROR: Failed to register JPEG handler, error: %d!\r\n", error);
+            // Add the ov2640 web pages
+            if (ov2640RegisterUriHandlers(object) == false)
                 break;
-            }
-
-            // Add the OV2640 details page
-            error = httpd_register_uri_handler(object->_webServer, &ov2640DetailsUri);
-            if (error != ESP_OK)
-            {
-                if (r4aWebServerDebug)
-                    r4aWebServerDebug->printf("ERROR: Failed to register OV2640 details page, error: %d!\r\n", error);
-                break;
-            }
         }
 #endif  // USE_OV2640
 
