@@ -19,7 +19,6 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
                          Print * display,
                          Print * debug)
 {
-    uint8_t data;
     R4A_I2C_BUS * i2cBus;
     esp_err_t status;
     bool success;
@@ -31,7 +30,8 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
         // Connect the pins to the I2C controller
         i2cBus = &esp32I2cBus->_i2cBus;
         status = i2cInit(esp32I2cBus->_busNumber, sdaPin, sclPin, clockHz);
-        if (status != ESP_OK)
+        success = (status == ESP_OK);
+        if (success == false)
         {
             const char * errorMessage = "ERROR: Failed to initialize I2C bus %d!\r\n";
             if (display)
@@ -41,32 +41,13 @@ bool r4aEsp32I2cBusBegin(R4A_ESP32_I2C_BUS * esp32I2cBus,
             break;
         }
 
-        // Delay to let the signals stablize
-        delay(10);
-
-        // Reset the devices on the I2C bus
-        data = R4A_I2C_SWRST;
-        success = r4aI2cBusWrite(i2cBus,
-                                 R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS,
-                                 &data,
-                                 sizeof(data),
-                                 debug);
-        if (success == false)
-        {
-            const char * errorMessage = "ERROR: Failed to reset the I2C bus!\r\n";
-            if (display)
-                display->printf(errorMessage);
-            else if (debug)
-                debug->printf(errorMessage);
-            break;
-        }
-
-        // Delay while the I2C devices reset
-        delay(10);
-
         // Enumerate the I2C devices
         if (enumerate)
+        {
+            // Delay while the I2C devices reset
+            delay(10);
             r4aI2cBusEnumerate(i2cBus, display);
+        }
     } while (0);
     return success;
 }
