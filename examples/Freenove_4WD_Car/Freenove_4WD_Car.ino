@@ -625,12 +625,21 @@ void setupCore0(void *parameter)
     r4aEsp32I2cBusBegin(&esp32I2cBus,
                         I2C_SDA,
                         I2C_SCL,
-                        R4A_I2C_FAST_MODE_HZ);
+                        R4A_I2C_FAST_MODE_HZ,
+                        false);
     i2cBus = &esp32I2cBus._i2cBus;
     r4aI2cBus = i2cBus;
 
+    // Reset the I2C devices
+    log_v("Calling r4aI2cCallSwReset");
+    r4aI2cCallSwReset(r4aI2cBus);
+
     // Allow I2C devices time to power up
     delay(100);
+
+    // Enumerate the I2C bus
+    log_v("Calling r4aI2cBusEnumerate");
+    r4aI2cBusEnumerate(r4aI2cBus);
 
     // Determine which devices are present
     log_v("Calling r4aI2cBusIsDevicePresent");
