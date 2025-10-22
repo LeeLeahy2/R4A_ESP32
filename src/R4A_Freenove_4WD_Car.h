@@ -392,6 +392,7 @@ const R4A_SPI_DEVICE ws2812 =                           \
     &spiBus._spiBus, /* SPI bus */                      \
     4 * 1000 * 1000, /* Clock frequency */              \
     -1,              /* No chip select pin */           \
+    0,               /* Chip select value */            \
     0,               /* Clock polarity */               \
     0,               /* Clock phase */                  \
 }
