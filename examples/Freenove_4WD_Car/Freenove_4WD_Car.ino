@@ -186,8 +186,9 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 #endif  // USE_ZED_F9P
 
 bool ak09916Present;
-bool ov2640Present;
+bool generalCallPresent;
 bool icm20948Present;
+bool ov2640Present;
 bool pca9685Present;
 bool pcf8574Present;
 bool sx1509Present;
@@ -633,10 +634,6 @@ void setupCore0(void *parameter)
     i2cBus = &esp32I2cBus._i2cBus;
     r4aI2cBus = i2cBus;
 
-    // Reset the I2C devices
-    log_v("Calling r4aI2cCallSwReset");
-    r4aI2cCallSwReset(r4aI2cBus);
-
     // Allow I2C devices time to power up
     delay(100);
 
@@ -647,6 +644,7 @@ void setupCore0(void *parameter)
     // Determine which devices are present
     log_v("Calling r4aI2cBusIsDevicePresent");
     ak09916Present = r4aI2cBusIsDevicePresent(i2cBus, AK09916_I2C_ADDRESS);
+    generalCallPresent = r4aI2cBusIsDevicePresent(i2cBus, R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS);
     icm20948Present = r4aI2cBusIsDevicePresent(i2cBus, ICM20948_I2C_ADDRESS);
     ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
     pca9685Present = r4aI2cBusIsDevicePresent(i2cBus, PCA9685_I2C_ADDRESS);
@@ -654,6 +652,13 @@ void setupCore0(void *parameter)
     sx1509Present = r4aI2cBusIsDevicePresent(i2cBus, SX1509_I2C_ADDRESS);
     vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
     zedf9pPresent = r4aI2cBusIsDevicePresent(i2cBus, ZEDF9P_I2C_ADDRESS);
+
+    // Reset the I2C devices
+    if (generalCallPresent)
+    {
+        log_v("Calling r4aI2cCallSwReset");
+        r4aI2cCallSwReset(r4aI2cBus);
+    }
 
     // Initialize the PCA9685
     log_v("Calling pca9685.begin");
