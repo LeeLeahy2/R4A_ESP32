@@ -6,7 +6,7 @@
 
 //*********************************************************************
 // Display data before the main menu header
-void mainMenuPre(Print * display)
+bool mainMenuPre(Print * display)
 {
     if (r4aWifiSsidPasswordEntries)
     {
@@ -27,6 +27,7 @@ void mainMenuPre(Print * display)
         // Display the current time
         r4aNtpDisplayDateTime(display);
     }
+    return true;
 }
 
 //*********************************************************************

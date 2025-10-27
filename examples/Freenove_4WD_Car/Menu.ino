@@ -108,7 +108,7 @@ void loopTimesMenu(const R4A_MENU_ENTRY * menuEntry,
 
 //*********************************************************************
 // Display data before the main menu header
-void mainMenuPre(Print * display)
+bool mainMenuPre(Print * display)
 {
     if (r4aWifiSsidPasswordEntries)
     {
@@ -130,6 +130,7 @@ void mainMenuPre(Print * display)
         r4aNtpDisplayDateTime(display);
     }
     DISPLAY_BATTERY_VOLTAGE(display);
+    return true;
 }
 
 //*********************************************************************
@@ -170,7 +171,7 @@ void wifiMenuRestart(const R4A_MENU_ENTRY * menuEntry,
 
 //*********************************************************************
 // Display data before the waypoint menu header
-void wpMenuPre(Print * display)
+bool wpMenuPre(Print * display)
 {
 #ifdef  USE_ZED_F9P
     zedf9p.displayLocation(nullptr, // comment
@@ -196,6 +197,9 @@ void wpMenuPre(Print * display)
                            false,   // displayAltitudeStdDev
                            false,   // displayFixType
                            display);
+    return true;
+#else
+    return false;
 #endif  // USE_ZED_F9P
 }
 

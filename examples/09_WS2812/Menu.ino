@@ -6,7 +6,7 @@
 
 //*********************************************************************
 // Display data before the main menu header
-void mainMenuPre(Print * display)
+bool mainMenuPre(Print * display)
 {
     if (r4aWifiSsidPasswordEntries)
     {
@@ -28,6 +28,7 @@ void mainMenuPre(Print * display)
         r4aNtpDisplayDateTime(display);
     }
     DISPLAY_BATTERY_VOLTAGE(display);
+    return true;
 }
 
 //*********************************************************************
