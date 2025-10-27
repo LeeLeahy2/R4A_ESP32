@@ -111,10 +111,12 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
     {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedMedium,    "blfMedium",    3000},
     {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedSlow,      "blfSlow",      1500},
 
+#ifdef  USE_OV2640
     // Camera Line Following (CLF)
 // Required    Type                  Minimum     Maximum        Address                         Name            Default Value
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &clfPanStartDegrees,            "clfPanDeg",    10},
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &servoTiltStartDegrees,         "clfTiltDeg",   90},
+#endif  // USE_OV2640
 
 #ifdef  USE_ZED_F9P
     // GPS (GNSS)
