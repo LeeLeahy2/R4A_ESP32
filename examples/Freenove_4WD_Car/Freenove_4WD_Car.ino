@@ -120,6 +120,7 @@ volatile bool core1Initialized;
 
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
+    {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  // 0x00
     {AK09916_I2C_ADDRESS,  "AK09916 3-axis Electronic Compass"},    // 0x0c
     {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"}, // 0x69
     {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70

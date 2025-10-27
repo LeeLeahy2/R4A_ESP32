@@ -84,6 +84,7 @@
 // List of devices on the I2C bus
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
+    {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},
     {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"},
     {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"},
     {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"},

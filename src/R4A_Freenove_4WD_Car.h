@@ -226,6 +226,7 @@ extern R4A_Freenove_4WD_Car r4aFreenove4wdCar;
 #define USE_I2C_DEVICE_TABLE   \
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =  \
 {   \
+    {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  \
     {OV2640_I2C_ADDRESS,   "OV2640 Camera"},    \
     {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"},   \
     {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"},    \
