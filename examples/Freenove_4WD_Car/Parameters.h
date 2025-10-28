@@ -58,6 +58,7 @@ uint32_t pca9685FrequencyHz;
 
 bool enableBatteryCheck;
 bool robotLineSensorLEDs;
+bool robotLedMatrixDuringIdle;
 uint8_t startIndex;
 bool robotUseWS2812;
 
@@ -189,6 +190,7 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &enableBatteryCheck,       "EnableBattery", true},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLineSensorLEDs,       "LSLEDs",       true},
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLedMatrixDuringIdle,  "MatrixIdle",   true},
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,      CHALLENGE_MAX - 1, &startIndex,                "StartIndex",   0},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotUseWS2812,            "RobotWS2812",  true},
 
