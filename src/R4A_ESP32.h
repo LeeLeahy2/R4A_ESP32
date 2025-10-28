@@ -259,9 +259,6 @@ int r4aCameraGetSaturation();
 //   Returns a sensor_t data structure or nullptr upon failure
 sensor_t * r4aCameraGetSensor(Print * display = nullptr);
 
-// Get the sensor data structure
-sensor_t * r4aCameraGetSensor(Print * display);
-
 // Get the sharpness
 // Outputs:
 //   Returns the sharpness value or R4A_ERROR_NO_SENSOR upon failure
