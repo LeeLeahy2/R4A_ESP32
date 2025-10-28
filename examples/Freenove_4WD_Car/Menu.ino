@@ -313,8 +313,8 @@ const R4A_MENU_ENTRY startMenuTable[] =
 {
     // Command  menuRoutine         menuParam               HelpRoutine         align   HelpText
     {"alf",     menuStartAlf,       0,                      nullptr,            0,      "Start advanced line following at boot"},
-    {"blf",     menuStartBlt,       0,                      nullptr,            0,      "Start basic line following at boot"},
-    {"blt",     menuStartBlf,       0,                      nullptr,            0,      "Start basic light tracking at boot"},
+    {"blf",     menuStartBlf,       0,                      nullptr,            0,      "Start basic line following at boot"},
+    {"blt",     menuStartBlt,       0,                      nullptr,            0,      "Start basic light tracking at boot"},
 #ifdef  USE_OV2640
     {"clf",     menuStartClf,       0,                      nullptr,            0,      "Start camera line following at boot"},
 #endif  // USE_OV2640
