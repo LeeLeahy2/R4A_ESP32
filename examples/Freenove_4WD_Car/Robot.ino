@@ -114,8 +114,7 @@ void robotIdle(uint32_t currentMsec)
     static uint32_t previousMsec;
 
     // Update the LEDs on a regular interval
-    if ((pcf8574Present || sx1509Present)
-        && robotUseWS2812 && ((currentMsec - previousMsec) > 50))
+    if ((currentMsec - previousMsec) > 50)
     {
         previousMsec = currentMsec;
 
@@ -123,27 +122,36 @@ void robotIdle(uint32_t currentMsec)
         if (vk16k33Present)
             r4aVk16k33DisplayIdle(&vk16k33);
 
-        // Read the line sensors
-        pcf8574.read(&lineSensors);
-        lineSensors &= 7;
+        // Determine if line sensor LEDs should be updated
+        if (robotLineSensorLEDs && (pcf8574Present || sx1509Present)
+            && robotUseWS2812)
+        {
+            car.ledsOff();
 
-        // Display the line sensors
-        car.ledsOff();
-        if (sx1509Present)
-        {
-            r4aLEDSetColorRgb(FRONT_L1, lineSensors & 0x02 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_L2, lineSensors & 0x04 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_L3, lineSensors & 0x08 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_R3, lineSensors & 0x10 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_R2, lineSensors & 0x20 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_R1, lineSensors & 0x40 ? R4A_LED_YELLOW : R4A_LED_OFF);
-        }
-        else
-        {
-            r4aLEDSetColorRgb(FRONT_L1, lineSensors & 1 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_L3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_R3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
-            r4aLEDSetColorRgb(FRONT_R1, lineSensors & 4 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            // Read the line sensors
+            if (sx1509Present)
+            {
+#ifdef USE_SPARKFUN_SEN_13582
+                r4aSx1509RegisterRead(&sx1509,
+                                      SX1509_DATA_A,
+                                      &lineSensors);
+                r4aLEDSetColorRgb(FRONT_L1, lineSensors & 0x02 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_L2, lineSensors & 0x04 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_L3, lineSensors & 0x08 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_R3, lineSensors & 0x10 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_R2, lineSensors & 0x20 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_R1, lineSensors & 0x40 ? R4A_LED_YELLOW : R4A_LED_OFF);
+#endif  // USE_SPARKFUN_SEN_13582
+            }
+            else if (pcf8574Present)
+            {
+                pcf8574.read(&lineSensors);
+                lineSensors &= 7;
+                r4aLEDSetColorRgb(FRONT_L1, lineSensors & 1 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_L3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_R3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                r4aLEDSetColorRgb(FRONT_R1, lineSensors & 4 ? R4A_LED_YELLOW : R4A_LED_OFF);
+            }
         }
     }
 }
