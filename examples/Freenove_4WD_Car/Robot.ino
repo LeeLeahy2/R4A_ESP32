@@ -11,7 +11,7 @@ bool robotCheckBatteryLevel()
     float voltage;
 
     // Check for ignoring the battery check
-    if (ignoreBatteryCheck)
+    if ((!enableBatteryCheck) || ignoreBatteryCheck)
         return true;
 
     // Verify the voltage level

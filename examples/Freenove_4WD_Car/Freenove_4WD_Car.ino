@@ -373,11 +373,14 @@ void setup()
     r4aEsp32VoltageSetReference(ADC_REFERENCE_VOLTAGE);
 
     // Turn off ESP32 Wrover blue LED when battery power is applied
-    log_v("Setting the blue LED\r\n");
-    float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
-    int blueLED = (batteryVoltage > 2.)
-                ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
-    digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
+    if (enableBatteryCheck)
+    {
+        log_v("Setting the blue LED\r\n");
+        float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
+        int blueLED = (batteryVoltage > 2.)
+                    ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
+        digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
+    }
 
     // Delay to allow the hardware initialize
     delay(1000);
@@ -499,15 +502,18 @@ void loop()
 
     // Turn on the ESP32 WROVER blue LED when the battery power is OFF
     currentMsec = millis();
-    if ((currentMsec - lastBatteryCheckMsec) >= 100)
+    if (enableBatteryCheck)
     {
-        lastBatteryCheckMsec = currentMsec;
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("READ_BATTERY_VOLTAGE");
-        float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
-        int blueLED = (batteryVoltage > 2.)
-                    ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
-        digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
+        if ((currentMsec - lastBatteryCheckMsec) >= 100)
+        {
+            lastBatteryCheckMsec = currentMsec;
+            if (DEBUG_LOOP_CORE_1)
+                callingRoutine("READ_BATTERY_VOLTAGE");
+            float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
+            int blueLED = (batteryVoltage > 2.)
+                        ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
+            digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
+        }
     }
 
     // Update the location
