@@ -7,8 +7,11 @@
 **********************************************************************/
 
 //****************************************
-// Constants
+// Includes
 //****************************************
+
+#include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
+#include <R4A_SparkFun.h>           // SparkFun Electronics boards
 
 #define USE_I2C
 //#define USE_NTRIP
@@ -17,6 +20,10 @@
 //#define USE_WAYPOINT_FOLLOWING
 //#define USE_ZED_F9P
 
+//****************************************
+// Constants
+//****************************************
+
 #define DEBUG_BOOT              0
 #define DEBUG_LOOP_CORE_0       0
 #define DEBUG_LOOP_CORE_1       0
@@ -24,9 +31,6 @@
 // Servo default starting position
 #define SERVO_PAN_START     90  // Degrees
 #define SERVO_TILT_START    15  // Degrees
-
-// Telnet port number
-#define TELNET_PORT         23
 
 enum CHALLENGE_INDEX
 {
@@ -47,21 +51,22 @@ enum CHALLENGE_INDEX
 };
 
 //****************************************
-// GNSS - Global Navigation Satellite System
+// Parameter default values
 //****************************************
+
+#define DOWNLOAD_AREA       "/nvm/"
 
 #define GNSS_POINTS_PER_SECOND      1
 #define GNSS_POINTS_TO_AVERAGE      (10 * GNSS_POINTS_PER_SECOND)   // 10 Seconds
 
+// Telnet port number
+#define TELNET_PORT         23
+
 //****************************************
-// Includes
+// Parameters
 //****************************************
 
-#include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
-#include <R4A_SparkFun.h>           // SparkFun Electronics boards
-
-#define DOWNLOAD_AREA       "/nvm/"
-
+// Use the defalut values above in Parameters.h
 #include "Parameters.h"
 
 //****************************************
