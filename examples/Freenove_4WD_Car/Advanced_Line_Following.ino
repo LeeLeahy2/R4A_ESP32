@@ -29,8 +29,8 @@ void alfStart(Print * display)
         alfInit,
         alfStart,
         alfStop,
-        "Advanced Line Following",      // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+        "Advanced Line Following",          // _name
+        R4A_CHALLENGE_SEC_LINE_FOLLOWING    // Challenge duration in seconds
     };
     float voltage;
 

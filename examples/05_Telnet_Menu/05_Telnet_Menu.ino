@@ -173,8 +173,6 @@ bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display = nullptr)
 // Robot operation
 //****************************************
 
-#define ROBOT_LINE_FOLLOW_DURATION_SEC      (3 * R4A_SECONDS_IN_A_MINUTE)
-
 #define ROBOT_START_DELAY_SEC               5
 #define ROBOT_START_DELAY_MILLISECONDS      (ROBOT_START_DELAY_SEC * R4A_MILLISECONDS_IN_A_SECOND)
 

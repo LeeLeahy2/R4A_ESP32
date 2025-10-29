@@ -61,7 +61,7 @@ void bltStart(Print * display)
         bltStop,
 
         "Basic Light Tracking",             // _name
-        ROBOT_LIGHT_TRACKING_DURATION_SEC,  // _duration
+        R4A_CHALLENGE_SEC_LIGHT_TRACKING    // Challenge duration in seconds
     };
     float voltage;
 

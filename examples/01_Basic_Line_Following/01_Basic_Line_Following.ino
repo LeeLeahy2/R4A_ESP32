@@ -130,7 +130,6 @@ bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display = nullptr)
 
 USE_MOTOR_TABLE;
 
-#define ROBOT_LINE_FOLLOW_DURATION_SEC      (3 * R4A_SECONDS_IN_A_MINUTE)
 #define ROBOT_START_DELAY_SEC               5
 #define ROBOT_STOP_TO_IDLE_SEC              30
 
@@ -143,8 +142,8 @@ R4A_ROBOT_CHALLENGE basicLineFollowing =
     nullptr,        // start
     blfStop,
 
-    "Basic Line Following", // _name
-    ROBOT_STOP_TO_IDLE_SEC  // Seconds between stop and idle
+    "Basic Line Following",             // _name
+    R4A_CHALLENGE_SEC_LINE_FOLLOWING    // Challenge duration in seconds
 };
 
 //*********************************************************************

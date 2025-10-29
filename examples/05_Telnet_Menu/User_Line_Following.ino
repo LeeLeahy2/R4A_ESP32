@@ -48,8 +48,8 @@ void menuUlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
         ulfStart,
         ulfStop,
 
-        "Advanced Line Following",      // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+        "Advanced Line Following",          // _name
+        R4A_CHALLENGE_SEC_LINE_FOLLOWING    // Challenge duration in seconds
     };
     float voltage;
 

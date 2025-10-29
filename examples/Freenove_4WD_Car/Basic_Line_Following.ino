@@ -89,8 +89,8 @@ void blfStart(Print * display)
         blfStart,
         blfStop,
 
-        "Basic Line Following",         // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+        "Basic Line Following",             // _name
+        R4A_CHALLENGE_SEC_LINE_FOLLOWING    // Challenge duration in seconds
     };
 #ifdef USE_SPARKFUN_SEN_13582
     static R4A_ROBOT_CHALLENGE blfSx1509LineFollowing =
@@ -100,8 +100,8 @@ void blfStart(Print * display)
         blfStart,
         blfStop,
 
-        "Basic Line Following",         // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+        "Basic Line Following",             // _name
+        R4A_CHALLENGE_SEC_LINE_FOLLOWING    // Challenge duration in seconds
     };
 #endif  // USE_SPARKFUN_SEN_13582
     R4A_ROBOT_CHALLENGE * challengeStructure;

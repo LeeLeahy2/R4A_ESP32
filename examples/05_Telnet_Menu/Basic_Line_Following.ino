@@ -108,8 +108,8 @@ void menuBlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
         blfStart,
         blfStop,
 
-        "Basic Line Following",         // _name
-        ROBOT_LINE_FOLLOW_DURATION_SEC, // _duration
+        "Basic Line Following",             // _name
+        R4A_CHALLENGE_SEC_LINE_FOLLOWING    // _duration
     };
     float voltage;
 

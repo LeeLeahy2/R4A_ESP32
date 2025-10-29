@@ -259,8 +259,8 @@ void wpfStart(Print * display)
         wpfInit,
         wpfStart,
         wpfStop,
-        "Waypoint Following",               // _name
-        ROBOT_WAYPOINT_FOLLOW_DURATION_SEC, // _duration
+        "Waypoint Following",                   // _name
+        R4A_CHALLENGE_SEC_WAYPOINT_FOLLOWING,   // Challenge duration in seconds
     };
 
     // Verify the I2C bus configuration
