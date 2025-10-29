@@ -134,7 +134,10 @@ void blfStart(Print * display)
         if (sx1509Present)
             challengeStructure = &blfSx1509LineFollowing;
 #endif  // USE_SPARKFUN_SEN_13582
-        r4aRobotStart(&robot, challengeStructure, display);
+        r4aRobotStart(&robot,
+                      challengeStructure,
+                      R4A_CHALLENGE_SEC_START_DELAY, // Challenge start delay
+                      display);
     }
 }
 

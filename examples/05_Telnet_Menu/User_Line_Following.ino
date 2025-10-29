@@ -48,7 +48,7 @@ void menuUlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
         ulfStart,
         ulfStop,
 
-        "Advanced Line Following",          // _name
+        "User Line Following",              // _name
         R4A_CHALLENGE_SEC_LINE_FOLLOWING    // Challenge duration in seconds
     };
     float voltage;
@@ -64,5 +64,6 @@ void menuUlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
         // Start the robot challenge if the robot is not active
         r4aRobotStart(&robot,
                       &userLineFollowing,
+                      R4A_CHALLENGE_SEC_START_DELAY, // Start delay in seconds
                       display);
 }

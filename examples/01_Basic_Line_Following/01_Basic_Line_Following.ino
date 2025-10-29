@@ -130,7 +130,6 @@ bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display = nullptr)
 
 USE_MOTOR_TABLE;
 
-#define ROBOT_START_DELAY_SEC               5
 #define ROBOT_STOP_TO_IDLE_SEC              30
 
 R4A_ROBOT robot;
@@ -226,7 +225,6 @@ void setup()
     // Initialize the robot
     r4aRobotInit(&robot,
                  xPortGetCoreID(),       // CPU core
-                 ROBOT_START_DELAY_SEC,  // Challenge start delay
                  ROBOT_STOP_TO_IDLE_SEC, // Delay after running the challenge
                  nullptr,                // Idle routine
                  nullptr);               // Time display routine
@@ -234,6 +232,7 @@ void setup()
     // Start the robot challenge
     r4aRobotStart(&robot,
                   &basicLineFollowing,
+                  R4A_CHALLENGE_SEC_START_DELAY, // Start delay in seconds
                   &Serial);
 
     // Execute loop forever

@@ -67,6 +67,7 @@ void clfStart(Print * display)
         // Start the robot challenge if the robot is not active
         r4aRobotStart(&robot,
                       &cameraLineFollowing,
+                      R4A_CHALLENGE_SEC_START_DELAY, // Challenge start delay
                       display);
 }
 

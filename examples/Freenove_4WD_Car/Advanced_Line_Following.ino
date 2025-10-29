@@ -57,6 +57,7 @@ void alfStart(Print * display)
         // Start the robot challenge if the robot is not active
         r4aRobotStart(&robot,
                       &advancedLineFollowing,
+                      R4A_CHALLENGE_SEC_START_DELAY, // Challenge start delay
                       display);
 }
 

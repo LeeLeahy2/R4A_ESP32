@@ -124,5 +124,6 @@ void menuBlfStart(const struct _R4A_MENU_ENTRY * menuEntry,
         // Start the robot challenge if the robot is not active
         r4aRobotStart(&robot,
                       &basicLineFollowing,
+                      R4A_CHALLENGE_SEC_START_DELAY, // Start delay in seconds
                       display);
 }
