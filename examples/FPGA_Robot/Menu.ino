@@ -7,72 +7,6 @@
 #ifdef  USE_ZED_F9P
 
 //*********************************************************************
-// Display the computed point
-// Inputs:
-//   parameter: Callback parameter passed to computeWayPoint
-//   comment: Text to display at the start of the line
-//   latitude: Latitude in degrees
-//   longitude: Longitude in degrees
-//   altitude: Altitude in meters
-//   horizontalAccuracy: Accuracy in meters
-//   satellitesInView: The number of satellites feeding the GNSS receiver
-//   latitudeStdDev: Latitude standard deviation in degrees
-//   longitudeStdDev: Longitude standard deviation in degrees
-//   altitudeStdDev: Altitude standard deviation in meters
-//   horizontalAccuracyStdDev: Horizontal accuracy standard deviation in meters
-//   display: Device used for output, passed to computeWayPoint
-void gnssDisplayPoint(intptr_t parameter,
-                      const char * comment,
-                      double latitude,
-                      double latitudeStdDev,
-                      double longitude,
-                      double longitudeStdDev,
-                      double altitude,
-                      double altitudeStdDev,
-                      double horizontalAccuracy,
-                      double horizontalAccuracyStdDev,
-                      uint8_t satellitesInView,
-                      Print * display)
-{
-    zedf9p.displayLocation(comment,
-                           latitude,
-                           0,
-                           longitude,
-                           0,
-                           altitude,
-                           0,
-                           horizontalAccuracy,
-                           0,
-                           satellitesInView,
-                           true,    // unitsFeetInches,
-                           false,   // displayTime,
-                           true,    // displaySiv,
-                           true,    // displayLatitude,
-                           false,   // displayLatStdDev,
-                           true,    // displayLongitude,
-                           false,   // displayLongStdDev,
-                           true,    // displayHorizAcc,
-                           false,   // displayHorizAccStdDev,
-                           false,   // displayAltitude,
-                           false,   // displayAltitudeStdDev,
-                           false,   // displayFixType,
-                           display);
-}
-
-//*********************************************************************
-// Compute point and display point
-void gnssMenuComputePoint(const R4A_MENU_ENTRY * menuEntry,
-                          const char * command,
-                          Print * display)
-{
-    zedf9p.computePoint(gnssDisplayPoint,
-                        0,
-                        GNSS_POINTS_TO_AVERAGE,
-                        "Location",
-                        display);
-}
-
-//*********************************************************************
 // Display the location
 void gnssMenuDisplayLocation(const R4A_MENU_ENTRY * menuEntry,
                              const char * command,
@@ -170,40 +104,6 @@ void wifiMenuRestart(const R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
-// Display data before the waypoint menu header
-bool wpMenuPre(Print * display)
-{
-#ifdef  USE_ZED_F9P
-    zedf9p.displayLocation(nullptr, // comment
-                           zedf9p._latitude,
-                           0.,      // latitudeStdDev
-                           zedf9p._longitude,
-                           0.,      // longitudeStdDev
-                           zedf9p._altitude,
-                           0.,      // altitudeStdDev
-                           zedf9p._horizontalAccuracy,
-                           0.,      // horizontalAccuracyStdDev
-                           zedf9p._satellitesInView,
-                           true,    // unitsFeetInches
-                           false,   // displayTime
-                           true,    // displaySiv
-                           true,    // displayLatitude
-                           false,   // displayLatStdDev
-                           true,    // displayLongitude
-                           false,   // displayLongStdDev
-                           true,    // displayHorizAcc
-                           false,   // displayHorizAccStdDev
-                           false,   // displayAltitude
-                           false,   // displayAltitudeStdDev
-                           false,   // displayFixType
-                           display);
-    return true;
-#else
-    return false;
-#endif  // USE_ZED_F9P
-}
-
-//*********************************************************************
 
 enum MENU_TABLE_INDEX
 {
@@ -226,13 +126,7 @@ enum MENU_TABLE_INDEX
     MTI_SERVO,
     MTI_START,
     MTI_TELNET,
-#ifdef  USE_ZED_F9P
-    MTI_WAY_POINT,
-#endif  // USE_ZED_F9P
     MTI_WS2812_LED,
-
-//#define USE_WAYPOINT_FOLLOWING
-//#define USE_ZED_F9P
     // Add new menu values before this line
     MTI_MAX
 };
@@ -263,11 +157,7 @@ const R4A_MENU_ENTRY debugMenuTable[] =
 const R4A_MENU_ENTRY gnssMenuTable[] =
 {
     // Command  menuRoutine             menuParam       HelpRoutine     align   HelpText
-#ifdef  USE_WAYPOINT_FOLLOWING
-    {"h",       menuWpfDisplayHeading,  0,              nullptr,        0,      "Display heading"},
-#endif  // USE_WAYPOINT_FOLLOWING
     {"l",      gnssMenuDisplayLocation, 0,              nullptr,        0,      "Display location"},
-    {"p",       gnssMenuComputePoint,   0,              nullptr,        0,      "Compute point and display point"},
     {"x",       nullptr,                R4A_MENU_MAIN,  nullptr,        0,      "Return to the main menu"},
 };
 #define GNSS_MENU_ENTRIES       sizeof(gnssMenuTable) / sizeof(gnssMenuTable[0])
@@ -319,11 +209,6 @@ const R4A_MENU_ENTRY startMenuTable[] =
     {"clf",     menuStartClf,       0,                      nullptr,            0,      "Start camera line following at boot"},
 #endif  // USE_OV2640
     {"None",    startNone,          0,                      nullptr,            0,      "Don't start anything at boot"},
-#ifdef  USE_ZED_F9P
-#ifdef  USE_WAYPOINT_FOLLOWING
-    {"wpf",     menuStartWpf,       0,                      nullptr,            0,      "Start waypoint following at boot"},
-#endif  // USE_WAYPOINT_FOLLOWING
-#endif  // USE_ZED_F9P
     {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
 };
 #define START_MENU_ENTRIES      sizeof(startMenuTable) / sizeof(startMenuTable[0])
@@ -349,27 +234,6 @@ const R4A_MENU_ENTRY telnetMenuTable[] =
     {"x",       nullptr,        R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define TELNET_MENU_ENTRIES  sizeof(telnetMenuTable) / sizeof(telnetMenuTable[0])
-
-// Way Point menu
-#ifdef  USE_ZED_F9P
-const R4A_MENU_ENTRY wayPointMenuTable[] =
-{
-    // Command  menuRoutine                 menuParam               HelpRoutine         align   HelpText
-    {"a",       r4aEsp32WpMenuAddPoint,     (intptr_t)"comment",    r4aMenuHelpSuffix,  7,      "Add a point to the file"},
-    {"cat",     r4aEsp32NvmMenuFileCat,     (intptr_t)"ffff",       r4aMenuHelpSuffix,  4,      "Display the contents of file ffff"},
-    {"cp",      r4aEsp32NvmMenuFileCopy,    (intptr_t)"src dest",   r4aMenuHelpSuffix,  8,      "Copy src file to dest file"},
-    {"dp",      r4aEsp32WpMenuDisplayPoint, 0,                      nullptr,            0,      "Display the next waypoint"},
-    {"dump",    r4aEsp32NvmMenuFileDump,    (intptr_t)"ffff",       r4aMenuHelpSuffix,  4,      "Dump the contents of file ffff"},
-    {"f",       r4aEsp32WpMenuFileName,     (intptr_t)"nnnn",       r4aMenuHelpSuffix,  4,      "Set waypoint file name"},
-    {"ls",      r4aEsp32NvmMenuFileList,    0,                      nullptr,            0,      "List the NVM directory"},
-    {"mv",      r4aEsp32NvmMenuFileMove,    (intptr_t)"src dest",   r4aMenuHelpSuffix,  8,      "Rename a file"},
-    {"p",       r4aEsp32WpMenuPrintFile,    0,                      nullptr,            0,      "Print the waypoint file contents"},
-    {"rm",      r4aEsp32NvmMenuFileRemove,  (intptr_t)"ffff",       r4aMenuHelpSuffix,  4,      "Remove file ffff"},
-    {"wget",    r4aEsp32NvmMenuHttpFileGet, (intptr_t)"url",        r4aMenuHelpSuffix,  3,      "Get a file from a web server"},
-    {"x",       nullptr,                    R4A_MENU_MAIN,          nullptr,            0,      "Exit the menu system"},
-};
-#define WAYPOINT_MENU_ENTRIES  sizeof(wayPointMenuTable) / sizeof(wayPointMenuTable[0])
-#endif  // USE_ZED_F9P
 
 // Main menu
 const R4A_MENU_ENTRY mainMenuTable[] =
@@ -410,14 +274,6 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
     {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
     {"wd", r4aMenuBoolToggle, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
-#ifdef  USE_I2C
-#ifdef  USE_ZED_F9P
-    {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
-#ifdef  USE_WAYPOINT_FOLLOWING
-    {"wpf",     wpfStartMenu,       0,              nullptr,    0,      "Waypoint following"},
-#endif  // USE_WAYPOINT_FOLLOWING
-#endif  // USE_ZED_F9P
-#endif  // USE_I2C
     {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
     {"wv", r4aMenuBoolToggle, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
@@ -448,9 +304,6 @@ const R4A_MENU_TABLE menuTable[] =
     {"Servo Menu",      nullptr,        servoMenuTable,     SERVO_MENU_ENTRIES},
     {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
-#ifdef  USE_ZED_F9P
-    {"Waypoint Menu",   wpMenuPre,      wayPointMenuTable,  WAYPOINT_MENU_ENTRIES},
-#endif  // USE_ZED_F9P
     {"WS2812 LED Menu", nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
 };
 const int menuTableEntries = sizeof(menuTable) / sizeof(menuTable[0]);

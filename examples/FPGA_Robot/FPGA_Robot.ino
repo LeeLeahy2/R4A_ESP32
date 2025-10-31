@@ -15,7 +15,6 @@
 //#define USE_NTRIP
 //#define USE_OV2640
 //#define USE_SPARKFUN_SEN_13582
-//#define USE_WAYPOINT_FOLLOWING
 //#define USE_ZED_F9P
 
 //****************************************
@@ -39,13 +38,8 @@ enum CHALLENGE_INDEX
 #ifdef  USE_OV2640
     CHALLENGE_CLF,      // 4
 #endif  // USE_OV2640
-#ifdef  USE_WAYPOINT_FOLLOWING
-#ifdef  USE_ZED_F9P
-    CHALLENGE_WPF,      // 5
-#endif  // USE_ZED_F9P
-#endif  // USE_WAYPOINT_FOLLOWING
     // Add new values before this line
-    CHALLENGE_MAX       // 6
+    CHALLENGE_MAX       // 5
 };
 
 //****************************************
@@ -78,7 +72,6 @@ void alfStart(Print * display);
 void blfStart(Print * display);
 void bltStart(Print * display);
 void clfStart(Print * display);
-void wpfStart(Print * display);
 
 //****************************************
 // OV2640 camera
@@ -266,11 +259,6 @@ START_CHALLENGE challengeList[] =
 #ifdef  USE_OV2640
     clfStart,   // 4
 #endif  // USE_OV2640
-#ifdef  USE_WAYPOINT_FOLLOWING
-#ifdef  USE_ZED_F9P
-    wpfStart,   // 5
-#endif  // USE_ZED_F9P
-#endif  // USE_WAYPOINT_FOLLOWING
     // Add new values before this line
 };
 const int challengeListEntries = sizeof(challengeList) / sizeof(challengeList[0]);
