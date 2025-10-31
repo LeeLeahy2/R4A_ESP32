@@ -15,7 +15,6 @@
 //#define USE_NTRIP
 //#define USE_OV2640
 //#define USE_SPARKFUN_SEN_13582
-//#define USE_ZED_F9P
 
 //****************************************
 // Constants
@@ -47,9 +46,6 @@ enum CHALLENGE_INDEX
 //****************************************
 
 #define DOWNLOAD_AREA       "/nvm/"
-
-#define GNSS_POINTS_PER_SECOND      1
-#define GNSS_POINTS_TO_AVERAGE      (10 * GNSS_POINTS_PER_SECOND)   // 10 Seconds
 
 // Telnet port number
 #define TELNET_PORT         23
@@ -115,7 +111,6 @@ volatile bool core1Initialized;
 #define AK09916_I2C_ADDRESS     0x0c
 #define SX1509_I2C_ADDRESS      0x3e
 #define ICM20948_I2C_ADDRESS    0x69
-#define ZEDF9P_I2C_ADDRESS      0x42
 
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
@@ -180,9 +175,6 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
                            16,
                            8,
                            1}; // Brightness (0 - 15)
-#ifdef  USE_ZED_F9P
-    R4A_ZED_F9P zedf9p(&esp32I2cBus._i2cBus, ZEDF9P_I2C_ADDRESS);
-#endif  // USE_ZED_F9P
 
 bool ak09916Present;
 bool generalCallPresent;
@@ -192,7 +184,6 @@ bool pca9685Present;
 bool pcf8574Present;
 bool sx1509Present;
 bool vk16k33Present;
-bool zedf9pPresent;
 
 //****************************************
 // Light Sensor
@@ -495,16 +486,6 @@ void loop()
         }
     }
 
-    // Update the location
-#ifdef  USE_ZED_F9P
-    if (zedf9pPresent)
-    {
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("zedf9p.update");
-        zedf9p.update(currentMsec, nullptr);
-    }
-#endif  // USE_ZED_F9P
-
     // Update the LEDs
     if (DEBUG_LOOP_CORE_1)
         callingRoutine("car.ledsUpdate");
@@ -627,7 +608,6 @@ void setupCore0(void *parameter)
     pcf8574Present = r4aI2cBusIsDevicePresent(i2cBus, PCF8574_I2C_ADDRESS);
     sx1509Present = r4aI2cBusIsDevicePresent(i2cBus, SX1509_I2C_ADDRESS);
     vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
-    zedf9pPresent = r4aI2cBusIsDevicePresent(i2cBus, ZEDF9P_I2C_ADDRESS);
 
     // Reset the I2C devices
     if (generalCallPresent)
@@ -668,16 +648,6 @@ void setupCore0(void *parameter)
         if (!r4aVk16k33Setup(&vk16k33))
             r4aReportFatalError("Failed to initialize the VK16K33 LED Matrix controller!");
     }
-
-    // Initialize the GPS receiver
-#ifdef  USE_ZED_F9P
-    if (zedf9pPresent)
-    {
-        log_v("Calling zedf9p.begin");
-        Serial.printf("Initializing the ZED-F9P GNSS receiver\r\n");
-        zedf9p.begin();
-    }
-#endif  // USE_ZED_F9P
 
     // Initialize the robot
     r4aRobotInit(&robot,
@@ -739,21 +709,6 @@ void loopCore0()
 
     // Get the time since boot
     currentMsec = millis();
-
-#ifdef  USE_ZED_F9P
-    // Update the location
-    if (zedf9pPresent)
-    {
-        static uint32_t lastGnssI2cPollMsec;
-        if ((currentMsec - lastGnssI2cPollMsec) >= r4aZedF9pPollMsec)
-        {
-            lastGnssI2cPollMsec = currentMsec;
-            if (DEBUG_LOOP_CORE_0)
-                callingRoutine("zedf9p.i2cPoll");
-            zedf9p.i2cPoll();
-        }
-    }
-#endif  // USE_ZED_F9P
 
 #ifdef  USE_NTRIP
     // Send navigation data to the GNSS radio

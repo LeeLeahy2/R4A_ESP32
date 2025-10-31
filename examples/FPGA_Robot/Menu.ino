@@ -4,27 +4,6 @@
   Menu routines
 **********************************************************************/
 
-#ifdef  USE_ZED_F9P
-
-//*********************************************************************
-// Display the location
-void gnssMenuDisplayLocation(const R4A_MENU_ENTRY * menuEntry,
-                             const char * command,
-                             Print * display)
-{
-    zedf9p.displayLocation("Location: ",
-                           true,    // unitsFeetInches,
-                           false,   // displayTime,
-                           true,    // displaySiv,
-                           true,    // displayLatitude
-                           true,    // displayLongitude
-                           true,    // displayHorizAcc,
-                           false,   // displayAltitude,
-                           false,   // displayFixType,
-                           display);
-}
-#endif  // USE_ZED_F9P
-
 //*********************************************************************
 // Display loop times
 void loopTimesMenu(const R4A_MENU_ENTRY * menuEntry,
@@ -108,9 +87,6 @@ void wifiMenuRestart(const R4A_MENU_ENTRY * menuEntry,
 enum MENU_TABLE_INDEX
 {
     MTI_DEBUG = R4A_MENU_MAIN + 1,
-#ifdef  USE_ZED_F9P
-    MTI_GNSS,
-#endif  // USE_ZED_F9P
     MTI_GPIO,
     MTI_I2C,
     MTI_LED_MATRIX,
@@ -151,17 +127,6 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define DEBUG_MENU_ENTRIES      sizeof(debugMenuTable) / sizeof(debugMenuTable[0])
-
-#ifdef  USE_ZED_F9P
-// GNSS menu
-const R4A_MENU_ENTRY gnssMenuTable[] =
-{
-    // Command  menuRoutine             menuParam       HelpRoutine     align   HelpText
-    {"l",      gnssMenuDisplayLocation, 0,              nullptr,        0,      "Display location"},
-    {"x",       nullptr,                R4A_MENU_MAIN,  nullptr,        0,      "Return to the main menu"},
-};
-#define GNSS_MENU_ENTRIES       sizeof(gnssMenuTable) / sizeof(gnssMenuTable[0])
-#endif  // USE_ZED_F9P
 
 // GPIO menu
 const R4A_MENU_ENTRY gpioMenuTable[] =
@@ -251,11 +216,6 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #endif  // USE_I2C
 #endif  // USE_OV2640
     {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
-#ifdef  USE_I2C
-#ifdef  USE_ZED_F9P
-    {"g",       nullptr,            MTI_GNSS,       nullptr,    0,      "Enter the GNSS menu"},
-#endif  // USE_ZED_F9P
-#endif  // USE_I2C
     {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
     {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
 #ifdef  USE_NTRIP
@@ -286,9 +246,6 @@ const R4A_MENU_TABLE menuTable[] =
     // menuName         preMenu routine firstEntry          entryCount
     {"Main Menu",       mainMenuPre,    mainMenuTable,      MAIN_MENU_ENTRIES},
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
-#ifdef  USE_ZED_F9P
-    {"GNSS Menu",       nullptr,        gnssMenuTable,      GNSS_MENU_ENTRIES},
-#endif  // USE_ZED_F9P
     {"GPIO Menu",       nullptr,        gpioMenuTable,      GPIO_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
     {"LED Matrix Menu", nullptr,       r4aVk16k33MenuTable, R4A_VK16K33_MENU_ENTRIES},
