@@ -613,6 +613,10 @@ void loop()
         }
     }
 
+    // Update the time display
+    else if (robotNtpTime && r4aNtpIsTimeValid() && (!r4aRobotIsActive(&robot)))
+        vk16k33NtpTime(currentMsec);
+
     // Process serial commands
     if (DEBUG_LOOP_CORE_1)
         callingRoutine("r4aSerialMenu");

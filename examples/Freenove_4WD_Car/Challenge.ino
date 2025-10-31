@@ -21,6 +21,9 @@ void challengeHalt(const char * errorMessage)
 // Called when the robot starts
 void challengeInit()
 {
+    // Save the time display state
+    robotNtpTimeSave();
+
     // Turn off the LED matrix
     if (vk16k33Present)
     {

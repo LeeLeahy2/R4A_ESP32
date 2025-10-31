@@ -75,3 +75,36 @@ void vk16k33DeltaTime(uint32_t milliseconds)
     }
     r4aVk16k33DisplayPixels(&vk16k33);
 }
+
+//*********************************************************************
+// Display the time on VK16K33
+void vk16k33NtpTime(uint32_t milliseconds)
+{
+    uint32_t hours;
+    static uint32_t lastMsec;
+    uint32_t minutes;
+
+    // Display time once per second
+    if (robotNtpTime && ((milliseconds - lastMsec) >= 1000))
+    {
+        lastMsec = milliseconds;
+
+        // Get the time
+        time_t seconds = r4aNtpGetEpochTime();
+        hours = hourFormat12(seconds);
+        minutes = minute(seconds);
+
+        // Display the time with zero suppression
+        r4aVk16k33BufferClear(&vk16k33);
+        if (hours > 9)
+            // Display the range 10 - 12
+            r4aVk16k33DisplayChar(&vk16k33, 0, 'l');
+        else
+            // Display the range 1 - 9
+            r4aVk16k33DisplayChar(&vk16k33, 0, (char)' ');
+        r4aVk16k33DisplayChar(&vk16k33, 1, (char)((hours %10) + '0'));
+        r4aVk16k33DisplayChar(&vk16k33, 6, (char)((minutes / 10) + '0'));
+        r4aVk16k33DisplayChar(&vk16k33, 11, (char)((minutes % 10) + '0'));
+        r4aVk16k33DisplayPixels(&vk16k33);
+    }
+}

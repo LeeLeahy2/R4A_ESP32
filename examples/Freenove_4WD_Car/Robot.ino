@@ -4,6 +4,9 @@
   Robot layer support routines
 **********************************************************************/
 
+bool robotPreviousNtpTime;
+bool robotNtpTimeRestoreNecessary;
+
 //*********************************************************************
 // Called when the robot starts
 bool robotCheckBatteryLevel()
@@ -59,8 +62,11 @@ void robotIdle(uint32_t currentMsec)
         // display switch to something else.
         if ((currentMsec - r4aRobotGetStopTime(&robot)) >= (robotRunTimeSec * R4A_MILLISECONDS_IN_A_SECOND))
         {
+            // Update the display data selection selection
+            robotNtpTimeRestore();
+
             // Display Idle on the LED matrix
-            if (vk16k33Present && robotDisplayIdle)
+            if (vk16k33Present && robotDisplayIdle && (!robotNtpTime || !r4aNtpIsTimeValid()))
                 r4aVk16k33DisplayIdle(&vk16k33);
 
             // Determine if line sensor LEDs should be updated
@@ -112,4 +118,24 @@ bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display)
            && motorFrontRight.speed(right, display)
            && motorBackRight.speed(right, display)
            && pca9685.writeBufferedRegisters(display);
+}
+
+//*********************************************************************
+// Restore the time display state
+void robotNtpTimeRestore()
+{
+    if (robotNtpTimeRestoreNecessary)
+    {
+        robotNtpTimeRestoreNecessary = false;
+        robotNtpTime = robotPreviousNtpTime;
+    }
+}
+
+//*********************************************************************
+// Save the time display state
+void robotNtpTimeSave()
+{
+    robotPreviousNtpTime = robotNtpTime;
+    robotNtpTimeRestoreNecessary = robotNtpTime;
+    robotNtpTime = false;
 }

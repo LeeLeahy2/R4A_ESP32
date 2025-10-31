@@ -58,6 +58,7 @@ uint32_t pca9685FrequencyHz;
 
 bool robotDisplayIdle;
 bool robotLineSensorLEDs;
+volatile bool robotNtpTime;
 uint16_t robotRunTimeSec;
 volatile bool robotRunTime;
 uint8_t robotStartDelaySec;
@@ -199,6 +200,7 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          255,           &robotStartDelaySec,        "RobotDelay",   R4A_CHALLENGE_SEC_START_DELAY},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotDisplayIdle,          "RobotIdle",    true},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLineSensorLEDs,       "RobotLsLEDs",  true},
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             (void *)&robotNtpTime,      "RobotNtpTime", true},
     {true,  R4A_ESP32_NVM_PT_UINT16, 0,          65535,         &robotRunTimeSec,           "RobotRtSec",   30},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             (void *)&robotRunTime,      "RobotRunTime", true},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotUseWS2812,            "RobotWS2812",  true},
