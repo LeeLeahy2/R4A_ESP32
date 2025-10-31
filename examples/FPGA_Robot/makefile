@@ -12,7 +12,7 @@ SHELL=/bin/bash
 # Source files
 ##########
 
-SKETCH=Freenove_4WD_Car
+SKETCH=FPGA_Robot
 ESP32_CHIP=esp32wrover
 PARTITION_FILE_NAME=huge_app
 

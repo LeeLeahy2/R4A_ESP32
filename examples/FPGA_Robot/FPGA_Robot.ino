@@ -1,9 +1,7 @@
 /**********************************************************************
-  Freenove_4WD_Car.ino
+  FPGA_Robot.ino
 
-  Sample sketch to control the Freenove 4WD car
-  https://store.freenove.com/products/fnk0053
-  https://www.amazon.com/gp/product/B08X6PTQFM/ref=ox_sc_act_title_1
+  Sample sketch to control the FPGA robot
 **********************************************************************/
 
 //****************************************
