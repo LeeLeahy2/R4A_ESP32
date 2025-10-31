@@ -9,11 +9,9 @@
 //****************************************
 
 #include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
-#include <R4A_SparkFun.h>           // SparkFun Electronics boards
 
 #define USE_I2C
 //#define USE_OV2640
-//#define USE_SPARKFUN_SEN_13582
 
 //****************************************
 // Constants
@@ -108,7 +106,6 @@ volatile bool core1Initialized;
 
 // I2C addresses
 #define AK09916_I2C_ADDRESS     0x0c
-#define SX1509_I2C_ADDRESS      0x3e
 #define ICM20948_I2C_ADDRESS    0x69
 
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
@@ -116,8 +113,6 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
     {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  // 0x00
     {AK09916_I2C_ADDRESS,  "AK09916 3-axis Electronic Compass"},    // 0x0c
     {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
-    {SX1509_I2C_ADDRESS,   "SX1509 Level Shifting GPIO Expander"}, // 0x3e
-    {ZEDF9P_I2C_ADDRESS,   "u-blox ZED F9P GNSS receiver"}, // 0x42
     {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
     {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"}, // 0x69
     {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70
@@ -159,13 +154,6 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
         3                       // Number of frame buffers to allocate
     };
 #endif  // USE_OV2640
-#ifdef  USE_SPARKFUN_SEN_13582
-    R4A_SX1509 sx1509 =
-    {
-        &esp32I2cBus._i2cBus,
-        SX1509_I2C_ADDRESS
-    };
-#endif  // USE_SPARKFUN_SEN_13582
     // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)
     R4A_VK16K33 vk16k33 = {&esp32I2cBus._i2cBus,
                            VK16K33_I2C_ADDRESS,
@@ -181,7 +169,6 @@ bool icm20948Present;
 bool ov2640Present;
 bool pca9685Present;
 bool pcf8574Present;
-bool sx1509Present;
 bool vk16k33Present;
 
 //****************************************
@@ -595,7 +582,6 @@ void setupCore0(void *parameter)
     ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
     pca9685Present = r4aI2cBusIsDevicePresent(i2cBus, PCA9685_I2C_ADDRESS);
     pcf8574Present = r4aI2cBusIsDevicePresent(i2cBus, PCF8574_I2C_ADDRESS);
-    sx1509Present = r4aI2cBusIsDevicePresent(i2cBus, SX1509_I2C_ADDRESS);
     vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
 
     // Reset the I2C devices
@@ -620,15 +606,6 @@ void setupCore0(void *parameter)
     log_v("Calling pcf8574.write");
     pcf8574.write(0xff);
 #endif  // USE_I2C
-
-    // Initialize the SX1509
-#ifdef USE_SPARKFUN_SEN_13582
-    if (sx1509Present)
-    {
-        if (r4aSfeSen13582Begin(&sx1509) == false)
-            r4aReportFatalError("Failed to initialize the SX1509!");
-    }
-#endif  // USE_SPARKFUN_SEN_13582
 
     // Initialize the VK16K33
     if (vk16k33Present)

@@ -93,9 +93,6 @@ enum MENU_TABLE_INDEX
     MTI_MOTOR,
     MTI_NVM,
     MTI_ROBOT,
-#ifdef  USE_SPARKFUN_SEN_13582
-    MTI_SEN13582,
-#endif  // USE_SPARKFUN_SEN_13582
     MTI_SERVO,
     MTI_START,
     MTI_TELNET,
@@ -175,18 +172,6 @@ const R4A_MENU_ENTRY startMenuTable[] =
 };
 #define START_MENU_ENTRIES      sizeof(startMenuTable) / sizeof(startMenuTable[0])
 
-#ifdef  USE_SPARKFUN_SEN_13582
-const R4A_MENU_ENTRY sfeSen13582MenuTable[] =
-{
-    // Command  menuRoutine                          menuParam   HelpRoutine align   HelpText
-    {"d",       r4aSfeSen13582MenuDisplayRegisters,  0,          nullptr,    0,      "Display the SX1509 registers"},
-    {"f",       r4aSfeSen13582MenuFeedbackLedToggle, 0,          nullptr,    0,      "Toggle the feedback LEDs"},
-    {"i",       r4aSfeSen13582MenuIrLedToggle,       0,          nullptr,    0,      "Toggle the IR LEDs"},
-    {"x",       nullptr,                          R4A_MENU_MAIN, nullptr,    0,      "Return to the main menu"},
-};
-#define SFE_SEN13582_MENU_ENTRIES   sizeof(sfeSen13582MenuTable) / sizeof(sfeSen13582MenuTable[0])
-#endif  //USE_SPARKFUN_SEN_13582
-
 // Telnet menu
 const R4A_MENU_ENTRY telnetMenuTable[] =
 {
@@ -220,9 +205,6 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #ifdef  USE_I2C
     {"robot",   nullptr,            MTI_ROBOT,      nullptr,    0,      "Enter the robot menu"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
-#ifdef  USE_SPARKFUN_SEN_13582
-    {"sen",     nullptr,            MTI_SEN13582,   nullptr,    0,      "Enter the SparkFun SEN-13582 menu"},
-#endif  // USE_SPARKFUN_SEN_13582
     {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
 #endif  // USE_I2C
     {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
@@ -246,9 +228,6 @@ const R4A_MENU_TABLE menuTable[] =
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Robot Menu",      nullptr,      robotMenuTable,       ROBOT_MENU_ENTRIES},
-#ifdef  USE_SPARKFUN_SEN_13582
-    {"SEN-13582 Menu",  nullptr,      sfeSen13582MenuTable, SFE_SEN13582_MENU_ENTRIES},
-#endif  // USE_SPARKFUN_SEN_13582
     {"Servo Menu",      nullptr,        servoMenuTable,     SERVO_MENU_ENTRIES},
     {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
