@@ -133,28 +133,6 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &ntpEnable,                 "NtpEnable",    true},
 
-#ifdef  USE_NTRIP
-    // NTRIP parameters
-// Required    Type                  Minimum     Maximum    Address                             Name            Default Value
-    {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,         &r4aNtripClientCasterHost,          "NtripHost",   R4A_ESP32_NVM_STRING("rtk2go.com")},
-    {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,         &r4aNtripClientCasterMountPoint,    "NtripMP",     R4A_ESP32_NVM_STRING("MH2-79")},
-    {true,  R4A_ESP32_NVM_PT_UINT16, 0,          0xffff,    &r4aNtripClientCasterPort,          "NtripPort",   2101},
-    {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,         &r4aNtripClientCasterUser,          "NtripUser",   R4A_ESP32_NVM_STRING("lpleahyjr@gmail.com")},
-    {false, R4A_ESP32_NVM_PT_P_CHAR, 0,          0,         &r4aNtripClientCasterUserPW,        "NtripUserPw", R4A_ESP32_NVM_STRING("")},
-
-    {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,         &r4aNtripClientCompany,             "Company",      R4A_ESP32_NVM_STRING("Freenove")},
-    {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,         &r4aNtripClientProduct,             "Product",      R4A_ESP32_NVM_STRING("4WD_Robot")},
-    {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,         &r4aNtripClientProductVersion,      "ProdVersion",  R4A_ESP32_NVM_STRING("v1.0")},
-
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,         (void *)&r4aNtripClientEnable,      "NtripEnable",  false},
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,         (void *)&r4aNtripClientDebugRtcm,   "NtripRtcm",    false},
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,         (void *)&r4aNtripClientDebugState,  "NtripState",   false},
-
-    {true,  R4A_ESP32_NVM_PT_UINT32, 0,          0xffffffff, &r4aNtripClientReceiveTimeout,     "NtripRxTmo",   (60 * 1000)},
-    {true,  R4A_ESP32_NVM_PT_UINT32, 0,          0xffffffff, &r4aNtripClientResponseDone,       "NtripRspDone", 1000},
-    {true,  R4A_ESP32_NVM_PT_UINT32, 0,          0xffffffff, &r4aNtripClientResponseTimeout,    "NtripRspTmo",  (10 * 1000)},
-#endif  // USE_NTRIP
-
     // NVM parameters
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &parameterFilePath,         "ParamFile",    R4A_ESP32_NVM_STRING("/Parameters.txt")},

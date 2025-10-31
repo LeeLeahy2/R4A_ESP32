@@ -91,9 +91,6 @@ enum MENU_TABLE_INDEX
     MTI_I2C,
     MTI_LED_MATRIX,
     MTI_MOTOR,
-#ifdef  USE_NTRIP
-    MTI_NTRIP,
-#endif  // USE_NTRIP
     MTI_NVM,
     MTI_ROBOT,
 #ifdef  USE_SPARKFUN_SEN_13582
@@ -218,9 +215,6 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
     {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
     {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
-#ifdef  USE_NTRIP
-    {"NTRIP",   nullptr,            MTI_NTRIP,      nullptr,    0,      "Enter the NTRIP menu"},
-#endif  // USE_NTRIP
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
 #ifdef  USE_I2C
@@ -250,9 +244,6 @@ const R4A_MENU_TABLE menuTable[] =
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
     {"LED Matrix Menu", nullptr,       r4aVk16k33MenuTable, R4A_VK16K33_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
-#ifdef  USE_NTRIP
-    {"NTRIP Menu",      nullptr,  r4aNtripClientMenuTable,  R4A_NTRIP_CLIENT_MENU_ENTRIES},
-#endif  // USE_NTRIP
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Robot Menu",      nullptr,      robotMenuTable,       ROBOT_MENU_ENTRIES},
 #ifdef  USE_SPARKFUN_SEN_13582

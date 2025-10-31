@@ -12,7 +12,6 @@
 #include <R4A_SparkFun.h>           // SparkFun Electronics boards
 
 #define USE_I2C
-//#define USE_NTRIP
 //#define USE_OV2640
 //#define USE_SPARKFUN_SEN_13582
 
@@ -505,16 +504,6 @@ void loop()
             r4aNtpUpdate(r4aWifiStationOnline);
         }
 
-#ifdef  USE_NTRIP
-        // Update the NTRIP client state
-        if (r4aNtripClientEnable)
-        {
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("r4aNtripClientUpdate");
-            r4aNtripClientUpdate(r4aWifiStationOnline, &Serial);
-        }
-#endif  // USE_NTRIP
-
         // Update the telnet server and clients
         if (DEBUG_LOOP_CORE_1)
             callingRoutine("telnet.update");
@@ -710,16 +699,6 @@ void loopCore0()
     // Get the time since boot
     currentMsec = millis();
 
-#ifdef  USE_NTRIP
-    // Send navigation data to the GNSS radio
-    if (r4aNtripClientEnable)
-    {
-        if (DEBUG_LOOP_CORE_0)
-            callingRoutine("r4aNtripClientRbRemoveData");
-        r4aNtripClientRbRemoveData(&Serial);
-    }
-#endif  // USE_NTRIP
-
     // Perform the robot challenge
     if (DEBUG_LOOP_CORE_0)
         callingRoutine("r4aRobotUpdate");
@@ -749,12 +728,6 @@ void validateTables()
         Serial.printf("menuTableIndexMax - 1: %d\r\n", menuTableIndexMax - 1);
         r4aReportFatalError("Fix menuTableEntries to match MENU_TABLE_INDEX");
     }
-
-#ifdef  USE_NTRIP
-    // Validate the NTRIP tables
-    log_v("r4aNtripClientValidateTables");
-    r4aNtripClientValidateTables();
-#endif  // USE_NTRIP
 }
 
 //*********************************************************************
