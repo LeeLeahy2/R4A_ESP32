@@ -27,7 +27,7 @@ void robotDisplayTime(uint32_t milliseconds)
 
     // Display the seconds and tenths on the LED matrix
     if (vk16k33Present)
-        vk16k33Time(milliseconds);
+        vk16k33DeltaTime(milliseconds);
 
     // Display the seconds on the LEDs
     else if (robotUseWS2812)

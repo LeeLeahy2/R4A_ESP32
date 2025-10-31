@@ -5,8 +5,8 @@
 **********************************************************************/
 
 //*********************************************************************
-// Display the time on VK16K33
-void vk16k33Time(uint32_t milliseconds)
+// Display the delta time on VK16K33
+void vk16k33DeltaTime(uint32_t milliseconds)
 {
     uint32_t thousands;
     uint32_t hundreds;
