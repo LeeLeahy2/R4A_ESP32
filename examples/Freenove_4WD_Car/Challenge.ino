@@ -67,7 +67,12 @@ void challengeStop()
         car.backupLightsOff();
     }
 
-    // Display halt
+    // Display the robot's runtime
     if (vk16k33Present)
-        r4aVk16k33DisplayHalt(&vk16k33);
+    {
+        uint32_t stopMsec;
+
+        stopMsec = r4aRobotGetStopTime(&robot);
+        robotDisplayTime(r4aRobotGetRunTime(&robot, stopMsec));
+    }
 }

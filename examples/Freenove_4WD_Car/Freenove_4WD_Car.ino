@@ -602,6 +602,17 @@ void loop()
     }
 #endif  // USE_OV2640
 
+    // Display the robot's runtime
+    if (robotRunTime && r4aRobotIsRunning(&robot))
+    {
+        static uint32_t lastMsec;
+        if ((currentMsec - lastMsec) >= 100)
+        {
+            lastMsec = currentMsec;
+            robotDisplayTime(r4aRobotGetRunTime(&robot, currentMsec));
+        }
+    }
+
     // Process serial commands
     if (DEBUG_LOOP_CORE_1)
         callingRoutine("r4aSerialMenu");
