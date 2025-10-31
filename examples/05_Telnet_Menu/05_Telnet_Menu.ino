@@ -173,8 +173,6 @@ bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display = nullptr)
 // Robot operation
 //****************************************
 
-#define ROBOT_STOP_TO_IDLE_SEC              30
-
 bool ignoreBatteryCheck;
 void robotIdle(uint32_t currentMsec);
 void robotDisplayTime(uint32_t milliseconds);
@@ -292,7 +290,6 @@ void setup()
     log_d("Calling r4aRobotInit");
     r4aRobotInit(&robot,
                  xPortGetCoreID(),       // CPU core
-                 ROBOT_STOP_TO_IDLE_SEC, // Delay after running the challenge
                  nullptr,                // Idle routine
                  nullptr);               // Time display routine
 

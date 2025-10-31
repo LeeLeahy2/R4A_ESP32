@@ -61,8 +61,6 @@ uint32_t startMsec;
 
 USE_MOTOR_TABLE;
 
-#define ROBOT_STOP_TO_IDLE_SEC              30
-
 R4A_ROBOT robot;
 
 R4A_ROBOT_CHALLENGE basicLineFollowing =
@@ -208,7 +206,6 @@ void setup()
     Serial.printf("Start initial delay\r\n");
     r4aRobotInit(&robot,
                  xPortGetCoreID(),       // CPU core
-                 ROBOT_STOP_TO_IDLE_SEC, // Delay after running the challenge
                  blfIdle,                // Idle routine
                  blfDisplayTime);        // Time display routine
 
