@@ -80,16 +80,6 @@ bool webServerRegisterUriHandlers(R4A_WEB_SERVER * object)
             break;
         }
 
-#ifdef  USE_OV2640
-        // Verify that the camera is enabled and initialized
-        if (ov2640Present)
-        {
-            // Add the ov2640 web pages
-            if (ov2640RegisterUriHandlers(object) == false)
-                break;
-        }
-#endif  // USE_OV2640
-
         // Successfully registered the handlers
         return true;
     } while (0);

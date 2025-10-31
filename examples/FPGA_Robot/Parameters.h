@@ -16,13 +16,6 @@ int16_t blfSpeedMedium;
 int16_t blfSpeedFast;
 
 //****************************************
-// Camera Line Following (CLF)
-//****************************************
-
-uint8_t clfPanStartDegrees;
-uint8_t clfTiltStartDegrees;
-
-//****************************************
 // mDNS
 //****************************************
 
@@ -39,12 +32,6 @@ bool ntpEnable;
 //****************************************
 
 const char * parameterFilePath;
-
-//****************************************
-// OV2640 camera
-//****************************************
-
-bool ov2640Enable;
 
 //****************************************
 // PCA9685
@@ -123,13 +110,6 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
     {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedMedium,    "blfMedium",    3000},
     {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedSlow,      "blfSlow",      1500},
 
-#ifdef  USE_OV2640
-    // Camera Line Following (CLF)
-// Required    Type                  Minimum     Maximum        Address                         Name            Default Value
-    {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &clfPanStartDegrees,            "clfPanDeg",    10},
-    {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &servoTiltStartDegrees,         "clfTiltDeg",   90},
-#endif  // USE_OV2640
-
     // Memory parameters
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_INT32,  0, (uint64_t)0xffffffff,   &r4aMallocMaxBytes,         "MallocMax",    (uint64_t)128},
@@ -142,12 +122,6 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
     // NVM parameters
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &parameterFilePath,         "ParamFile",    R4A_ESP32_NVM_STRING("/Parameters.txt")},
-
-#ifdef  USE_OV2640
-    // OV2640 camera
-// Required    Type                  Minimum     Maximum        Address                     Name            Default Value
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &ov2640Enable,              "Camera",       false},
-#endif  // USE_OV2640
 
     // PCA9685
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value

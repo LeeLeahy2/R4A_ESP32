@@ -37,7 +37,6 @@
 #include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
 
 #define USE_I2C
-//#define USE_OV2640
 
 //****************************************
 // Constants
@@ -56,11 +55,8 @@ enum CHALLENGE_INDEX
     CHALLENGE_NONE = 0,
     CHALLENGE_ALF,      // 1
     CHALLENGE_BLF,      // 2
-#ifdef  USE_OV2640
-    CHALLENGE_CLF,      // 3
-#endif  // USE_OV2640
     // Add new values before this line
-    CHALLENGE_MAX       // 4
+    CHALLENGE_MAX       // 3
 };
 
 //****************************************
@@ -95,34 +91,26 @@ typedef void (*START_CHALLENGE)(Print * display);
 bool contextCreate(void ** contextData, NetworkClient * client);
 void alfStart(Print * display);
 void blfStart(Print * display);
-void clfStart(Print * display);
 
 void spiFlashDisplayStatus(uint8_t status, Print * display);
 bool spiFlashWriteEnable(bool enable);
-
-//****************************************
-// OV2640 camera
-//****************************************
-
-// List the users of the camera, one bit per user
-enum CAMERA_USERS
-{
-    CAMERA_USER_DISABLED = 0,
-    CAMERA_USER_CLF,
-    CAMERA_USER_SERVO,
-    CAMERA_USER_WEB_SERVER,
-};
-
-#ifdef  USE_OV2640
-// Forward routine declarations
-bool ov2640ProcessWebServerFrameBuffer(camera_fb_t * frameBuffer, Print * display);
-#endif  // USE_OV2640
 
 //****************************************
 // Battery macros
 //****************************************
 
 #define ADC_REFERENCE_VOLTAGE   3.48    // Volts
+
+//****************************************
+// Camera
+//****************************************
+
+// List the users of the camera, one bit per user
+enum CAMERA_USERS
+{
+    CAMERA_USER_DISABLED = 0,
+    CAMERA_USER_WEB_SERVER,
+};
 
 //****************************************
 // CPU core management
@@ -151,7 +139,6 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
     {LEDS_I2C_ADDRESS,        "Alchitry Pt V2 LEDs"}, // 0x33
     {SEVEN_SEG_DISP_I2C_ADDR, "Seven Segment Display"}, // 0x57
     {PCA9685_I2C_ADDRESS,     "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
-    {OV2640_I2C_ADDRESS,      "OV2640 Camera"}, // 0x70
 };
 
 R4A_ESP32_I2C_BUS esp32I2cBus =
@@ -175,23 +162,8 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
         R4A_PCA9685_MOTOR motorFrontRight(&pca9685, 13, 12);
         R4A_PCA9685_MOTOR motorFrontLeft(&pca9685, 14, 15);
     R4A_PCF8574 pcf8574(&esp32I2cBus._i2cBus, PCF8574_I2C_ADDRESS);
-#ifdef  USE_OV2640
-    const R4A_OV2640_SETUP ov2640 =
-    {
-        &r4a4wdCarOv2640Pins,   // ESP32 GPIO pins for the 0V2640 camera
-        20 * 1000 * 1000,       // Input clock frequency for the OV2640
-        LEDC_TIMER_0,           // Timer producing the 2x clock frequency
-        LEDC_CHANNEL_0,         // Channel dividing the clock frequency to 1x
-        OV2640_I2C_ADDRESS,     // Device address of the OV2640 on the SCCB bus
-        10,                     // Value for JPEG quality
-        PIXFORMAT_JPEG,         // Value specifying the pixel format
-        FRAMESIZE_CIF,          // Value specifying the frame size
-        3                       // Number of frame buffers to allocate
-    };
-#endif  // USE_OV2640
 
 bool generalCallPresent;
-bool ov2640Present;
 bool pca9685Present;
 bool pcf8574Present;
 bool s7dPresent;
@@ -260,9 +232,6 @@ START_CHALLENGE challengeList[] =
     nullptr,
     alfStart,   // 1
     blfStart,   // 2
-#ifdef  USE_OV2640
-    clfStart,   // 3
-#endif  // USE_OV2640
     // Add new values before this line
 };
 const int challengeListEntries = sizeof(challengeList) / sizeof(challengeList[0]);
@@ -555,26 +524,6 @@ void setup()
     while (!core0Initialized)
         delayMicroseconds(1);
 
-    // Initialize the camera
-#ifdef USE_OV2640
-    r4aCameraUserAdd(CAMERA_USER_DISABLED);
-    if (ov2640Present)
-    {
-        if (ov2640Enable == false)
-        {
-            ov2640Present = false;
-            Serial.printf("WARNING: OV2640 camera is disabled!\r\n");
-        }
-        else
-        {
-            log_v("Calling r4aOv2640Setup");
-            Serial.printf("Initializing the OV2640 camera\r\n");
-            if (r4aOv2640Setup(&ov2640))
-                r4aCameraUserRemove(CAMERA_USER_DISABLED);
-        }
-    }
-#endif  // USE_OV2640
-
     //****************************************
     // Core 1 completed initialization
     //****************************************
@@ -661,22 +610,6 @@ void loop()
         r4aWebServerUpdate(&webServer, r4aWifiStationOnline && webServerEnable);
     }
 
-#ifdef  USE_OV2640
-    // Discard frame buffers
-    if (r4aCameraUsers == 0)
-    {
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("r4aCameraFrameBufferGet");
-        camera_fb_t * frameBuffer = r4aCameraFrameBufferGet();
-        if (frameBuffer)
-        {
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("r4aCameraFrameBufferFree");
-            r4aCameraFrameBufferFree(frameBuffer);
-        }
-    }
-#endif  // USE_OV2640
-
     // Display the robot's runtime
     if (robotRunTime && r4aRobotIsRunning(&robot))
     {
@@ -736,7 +669,6 @@ void setupCore0(void *parameter)
     // Determine which devices are present
     log_v("Calling r4aI2cBusIsDevicePresent");
     generalCallPresent = r4aI2cBusIsDevicePresent(i2cBus, R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS);
-    ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
     pca9685Present = r4aI2cBusIsDevicePresent(i2cBus, PCA9685_I2C_ADDRESS);
     pcf8574Present = r4aI2cBusIsDevicePresent(i2cBus, PCF8574_I2C_ADDRESS);
     s7dPresent = r4aI2cBusIsDevicePresent(i2cBus, SEVEN_SEG_DISP_I2C_ADDR);
