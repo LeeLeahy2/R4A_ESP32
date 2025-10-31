@@ -374,7 +374,7 @@ void wpfStart(Print * display)
             // Start the robot challenge if the robot is not active
             r4aRobotStart(&robot,
                           &wayPointFollowing,
-                          R4A_CHALLENGE_SEC_START_DELAY, // Challenge start delay
+                          robotStartDelaySec,
                           display);
         }
     }

@@ -136,7 +136,7 @@ void blfStart(Print * display)
 #endif  // USE_SPARKFUN_SEN_13582
         r4aRobotStart(&robot,
                       challengeStructure,
-                      R4A_CHALLENGE_SEC_START_DELAY, // Challenge start delay
+                      robotStartDelaySec,
                       display);
     }
 }
