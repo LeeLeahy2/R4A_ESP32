@@ -53,39 +53,46 @@ void robotIdle(uint32_t currentMsec)
     {
         previousMsec = currentMsec;
 
-        // Display Idle on the LED matrix
-        if (vk16k33Present && robotLedMatrixDuringIdle)
-            r4aVk16k33DisplayIdle(&vk16k33);
-
-        // Determine if line sensor LEDs should be updated
-        if (robotLineSensorLEDs && (pcf8574Present || sx1509Present)
-            && robotUseWS2812)
+        // Determine if the display should be updated.  Initially when the
+        // robot stops, the brake lights are on and the runtime is displayed.
+        // After some time (robotRunTimeSec), the WS2812 RGB LEDs and the
+        // display switch to something else.
+        if ((currentMsec - r4aRobotGetStopTime(&robot)) >= (robotRunTimeSec * R4A_MILLISECONDS_IN_A_SECOND))
         {
-            car.ledsOff();
+            // Display Idle on the LED matrix
+            if (vk16k33Present && robotLedMatrixDuringIdle)
+                r4aVk16k33DisplayIdle(&vk16k33);
 
-            // Read the line sensors
-            if (sx1509Present)
+            // Determine if line sensor LEDs should be updated
+            if (robotLineSensorLEDs && (pcf8574Present || sx1509Present)
+                && robotUseWS2812)
             {
+                car.ledsOff();
+
+                // Read the line sensors
+                if (sx1509Present)
+                {
 #ifdef USE_SPARKFUN_SEN_13582
-                r4aSx1509RegisterRead(&sx1509,
-                                      SX1509_DATA_A,
-                                      &lineSensors);
-                r4aLEDSetColorRgb(FRONT_L1, lineSensors & 0x02 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_L2, lineSensors & 0x04 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_L3, lineSensors & 0x08 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_R3, lineSensors & 0x10 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_R2, lineSensors & 0x20 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_R1, lineSensors & 0x40 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aSx1509RegisterRead(&sx1509,
+                                          SX1509_DATA_A,
+                                          &lineSensors);
+                    r4aLEDSetColorRgb(FRONT_L1, lineSensors & 0x02 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_L2, lineSensors & 0x04 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_L3, lineSensors & 0x08 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_R3, lineSensors & 0x10 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_R2, lineSensors & 0x20 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_R1, lineSensors & 0x40 ? R4A_LED_YELLOW : R4A_LED_OFF);
 #endif  // USE_SPARKFUN_SEN_13582
-            }
-            else if (pcf8574Present)
-            {
-                pcf8574.read(&lineSensors);
-                lineSensors &= 7;
-                r4aLEDSetColorRgb(FRONT_L1, lineSensors & 1 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_L3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_R3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
-                r4aLEDSetColorRgb(FRONT_R1, lineSensors & 4 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                }
+                else if (pcf8574Present)
+                {
+                    pcf8574.read(&lineSensors);
+                    lineSensors &= 7;
+                    r4aLEDSetColorRgb(FRONT_L1, lineSensors & 1 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_L3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_R3, lineSensors & 2 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                    r4aLEDSetColorRgb(FRONT_R1, lineSensors & 4 ? R4A_LED_YELLOW : R4A_LED_OFF);
+                }
             }
         }
     }

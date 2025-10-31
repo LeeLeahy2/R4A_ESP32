@@ -53,14 +53,20 @@ bool ov2640Enable;
 uint32_t pca9685FrequencyHz;
 
 //****************************************
+// Robot
+//****************************************
+
+bool robotLedMatrixDuringIdle;
+bool robotLineSensorLEDs;
+uint16_t robotRunTimeSec;
+bool robotUseWS2812;
+
+//****************************************
 // Robot challenge
 //****************************************
 
 bool enableBatteryCheck;
-bool robotLineSensorLEDs;
-bool robotLedMatrixDuringIdle;
 uint8_t startIndex;
-bool robotUseWS2812;
 
 //****************************************
 // Servos
@@ -186,13 +192,17 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_UINT16, 24,         1525,          &pca9685FrequencyHz,        "pca9685Hz",    50},
 
+    // Robot
+// Required    Type                  Minimum     Maximum        Address                     Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLedMatrixDuringIdle,  "MatrixIdle",   true},
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLineSensorLEDs,       "RobotLsLEDs",  true},
+    {true,  R4A_ESP32_NVM_PT_UINT16, 0,          65535,         &robotRunTimeSec,           "RobotRtSec",   30},
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotUseWS2812,            "RobotWS2812",  true},
+
     // Robot challenge
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &enableBatteryCheck,       "EnableBattery", true},
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLineSensorLEDs,       "LSLEDs",       true},
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLedMatrixDuringIdle,  "MatrixIdle",   true},
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,      CHALLENGE_MAX - 1, &startIndex,                "StartIndex",   0},
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotUseWS2812,            "RobotWS2812",  true},
 
     // Servos
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
