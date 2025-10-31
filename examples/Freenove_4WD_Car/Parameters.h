@@ -56,7 +56,7 @@ uint32_t pca9685FrequencyHz;
 // Robot
 //****************************************
 
-bool robotLedMatrixDuringIdle;
+bool robotDisplayIdle;
 bool robotLineSensorLEDs;
 uint16_t robotRunTimeSec;
 bool robotUseWS2812;
@@ -194,7 +194,7 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 
     // Robot
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
-    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLedMatrixDuringIdle,  "MatrixIdle",   true},
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotDisplayIdle,          "RobotIdle",    true},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotLineSensorLEDs,       "RobotLsLEDs",  true},
     {true,  R4A_ESP32_NVM_PT_UINT16, 0,          65535,         &robotRunTimeSec,           "RobotRtSec",   30},
     {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &robotUseWS2812,            "RobotWS2812",  true},

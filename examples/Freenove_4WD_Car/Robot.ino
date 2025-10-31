@@ -60,7 +60,7 @@ void robotIdle(uint32_t currentMsec)
         if ((currentMsec - r4aRobotGetStopTime(&robot)) >= (robotRunTimeSec * R4A_MILLISECONDS_IN_A_SECOND))
         {
             // Display Idle on the LED matrix
-            if (vk16k33Present && robotLedMatrixDuringIdle)
+            if (vk16k33Present && robotDisplayIdle)
                 r4aVk16k33DisplayIdle(&vk16k33);
 
             // Determine if line sensor LEDs should be updated
