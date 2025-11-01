@@ -243,12 +243,6 @@ R4A_MENU serialMenu;
 USE_SERVO_TABLE;
 
 //****************************************
-// SPI support - WS2812 LEDs
-//****************************************
-
-R4A_4WD_CAR_SPI_WS2812_GLOBALS;
-
-//****************************************
 // Web server
 //****************************************
 
@@ -342,9 +336,6 @@ void setup()
     if (status != pdPASS)
         r4aReportFatalError("Failed to create the core 0 task!");
     log_v("Core 0 task started");
-
-    // Initialize the SPI controller and WS2812 LEDs
-    R4A_4WD_CAR_SPI_WS2812_SETUP(1);
 
     // Start WiFi if enabled
     log_v("Calling r4aWifiBegin");
@@ -458,11 +449,6 @@ void loop()
             digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
         }
     }
-
-    // Update the LEDs
-    if (DEBUG_LOOP_CORE_1)
-        callingRoutine("car.ledsUpdate");
-    car.ledsUpdate(currentMsec);
 
     // Update the WiFi status
     r4aWifiUpdate();

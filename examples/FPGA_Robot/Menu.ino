@@ -91,11 +91,9 @@ enum MENU_TABLE_INDEX
     MTI_I2C,
     MTI_MOTOR,
     MTI_NVM,
-    MTI_ROBOT,
     MTI_SERVO,
     MTI_START,
     MTI_TELNET,
-    MTI_WS2812_LED,
     // Add new menu values before this line
     MTI_MAX
 };
@@ -115,7 +113,6 @@ const R4A_MENU_ENTRY debugMenuTable[] =
 #ifdef  USE_I2C
     {"s",       nullptr,                    MTI_SERVO,      nullptr,    0,      "Servo menu"},
 #endif  // USE_I2C
-    {"w",       nullptr,                    MTI_WS2812_LED, nullptr,    0,      "WS2812 RGB LED menu"},
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define DEBUG_MENU_ENTRIES      sizeof(debugMenuTable) / sizeof(debugMenuTable[0])
@@ -129,15 +126,6 @@ const R4A_MENU_ENTRY gpioMenuTable[] =
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,            0,      "Return to the main menu"},
 };
 #define GPIO_MENU_ENTRIES      sizeof(gpioMenuTable) / sizeof(gpioMenuTable[0])
-
-// Robot menu
-const R4A_MENU_ENTRY robotMenuTable[] =
-{
-    // Command  menuRoutine         menuParam                   HelpRoutine    align    HelpText
-    {"w",       r4aMenuBoolToggle, (intptr_t)&robotUseWS2812,   r4aMenuBoolHelp, 0,     "Enable/disable WS2812 use"},
-    {"x",       nullptr,            R4A_MENU_MAIN,              nullptr,         0,     "Return to the main menu"},
-};
-#define ROBOT_MENU_ENTRIES      sizeof(robotMenuTable) / sizeof(robotMenuTable[0])
 
 // Define the table index values
 #define SERVO_PAN       0
@@ -199,7 +187,6 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
 #ifdef  USE_I2C
-    {"robot",   nullptr,            MTI_ROBOT,      nullptr,    0,      "Enter the robot menu"},
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
     {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
 #endif  // USE_I2C
@@ -222,10 +209,8 @@ const R4A_MENU_TABLE menuTable[] =
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
-    {"Robot Menu",      nullptr,      robotMenuTable,       ROBOT_MENU_ENTRIES},
     {"Servo Menu",      nullptr,        servoMenuTable,     SERVO_MENU_ENTRIES},
     {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
-    {"WS2812 LED Menu", nullptr,     r4a4wdCarLedMenuTable, R4A_4WD_CAR_LED_MENU_ENTRIES},
 };
 const int menuTableEntries = sizeof(menuTable) / sizeof(menuTable[0]);
