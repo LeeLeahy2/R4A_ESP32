@@ -163,7 +163,6 @@ const R4A_MENU_ENTRY startMenuTable[] =
     // Command  menuRoutine         menuParam               HelpRoutine         align   HelpText
     {"alf",     menuStartAlf,       0,                      nullptr,            0,      "Start advanced line following at boot"},
     {"blf",     menuStartBlf,       0,                      nullptr,            0,      "Start basic line following at boot"},
-    {"blt",     menuStartBlt,       0,                      nullptr,            0,      "Start basic light tracking at boot"},
 #ifdef  USE_OV2640
     {"clf",     menuStartClf,       0,                      nullptr,            0,      "Start camera line following at boot"},
 #endif  // USE_OV2640
@@ -189,7 +188,6 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #ifdef  USE_I2C
     {"alf",     alfStartMenu,       0,              nullptr,    0,      "Advanced line following"},
     {"blf",     blfStartMenu,       0,              nullptr,    0,      "Basic line following"},
-    {"blt",     bltStartMenu,       0,              nullptr,    0,      "Basic light tracking"},
 #endif  // USE_I2C
 #ifdef  USE_OV2640
     {"c", r4aMenuBoolToggle, (intptr_t)&ov2640Enable, r4aMenuBoolHelp, 0, "Toggle OV2640 camera"},

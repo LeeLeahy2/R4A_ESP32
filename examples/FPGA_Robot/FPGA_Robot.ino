@@ -30,12 +30,11 @@ enum CHALLENGE_INDEX
     CHALLENGE_NONE = 0,
     CHALLENGE_ALF,      // 1
     CHALLENGE_BLF,      // 2
-    CHALLENGE_BLT,      // 3
 #ifdef  USE_OV2640
-    CHALLENGE_CLF,      // 4
+    CHALLENGE_CLF,      // 3
 #endif  // USE_OV2640
     // Add new values before this line
-    CHALLENGE_MAX       // 5
+    CHALLENGE_MAX       // 4
 };
 
 //****************************************
@@ -63,7 +62,6 @@ typedef void (*START_CHALLENGE)(Print * display);
 bool contextCreate(void ** contextData, NetworkClient * client);
 void alfStart(Print * display);
 void blfStart(Print * display);
-void bltStart(Print * display);
 void clfStart(Print * display);
 
 //****************************************
@@ -235,9 +233,8 @@ START_CHALLENGE challengeList[] =
     nullptr,
     alfStart,   // 1
     blfStart,   // 2
-    bltStart,   // 3
 #ifdef  USE_OV2640
-    clfStart,   // 4
+    clfStart,   // 3
 #endif  // USE_OV2640
     // Add new values before this line
 };
