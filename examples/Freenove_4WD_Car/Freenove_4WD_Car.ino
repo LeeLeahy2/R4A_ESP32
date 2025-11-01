@@ -127,13 +127,13 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
     {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  // 0x00
     {AK09916_I2C_ADDRESS,  "AK09916 3-axis Electronic Compass"},    // 0x0c
-    {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"}, // 0x69
-    {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70
-    {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
     {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
     {SX1509_I2C_ADDRESS,   "SX1509 Level Shifting GPIO Expander"}, // 0x3e
+    {ZEDF9P_I2C_ADDRESS,   "u-blox ZED F9P GNSS receiver"}, // 0x42
+    {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
+    {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"}, // 0x69
+    {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70
     {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"}, // 0x71
-    {ZEDF9P_I2C_ADDRESS,   "u-blox ZED F9P GNSS receiver"} // 0x42
 };
 
 R4A_ESP32_I2C_BUS esp32I2cBus =
