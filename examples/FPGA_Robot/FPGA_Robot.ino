@@ -102,15 +102,11 @@ volatile bool core1Initialized;
 #define I2C_SCL                 14
 #define I2C_SDA                 13
 
-// I2C addresses
-#define ICM20948_I2C_ADDRESS    0x69
-
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
     {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  // 0x00
     {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
     {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
-    {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"}, // 0x69
     {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70
 };
 
@@ -151,7 +147,6 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
 #endif  // USE_OV2640
 
 bool generalCallPresent;
-bool icm20948Present;
 bool ov2640Present;
 bool pca9685Present;
 bool pcf8574Present;
@@ -543,7 +538,6 @@ void setupCore0(void *parameter)
     // Determine which devices are present
     log_v("Calling r4aI2cBusIsDevicePresent");
     generalCallPresent = r4aI2cBusIsDevicePresent(i2cBus, R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS);
-    icm20948Present = r4aI2cBusIsDevicePresent(i2cBus, ICM20948_I2C_ADDRESS);
     ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
     pca9685Present = r4aI2cBusIsDevicePresent(i2cBus, PCA9685_I2C_ADDRESS);
     pcf8574Present = r4aI2cBusIsDevicePresent(i2cBus, PCF8574_I2C_ADDRESS);
