@@ -108,6 +108,9 @@ volatile bool core1Initialized;
 // I2C bus configuration
 //****************************************
 
+#define I2C_SCL                 14
+#define I2C_SDA                 13
+
 // I2C addresses
 #define AK09916_I2C_ADDRESS     0x0c
 #define SX1509_I2C_ADDRESS      0x3e
