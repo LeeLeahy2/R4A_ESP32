@@ -15,8 +15,17 @@
         |                |        |            |----->| HOLD#   |
         |                |        |            |      '---------'
         |         SDA 13 |<------>| L6         |
-        |         SCL 14 |<------>| F4         |
-        |                |        |            |
+        |         SCL 14 |<------>| F4         |            IO
+        |                |        |            |           Board
+        |                |        |            |      .--------------.
+        |                |        |            |=====>| 7 Seg Disp   |
+        |                |        |            |      |              |
+        |                |        |            |=====>| LEDs         |
+        |                |        |            |      |              |
+        |                |        |            |<=====| Dip Switches |
+        |                |        |            |      |              |
+        |                |        |            |<=====| Push Buttons |
+        |                |        |            |      '--------------'
         '----------------'        '------------'
 
 **********************************************************************/
@@ -131,12 +140,14 @@ volatile bool core1Initialized;
 
 // I2C addresses
 #define SPI_FLASH_I2C_ADDRESS   0x32
+#define SEVEN_SEG_DISP_I2C_ADDR 0x57
 
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
     {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  // 0x00
     {PCF8574_I2C_ADDRESS,     "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
     {SPI_FLASH_I2C_ADDRESS,   "SPI Flash Controller"}, // 0x32
+    {SEVEN_SEG_DISP_I2C_ADDR, "Seven Segment Display"}, // 0x57
     {PCA9685_I2C_ADDRESS,     "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
     {OV2640_I2C_ADDRESS,      "OV2640 Camera"}, // 0x70
 };
@@ -181,6 +192,7 @@ bool generalCallPresent;
 bool ov2640Present;
 bool pca9685Present;
 bool pcf8574Present;
+bool s7dPresent;
 
 //****************************************
 // Light Sensor
@@ -674,6 +686,10 @@ void loop()
         }
     }
 
+    // Update the time display
+    else if (robotNtpTime && r4aNtpIsTimeValid() && (!r4aRobotIsActive(&robot)))
+        sevenSegmentNtpTime(currentMsec);
+
     // Process serial commands
     if (DEBUG_LOOP_CORE_1)
         callingRoutine("r4aSerialMenu");
@@ -721,6 +737,7 @@ void setupCore0(void *parameter)
     ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
     pca9685Present = r4aI2cBusIsDevicePresent(i2cBus, PCA9685_I2C_ADDRESS);
     pcf8574Present = r4aI2cBusIsDevicePresent(i2cBus, PCF8574_I2C_ADDRESS);
+    s7dPresent = r4aI2cBusIsDevicePresent(i2cBus, SEVEN_SEG_DISP_I2C_ADDR);
 
     // Reset the I2C devices
     if (generalCallPresent)
@@ -759,6 +776,10 @@ void setupCore0(void *parameter)
     loopCore0OutTimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 0 out of loop time buffer (loopCore0OutTimeUsec)");
     if (!loopCore0OutTimeUsec)
         r4aReportFatalError("Failed to allocate loopCore0OutTimeUsec!");
+
+    // Clear the display
+    if (s7dPresent)
+        sevenSegmentClear();
 
     //****************************************
     // Core 0 completed initialization

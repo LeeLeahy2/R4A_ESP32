@@ -26,6 +26,9 @@ bool robotCheckBatteryLevel()
 // Display the delta time
 void robotDisplayTime(uint32_t milliseconds)
 {
+    // Display the delta time
+    if (s7dPresent)
+        sevenSegmentDeltaTime(milliseconds);
 }
 
 //*********************************************************************
@@ -46,6 +49,10 @@ void robotIdle(uint32_t currentMsec)
         if ((currentMsec - r4aRobotGetStopTime(&robot)) >= (robotRunTimeSec * R4A_MILLISECONDS_IN_A_SECOND))
             // Update the display data selection selection
             robotNtpTimeRestore();
+
+        // Display idle on the seven segment display
+        if (robotDisplayIdle && (!robotNtpTime || !r4aNtpIsTimeValid()))
+            sevenSegmentIdle();
 
         // Determine if line sensor LEDs should be updated
         if (robotLineSensorLEDs && pcf8574Present)
