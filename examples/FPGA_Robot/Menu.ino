@@ -89,7 +89,6 @@ enum MENU_TABLE_INDEX
     MTI_DEBUG = R4A_MENU_MAIN + 1,
     MTI_GPIO,
     MTI_I2C,
-    MTI_LED_MATRIX,
     MTI_MOTOR,
     MTI_NVM,
     MTI_ROBOT,
@@ -110,7 +109,6 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     {"h",       r4aEsp32MenuDisplayHeap,    0,              nullptr,    0,      "Display the heap"},
 #ifdef  USE_I2C
     {"i",       nullptr,                    MTI_I2C,        nullptr,    0,      "I2C menu"},
-    {"l",       nullptr,                    MTI_LED_MATRIX, nullptr,    0,      "LED matrix menu"},
     {"m",       nullptr,                    MTI_MOTOR,      nullptr,    0,      "Motor menu"},
 #endif  // USE_I2C
     {"p",    r4aEsp32MenuDisplayPartitions, 0,              nullptr,    0,      "Display the partitions"},
@@ -222,7 +220,6 @@ const R4A_MENU_TABLE menuTable[] =
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
     {"GPIO Menu",       nullptr,        gpioMenuTable,      GPIO_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
-    {"LED Matrix Menu", nullptr,       r4aVk16k33MenuTable, R4A_VK16K33_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Robot Menu",      nullptr,      robotMenuTable,       ROBOT_MENU_ENTRIES},

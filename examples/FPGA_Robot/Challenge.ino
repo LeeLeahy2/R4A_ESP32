@@ -12,8 +12,6 @@
 void challengeHalt(const char * errorMessage)
 {
     challengeStop();
-    if (vk16k33Present)
-        r4aVk16k33DisplayHalt(&vk16k33);
     r4aReportFatalError(errorMessage);
 }
 
@@ -23,13 +21,6 @@ void challengeInit()
 {
     // Save the time display state
     robotNtpTimeSave();
-
-    // Turn off the LED matrix
-    if (vk16k33Present)
-    {
-        r4aVk16k33BufferClear(&vk16k33);
-        r4aVk16k33DisplayPixels(&vk16k33);
-    }
 
     // Update the lights
     if (robotUseWS2812)
@@ -68,14 +59,5 @@ void challengeStop()
         car.ledsTurnOff();
         car.headlightsOff();
         car.backupLightsOff();
-    }
-
-    // Display the robot's runtime
-    if (vk16k33Present)
-    {
-        uint32_t stopMsec;
-
-        stopMsec = r4aRobotGetStopTime(&robot);
-        robotDisplayTime(r4aRobotGetRunTime(&robot, stopMsec));
     }
 }

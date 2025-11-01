@@ -114,7 +114,6 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
     {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
     {ICM20948_I2C_ADDRESS, "ICM-20948 9-Axis MEMS Motion Tracking Device"}, // 0x69
     {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70
-    {VK16K33_I2C_ADDRESS,  "VT16K33 16x8 LED controller, LED matrix"}, // 0x71
 };
 
 R4A_ESP32_I2C_BUS esp32I2cBus =
@@ -152,14 +151,6 @@ R4A_I2C_BUS * r4aI2cBus; // I2C bus for menu system
         3                       // Number of frame buffers to allocate
     };
 #endif  // USE_OV2640
-    // LED matrix is 16 pixels wide by 8 high, use maximum brightness (15)
-    R4A_VK16K33 vk16k33 = {&esp32I2cBus._i2cBus,
-                           VK16K33_I2C_ADDRESS,
-                           r4aLedMatrixColumnMap,
-                           r4aLedMatrixRowPixelMap,
-                           16,
-                           8,
-                           1}; // Brightness (0 - 15)
 
 bool ak09916Present;
 bool generalCallPresent;
@@ -167,7 +158,6 @@ bool icm20948Present;
 bool ov2640Present;
 bool pca9685Present;
 bool pcf8574Present;
-bool vk16k33Present;
 
 //****************************************
 // Light Sensor
@@ -526,10 +516,6 @@ void loop()
         }
     }
 
-    // Update the time display
-    else if (robotNtpTime && r4aNtpIsTimeValid() && (!r4aRobotIsActive(&robot)))
-        vk16k33NtpTime(currentMsec);
-
     // Process serial commands
     if (DEBUG_LOOP_CORE_1)
         callingRoutine("r4aSerialMenu");
@@ -579,7 +565,6 @@ void setupCore0(void *parameter)
     ov2640Present = r4aI2cBusIsDevicePresent(i2cBus, OV2640_I2C_ADDRESS);
     pca9685Present = r4aI2cBusIsDevicePresent(i2cBus, PCA9685_I2C_ADDRESS);
     pcf8574Present = r4aI2cBusIsDevicePresent(i2cBus, PCF8574_I2C_ADDRESS);
-    vk16k33Present = r4aI2cBusIsDevicePresent(i2cBus, VK16K33_I2C_ADDRESS);
 
     // Reset the I2C devices
     if (generalCallPresent)
@@ -603,14 +588,6 @@ void setupCore0(void *parameter)
     log_v("Calling pcf8574.write");
     pcf8574.write(0xff);
 #endif  // USE_I2C
-
-    // Initialize the VK16K33
-    if (vk16k33Present)
-    {
-        log_v("Calling r4aVk16k33Setup");
-        if (!r4aVk16k33Setup(&vk16k33))
-            r4aReportFatalError("Failed to initialize the VK16K33 LED Matrix controller!");
-    }
 
     // Initialize the robot
     r4aRobotInit(&robot,

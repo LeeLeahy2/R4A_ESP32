@@ -28,12 +28,8 @@ void robotDisplayTime(uint32_t milliseconds)
 {
     uint32_t seconds;
 
-    // Display the seconds and tenths on the LED matrix
-    if (vk16k33Present)
-        vk16k33DeltaTime(milliseconds);
-
     // Display the seconds on the LEDs
-    else if (robotUseWS2812)
+    if (robotUseWS2812)
     {
         seconds = milliseconds / R4A_MILLISECONDS_IN_A_SECOND;
         r4aLEDSetColorRgb(FRONT_L1, (seconds & 1) ? R4A_LED_AQUA : R4A_LED_OFF);
@@ -64,10 +60,6 @@ void robotIdle(uint32_t currentMsec)
         {
             // Update the display data selection selection
             robotNtpTimeRestore();
-
-            // Display Idle on the LED matrix
-            if (vk16k33Present && robotDisplayIdle && (!robotNtpTime || !r4aNtpIsTimeValid()))
-                r4aVk16k33DisplayIdle(&vk16k33);
 
             // Turn off the brake lights
             if (robotUseWS2812)
