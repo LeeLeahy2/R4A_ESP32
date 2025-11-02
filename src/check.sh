@@ -145,5 +145,11 @@ make
 git reset --hard --quiet  HEAD
 make clean
 
+# FPGA Robot
+cd ../FPGA_Robot
+make clean
+make
+make clean
+
 # Restore the source directory
 popd
