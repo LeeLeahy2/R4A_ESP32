@@ -140,6 +140,7 @@ volatile bool core1Initialized;
 
 // I2C addresses
 #define SPI_FLASH_I2C_ADDRESS   0x32
+#define LEDS_I2C_ADDRESS        0x33
 #define SEVEN_SEG_DISP_I2C_ADDR 0x57
 
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
@@ -147,6 +148,7 @@ const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
     {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  // 0x00
     {PCF8574_I2C_ADDRESS,     "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
     {SPI_FLASH_I2C_ADDRESS,   "SPI Flash Controller"}, // 0x32
+    {LEDS_I2C_ADDRESS,        "Alchitry Pt V2 LEDs"}, // 0x33
     {SEVEN_SEG_DISP_I2C_ADDR, "Seven Segment Display"}, // 0x57
     {PCA9685_I2C_ADDRESS,     "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
     {OV2640_I2C_ADDRESS,      "OV2640 Camera"}, // 0x70

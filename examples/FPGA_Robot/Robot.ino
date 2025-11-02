@@ -60,6 +60,12 @@ void robotIdle(uint32_t currentMsec)
             // Read the line sensors
             pcf8574.read(&lineSensors);
             lineSensors &= 7;
+
+            // Update the LEDs
+            r4aI2cBusWrite(r4aI2cBus,
+                           LEDS_I2C_ADDRESS,
+                           &lineSensors,
+                           sizeof(lineSensors));
         }
     }
 }
