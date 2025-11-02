@@ -485,7 +485,6 @@ void loop()
     static uint32_t lastBatteryCheckMsec;
     static R4A_TIME_USEC_t loopEndTimeUsec;
     static uint32_t loopIndex;
-    static bool previousConnected;
 
     // Computing the time outside the loop
     currentUsec = esp_timer_get_time();
@@ -541,44 +540,15 @@ void loop()
         if (r4aNtripClientEnable)
         {
             if (DEBUG_LOOP_CORE_1)
-                callingRoutine("r4aNtripClientUpdate\r\n");
+                callingRoutine("r4aNtripClientUpdate");
             r4aNtripClientUpdate(r4aWifiStationOnline, &Serial);
         }
 #endif  // USE_NTRIP
 
-        // Notify the telnet server of WiFi changes
-        if (telnetEnable)
-        {
-            if (previousConnected != r4aWifiStationOnline)
-            {
-                previousConnected = r4aWifiStationOnline;
-                if (r4aWifiStationOnline)
-                {
-                    if (DEBUG_LOOP_CORE_1)
-                        callingRoutine("telnet.begin\r\n");
-                    telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
-                    Serial.printf("Telnet: %s:%d\r\n", WiFi.localIP().toString().c_str(),
-                                  telnet.port());
-                }
-                else
-                {
-                    if (DEBUG_LOOP_CORE_1)
-                        callingRoutine("telnet.end\r\n");
-                    telnet.end();
-                }
-            }
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("telnet.update");
-            telnet.update(r4aWifiStationOnline);
-        }
-
-        // Check for telnet being disabled while the server is running
-        else if (previousConnected != r4aWifiStationOnline)
-        {
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("telnet.end\r\n");
-            telnet.end();
-        }
+        // Update the telnet server and clients
+        if (DEBUG_LOOP_CORE_1)
+            callingRoutine("telnet.update");
+        telnet.update(telnetEnable, r4aWifiStationOnline);
 
         // Update the web server
         if (DEBUG_LOOP_CORE_1)
