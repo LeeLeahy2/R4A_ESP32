@@ -373,29 +373,30 @@ const int r4aPca9685ServoTableEntries = sizeof(r4aPca9685ServoTable) / sizeof(r4
 // SPI support - WS2812 LEDs
 //****************************************
 
-#define R4A_4WD_CAR_SPI_WS2812_GLOBALS                  \
-/* SPI controller connected to the SPI bus */           \
-R4A_ESP32_SPI_CONTROLLER spiBus =                       \
-{                                                       \
-    {                                                   \
-        1,      /* SPI bus number */                    \
-        -1,     /* SCLK GPIO */                         \
-        BATTERY_WS2812_PIN,   /* MOSI GPIO */           \
-        -1,     /* MISO GPIO  */                        \
-        r4aEsp32SpiTransfer /* SPI transfer routine */  \
-    },                                                  \
-    nullptr,                                            \
-};                                                      \
-                                                        \
-/* WS2812 - RGB LED connected to the SPI bus */         \
-const R4A_SPI_DEVICE ws2812 =                           \
-{                                                       \
-    &spiBus._spiBus, /* SPI bus */                      \
-    4 * 1000 * 1000, /* Clock frequency */              \
-    -1,              /* No chip select pin */           \
-    0,               /* Chip select value */            \
-    0,               /* Clock polarity */               \
-    0,               /* Clock phase */                  \
+#define R4A_4WD_CAR_SPI_WS2812_GLOBALS              \
+/* SPI controller connected to the SPI bus */       \
+const R4A_SPI_BUS spiBus =                          \
+{                                                   \
+    1,      /* SPI bus number */                    \
+    -1,     /* SCLK GPIO */                         \
+    BATTERY_WS2812_PIN,   /* MOSI GPIO */           \
+    -1,     /* MISO GPIO  */                        \
+    r4aEsp32SpiTransfer /* SPI transfer routine */  \
+};                                                  \
+                                                    \
+/* Handle for device data for SPI driver */         \
+spi_device_handle_t ws2812Handle;                   \
+                                                    \
+/* WS2812 - RGB LED connected to the SPI bus */     \
+const R4A_SPI_DEVICE ws2812 =                       \
+{                                                   \
+    &spiBus,         /* SPI bus */                  \
+    &ws2812Handle,   /* Device handle in RAM */     \
+    4 * 1000 * 1000, /* Clock frequency */          \
+    -1,              /* No chip select pin */       \
+    0,               /* Chip select value */        \
+    0,               /* Clock polarity */           \
+    0,               /* Clock phase */              \
 }
 
 #define R4A_4WD_CAR_SPI_WS2812_SETUP(intensity)             \
@@ -406,8 +407,8 @@ const R4A_SPI_DEVICE ws2812 =                           \
                                                             \
     /* Select the WS2812 devices on the SPI bus */          \
     log_v("Calling r4aEsp32SpiDeviceSelect");               \
-    if (!r4aEsp32SpiDeviceSelect(&ws2812))                  \
-        r4aReportFatalError("Failed to select the WS2812 devices on the SPI bus!"); \
+    if (!r4aEsp32SpiDeviceHandleInit(&ws2812))              \
+        r4aReportFatalError("Failed to get the WS2812 device handle!"); \
                                                             \
     /* Initialize the SPI controller for the WD2812 LEDs */ \
     log_v("Calling r4aLEDSetup");                           \

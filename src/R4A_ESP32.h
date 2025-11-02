@@ -1444,20 +1444,15 @@ extern const R4A_PIXEL_FORMAT_MASK_t r4aOv2640SupportedPixelFormats;
 // SPI API
 //****************************************
 
-typedef struct _R4A_ESP32_SPI_CONTROLLER
-{
-    R4A_SPI_BUS _spiBus;            // Generic SPI bus description
-    spi_device_handle_t _spiHandle; // Handle of the SPI controller
-} R4A_ESP32_SPI_CONTROLLER;
+typedef spi_device_handle_t * R4A_SPI_CONTEXT;
 
 // Initialize the SPI controller
 // Inputs:
-//   spiController: Address of an R4A_ESP32_SPI_CONTROLLER data structure
 //   spiBus: Address of an R4A_SPI_BUS data structure
 //   display: Address of Print object for output, may be nullptr
 // Outputs:
 //   Return true if successful and false upon failure
-bool r4aEsp32SpiBegin(R4A_ESP32_SPI_CONTROLLER * spiController,
+bool r4aEsp32SpiBegin(const R4A_SPI_BUS * spiBus,
                       Print * display = nullptr);
 
 // Translate a controller number into a controller base register address
@@ -1467,14 +1462,21 @@ bool r4aEsp32SpiBegin(R4A_ESP32_SPI_CONTROLLER * spiController,
 //   Returns the address of the SPI controller or nullptr upon failure
 R4A_ESP32_SPI_REGS * r4aEsp32SpiControllerAddress(uint8_t number);
 
-// Initialize a SPI device
+// Get the SPI device handle address
 // Inputs:
-//   spiDevice: Address of a R4A_SPI_DEVICE data structure
+//   spiDevice: Address of an R4A_SPI_DEVICE data structure
+// Outputs:
+//   Returns the address of a spi_device_handle_t
+spi_device_handle_t * r4aEsp32SpiDeviceHandleAddr(const R4A_SPI_DEVICE * spiDevice);
+
+// Initialize a SPI device handle
+// Inputs:
+//   spiDevice: Address of an R4A_SPI_DEVICE data structure
 //   display: Address of Print object for output, may be nullptr
 // Outputs:
 //   Return true if successful and false upon failure
-bool r4aEsp32SpiDeviceSelect(const R4A_SPI_DEVICE * spiDevice,
-                             Print * display = nullptr);
+bool r4aEsp32SpiDeviceHandleInit(const R4A_SPI_DEVICE * spiDevice,
+                                 Print * display = nullptr);
 
 // Display the SPI registers
 // Inputs:
@@ -1492,14 +1494,14 @@ uint32_t r4aEsp32SpiGetClock(R4A_ESP32_SPI_REGS * spi, Print * display = nullptr
 
 // Transfer the data to the SPI device
 // Inputs:
-//   spiBus: Address of an R4A_SPI_BUS data structure
+//   spiDevice: Address of an R4A_SPI_DEVICE data structure
 //   txDmaBuffer: Address of the buffer containing the data to send, maybe nullptr
 //   rxDmaBuffer: Address of the receive data buffer, maybe nullptr
 //   length: Number of data bytes in the buffer
 //   display: Address of Print object for output, maybe nullptr
 // Outputs:
 //   Return true if successful and false upon failure
-bool r4aEsp32SpiTransfer(struct _R4A_SPI_BUS * spiBus,
+bool r4aEsp32SpiTransfer(const struct _R4A_SPI_DEVICE * spiDevice,
                          const uint8_t * txDmaBuffer,
                          uint8_t * rxDmaBuffer,
                          size_t length,

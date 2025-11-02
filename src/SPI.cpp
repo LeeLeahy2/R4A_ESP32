@@ -103,16 +103,14 @@ const uint32_t r4aEsp32SpiNamesEntries = sizeof(r4aEsp32SpiNames) / sizeof(r4aEs
 
 //*********************************************************************
 // Initialize the SPI controller
-bool r4aEsp32SpiBegin(R4A_ESP32_SPI_CONTROLLER * spiController,
+bool r4aEsp32SpiBegin(const R4A_SPI_BUS * spiBus,
                       Print * display)
 {
     spi_bus_config_t buscfg;
     R4A_ESP32_SPI_REGS * controller;
-    R4A_SPI_BUS * spiBus;
     esp_err_t status;
 
     // Validate the controller number by getting the controller address
-    spiBus = (R4A_SPI_BUS *)spiController;
     controller = r4aEsp32SpiControllerAddress(spiBus->_busNumber);
 
     // Configure the SPI bus
@@ -130,66 +128,11 @@ bool r4aEsp32SpiBegin(R4A_ESP32_SPI_CONTROLLER * spiController,
     buscfg.sclk_io_num = spiBus->_pinSCLK;
     buscfg.quadwp_io_num = -1;
     buscfg.quadhd_io_num = -1;
-    spiController->_spiHandle = nullptr;
     status = spi_bus_initialize((spi_host_device_t)(spiBus->_busNumber), &buscfg, 1);
     if (display)
         display->printf("SPI %d: %d, %s\r\n", spiBus->_busNumber, status, esp_err_to_name(status));
     return (status == ESP_OK);
 };
-
-//*********************************************************************
-// Initialize a SPI device
-bool r4aEsp32SpiDeviceSelect(const R4A_SPI_DEVICE * spiDevice,
-                             Print * display)
-{
-    uint32_t clockHz;
-    R4A_SPI_BUS * spiBus;
-    R4A_ESP32_SPI_REGS * controller;
-    spi_device_interface_config_t devcfg;
-    uint8_t mode;
-    R4A_ESP32_SPI_CONTROLLER * spiController;
-    esp_err_t status;
-
-    // Display the desired clock frequency
-    if (display)
-    {
-        clockHz = spiDevice->_clockHz;
-        uint32_t mHz = clockHz / (1000 * 1000);
-        uint32_t kHz = (clockHz / 1000) - (mHz * 1000);
-        display->printf("Requested: %ld.%03ld MHz\r\n", mHz, kHz);
-    }
-
-    // Determine the mode for the clock polarity and phase
-    mode = ((spiDevice->_clockPhase & 1) << 1) | (spiDevice->_clockPolarity & 1);
-
-    // Describe the SPI device configuration
-    memset((void *)&devcfg, 0, sizeof(devcfg));
-    devcfg.clock_speed_hz = spiDevice->_clockHz;
-    devcfg.mode = mode;
-    devcfg.spics_io_num = spiDevice->_pinCS;
-    devcfg.queue_size = 7;
-
-    // Configure the SPI controller to talk to the SPI device
-    spiBus = spiDevice->_spiBus;
-    spiController = (R4A_ESP32_SPI_CONTROLLER *)spiBus;
-    status = spi_bus_add_device((spi_host_device_t)(spiBus->_busNumber),
-                                &devcfg,
-                                &spiController->_spiHandle);
-    if (display)
-    {
-        display->printf("SPI %d: %d, %s\r\n", spiBus->_busNumber, status, esp_err_to_name(status));
-        if (status == ESP_OK)
-        {
-            controller = r4aEsp32SpiControllerAddress(spiBus->_busNumber);
-            clockHz = r4aEsp32SpiGetClock(controller);
-            uint32_t mHz = clockHz / (1000 * 1000);
-            uint32_t kHz = (clockHz / 1000) - (mHz * 1000);
-            display->printf("Actual: %ld.%03ld MHz\r\n", mHz, kHz);
-            display->printf("Mode: %d\r\n", mode);
-        }
-    }
-    return (status == ESP_OK);
-}
 
 //*********************************************************************
 // Translate a controller number into a controller base register address
@@ -212,6 +155,78 @@ R4A_ESP32_SPI_REGS * r4aEsp32SpiControllerAddress(uint8_t number)
     }
     return (R4A_ESP32_SPI_REGS *)controller[number];
 };
+
+//*********************************************************************
+// Get the SPI device handle address
+spi_device_handle_t * r4aEsp32SpiDeviceHandleAddr(const R4A_SPI_DEVICE * spiDevice)
+{
+    return (spi_device_handle_t *)spiDevice->_cpuContext;
+}
+
+//*********************************************************************
+// Initialize a SPI device handle
+bool r4aEsp32SpiDeviceHandleInit(const R4A_SPI_DEVICE * spiDevice,
+                                 Print * display)
+{
+    uint32_t clockHz;
+    R4A_ESP32_SPI_REGS * controller;
+    spi_device_interface_config_t devcfg;
+    uint8_t mode;
+    const R4A_SPI_BUS * spiBus;
+    spi_device_handle_t * spiDeviceHandleAddr;
+    esp_err_t status;
+    bool success;
+
+    // Verify that the handle storage is in RAM
+    spiDeviceHandleAddr = r4aEsp32SpiDeviceHandleAddr(spiDevice);
+    if (r4aEsp32IsAddressInRAM(spiDeviceHandleAddr) == false)
+    {
+        if (display)
+            display->printf("ERROR: _cpuContext needs to point to a spi_device_handle_t value in RAM!\r\n");
+        return false;
+    }
+
+    // Display the desired clock frequency
+    if (display)
+    {
+        clockHz = spiDevice->_clockHz;
+        uint32_t mHz = clockHz / (1000 * 1000);
+        uint32_t kHz = (clockHz / 1000) - (mHz * 1000);
+        display->printf("Requested: %ld.%03ld MHz\r\n", mHz, kHz);
+    }
+
+    // Determine the mode for the clock polarity and phase
+    mode = ((spiDevice->_clockPhase & 1) << 1) | (spiDevice->_clockPolarity & 1);
+
+    // Describe the SPI device configuration
+    memset((void *)&devcfg, 0, sizeof(devcfg));
+    devcfg.clock_speed_hz = spiDevice->_clockHz;
+    devcfg.mode = mode;
+    devcfg.spics_io_num = spiDevice->_pinCS;
+    devcfg.queue_size = 7;
+
+    // Configure the SPI controller to talk to the SPI device
+    spiBus = spiDevice->_spiBus;
+    *spiDeviceHandleAddr = nullptr;
+    status = spi_bus_add_device((spi_host_device_t)(spiBus->_busNumber),
+                                &devcfg,
+                                spiDeviceHandleAddr);
+    success = (status == ESP_OK);
+    if (display)
+    {
+        display->printf("SPI %d: %d, %s\r\n", spiBus->_busNumber, status, esp_err_to_name(status));
+        if (success)
+        {
+            controller = r4aEsp32SpiControllerAddress(spiBus->_busNumber);
+            clockHz = r4aEsp32SpiGetClock(controller);
+            uint32_t mHz = clockHz / (1000 * 1000);
+            uint32_t kHz = (clockHz / 1000) - (mHz * 1000);
+            display->printf("Actual: %ld.%03ld MHz\r\n", mHz, kHz);
+            display->printf("Mode: %d\r\n", mode);
+        }
+    }
+    return success;
+}
 
 //*********************************************************************
 // Display the SPI registers
@@ -331,34 +346,68 @@ uint32_t r4aEsp32SpiGetClock(R4A_ESP32_SPI_REGS * spi, Print * display)
 
 //*********************************************************************
 // Transfer the data to the SPI device
-bool r4aEsp32SpiTransfer(struct _R4A_SPI_BUS * spiBus,
+bool r4aEsp32SpiTransfer(const struct _R4A_SPI_DEVICE * spiDevice,
                          const uint8_t * txDmaBuffer,
                          uint8_t * rxDmaBuffer,
                          size_t length,
                          Print * display)
 {
-    R4A_ESP32_SPI_CONTROLLER * spiController;
+    bool busAcquired;
+    bool chipSelected;
+    spi_device_handle_t spiDeviceHandle;
     esp_err_t status;
+    bool success;
     spi_transaction_t transaction;
 
-    // Describe the SPI transaction
-    memset(&transaction, 0, sizeof(transaction));
-    transaction.length = length << 3;
-    transaction.tx_buffer = txDmaBuffer;
-    transaction.rx_buffer = rxDmaBuffer;
-
-    // Perform the SPI transaction
-    spiController = (R4A_ESP32_SPI_CONTROLLER *)spiBus;
-    status = spi_device_transmit(spiController->_spiHandle, &transaction);
-    if (status != ESP_OK)
+    do
     {
-        if (display)
-            display->printf("ERROR: SPI transaction failed, %d, %s\r\n",
-                            status, esp_err_to_name(status));
-    }
+        busAcquired = false;
+        chipSelected = false;
+        spiDeviceHandle = *(r4aEsp32SpiDeviceHandleAddr(spiDevice));
+        success = false;
+
+        // Describe the SPI transaction
+        memset(&transaction, 0, sizeof(transaction));
+        transaction.length = length << 3;
+        transaction.tx_buffer = txDmaBuffer;
+        transaction.rx_buffer = rxDmaBuffer;
+
+        // Get exclusive access to the SPI bus
+        status = spi_device_acquire_bus(spiDeviceHandle, portMAX_DELAY);
+        if (status != ESP_OK)
+        {
+            if (display)
+                display->printf("ERROR: Failed to acquire the SPI bus!\r\n");
+            break;
+        }
+        busAcquired = true;
+
+        // Use the chip select to enable the SPI device
+        r4aSpiChipSelect(spiDevice, true);
+        chipSelected = true;
+
+        // Perform the SPI transaction
+        status = spi_device_transmit(spiDeviceHandle, &transaction);
+        if (status != ESP_OK)
+        {
+            if (display)
+                display->printf("ERROR: SPI transaction failed, %d, %s\r\n",
+                                status, esp_err_to_name(status));
+            break;
+        }
+        success = true;
+    } while (0);
+
+    // Disable the SPI device using the chip select
+    if (chipSelected)
+        r4aSpiChipSelect(spiDevice, false);
+
+    // Release the SPI bus
+    if (busAcquired)
+        spi_device_release_bus(spiDeviceHandle);
 
     // Return the transaction status
-    return (status == ESP_OK);
+    return success;
 }
 
 //*********************************************************************
