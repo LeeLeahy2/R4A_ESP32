@@ -78,6 +78,13 @@ uint8_t servoPanStartDegrees;
 uint8_t servoTiltStartDegrees;
 
 //****************************************
+// SPI Flash
+//****************************************
+
+bool spiFlashServerEnable;
+uint16_t r4aSpiFlashServerPort;
+
+//****************************************
 // Telnet
 //****************************************
 
@@ -164,6 +171,11 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &servoPanStartDegrees,      "panDegrees",   SERVO_PAN_START},
     {true,  R4A_ESP32_NVM_PT_UINT8,  0,          180,           &servoTiltStartDegrees,     "tiltDegrees",  SERVO_TILT_START},
+
+    // SPI Flash
+// Required    Type                  Minimum     Maximum        Address                     Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_BOOL,   0,          1,             &spiFlashServerEnable,      "FlashServer",  false},
+    {true,  R4A_ESP32_NVM_PT_UINT16, 0,          65535,         &r4aSpiFlashServerPort,  "FlashServerPort", 6868},
 
     // Telnet
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value

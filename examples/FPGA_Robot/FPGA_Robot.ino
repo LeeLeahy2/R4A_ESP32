@@ -2,6 +2,23 @@
   FPGA_Robot.ino
 
   Sample sketch to control the FPGA robot
+
+         Freenove FNK0060
+          ESP32 WROVER-E               FPGA            SPI Flash
+        .----------------.        .------------.      .---------.
+        |                |        |            |      | 26f032B |
+        |        SCLK 27 |------->| W7         |----->| SCLK    |
+        |        MOSI 26 |------->| V8         |----->| MOSI    |
+        |        MISO 25 |<-------| AA4        |<-----| MISO    |
+        |                |        |            |----->| CS#     |
+        |                |        |            |----->| WP#     |
+        |                |        |            |----->| HOLD#   |
+        |                |        |            |      '---------'
+        |         SDA 13 |<------>| L6         |
+        |         SCL 14 |<------>| F4         |
+        |                |        |            |
+        '----------------'        '------------'
+
 **********************************************************************/
 
 //****************************************
@@ -54,6 +71,13 @@ enum CHALLENGE_INDEX
 #include "Parameters.h"
 
 //****************************************
+// FPGA configuration
+//****************************************
+
+// Define the bits in the SPI Flash control register
+#define FPGA_SPI_FLASH_WRITE_ENABLE     1
+
+//****************************************
 // Forward routine declarations
 //****************************************
 
@@ -63,6 +87,9 @@ bool contextCreate(void ** contextData, NetworkClient * client);
 void alfStart(Print * display);
 void blfStart(Print * display);
 void clfStart(Print * display);
+
+void spiFlashDisplayStatus(uint8_t status, Print * display);
+bool spiFlashWriteEnable(bool enable);
 
 //****************************************
 // OV2640 camera
@@ -102,12 +129,16 @@ volatile bool core1Initialized;
 #define I2C_SCL                 14
 #define I2C_SDA                 13
 
+// I2C addresses
+#define SPI_FLASH_I2C_ADDRESS   0x32
+
 const R4A_I2C_DEVICE_DESCRIPTION i2cBusDeviceTable[] =
 {
     {R4A_I2C_GENERAL_CALL_DEVICE_ADDRESS, "General Call"},  // 0x00
-    {PCF8574_I2C_ADDRESS,  "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
-    {PCA9685_I2C_ADDRESS,  "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
-    {OV2640_I2C_ADDRESS,   "OV2640 Camera"}, // 0x70
+    {PCF8574_I2C_ADDRESS,     "PCF8574 8-Bit I/O Expander, line tracking"}, // 0x20
+    {SPI_FLASH_I2C_ADDRESS,   "SPI Flash Controller"}, // 0x32
+    {PCA9685_I2C_ADDRESS,     "PCA9685 16-Channel LED controller, motors & servos"}, // 0x5f
+    {OV2640_I2C_ADDRESS,      "OV2640 Camera"}, // 0x70
 };
 
 R4A_ESP32_I2C_BUS esp32I2cBus =
@@ -235,6 +266,137 @@ R4A_MENU serialMenu;
 USE_SERVO_TABLE;
 
 //****************************************
+// SPI support
+//****************************************
+
+// SPI controller connected to the SPI bus
+const R4A_SPI_BUS spiBus =
+{
+    1,      // SPI bus number
+    27,     // SCLK GPIO
+    26,     // MOSI GPIO
+    25,     // MISO GPIO
+    r4aEsp32SpiTransfer // SPI transfer routine
+};
+
+// SPI Flash Status register
+#define STATUS_BUSY         0x80    // Write operation in progress
+#define STATUS_SEC          0x20    // Security ID status
+#define STATUS_WPLD         0x10    // Write protect lock down
+#define STATUS_WSP          0x08    // Programming suspended
+#define STATUS_WSE          0x04    // Erase suspended
+#define STATUS_WEL          0x02    // Write enable
+
+#define MAP_BPR_BIT(x)      (((79 - x) & ~7) + (x & 7))
+
+const R4A_SPI_FLASH_PROTECTION spiFlashBlockProtection[]
+{
+    {       0, MAP_BPR_BIT(65), MAP_BPR_BIT(64)},
+    {  0x2000, MAP_BPR_BIT(67), MAP_BPR_BIT(66)},
+    {  0x4000, MAP_BPR_BIT(69), MAP_BPR_BIT(68)},
+    {  0x6000, MAP_BPR_BIT(71), MAP_BPR_BIT(70)},
+    {  0x8000,              -1, MAP_BPR_BIT(62)},
+    { 0x10000,              -1, MAP_BPR_BIT( 0)},
+    { 0x20000,              -1, MAP_BPR_BIT( 1)},
+    { 0x30000,              -1, MAP_BPR_BIT( 2)},
+    { 0x40000,              -1, MAP_BPR_BIT( 3)},
+    { 0x50000,              -1, MAP_BPR_BIT( 4)},
+    { 0x60000,              -1, MAP_BPR_BIT( 5)},
+    { 0x70000,              -1, MAP_BPR_BIT( 6)},
+    { 0x80000,              -1, MAP_BPR_BIT( 7)},
+    { 0x90000,              -1, MAP_BPR_BIT( 8)},
+    { 0xa0000,              -1, MAP_BPR_BIT( 9)},
+    { 0xb0000,              -1, MAP_BPR_BIT(10)},
+    { 0xc0000,              -1, MAP_BPR_BIT(11)},
+    { 0xd0000,              -1, MAP_BPR_BIT(12)},
+    { 0xe0000,              -1, MAP_BPR_BIT(13)},
+    { 0xf0000,              -1, MAP_BPR_BIT(14)},
+    {0x100000,              -1, MAP_BPR_BIT(15)},
+    {0x110000,              -1, MAP_BPR_BIT(16)},
+    {0x120000,              -1, MAP_BPR_BIT(17)},
+    {0x130000,              -1, MAP_BPR_BIT(18)},
+    {0x140000,              -1, MAP_BPR_BIT(19)},
+    {0x150000,              -1, MAP_BPR_BIT(20)},
+    {0x160000,              -1, MAP_BPR_BIT(21)},
+    {0x170000,              -1, MAP_BPR_BIT(22)},
+    {0x180000,              -1, MAP_BPR_BIT(23)},
+    {0x190000,              -1, MAP_BPR_BIT(24)},
+    {0x1a0000,              -1, MAP_BPR_BIT(25)},
+    {0x1b0000,              -1, MAP_BPR_BIT(26)},
+    {0x1c0000,              -1, MAP_BPR_BIT(27)},
+    {0x1d0000,              -1, MAP_BPR_BIT(28)},
+    {0x1e0000,              -1, MAP_BPR_BIT(29)},
+    {0x1f0000,              -1, MAP_BPR_BIT(30)},
+    {0x200000,              -1, MAP_BPR_BIT(31)},
+    {0x210000,              -1, MAP_BPR_BIT(32)},
+    {0x220000,              -1, MAP_BPR_BIT(33)},
+    {0x230000,              -1, MAP_BPR_BIT(34)},
+    {0x240000,              -1, MAP_BPR_BIT(35)},
+    {0x250000,              -1, MAP_BPR_BIT(36)},
+    {0x260000,              -1, MAP_BPR_BIT(37)},
+    {0x270000,              -1, MAP_BPR_BIT(38)},
+    {0x280000,              -1, MAP_BPR_BIT(39)},
+    {0x290000,              -1, MAP_BPR_BIT(40)},
+    {0x2a0000,              -1, MAP_BPR_BIT(41)},
+    {0x2b0000,              -1, MAP_BPR_BIT(42)},
+    {0x2c0000,              -1, MAP_BPR_BIT(43)},
+    {0x2d0000,              -1, MAP_BPR_BIT(44)},
+    {0x2e0000,              -1, MAP_BPR_BIT(45)},
+    {0x2f0000,              -1, MAP_BPR_BIT(46)},
+    {0x300000,              -1, MAP_BPR_BIT(47)},
+    {0x310000,              -1, MAP_BPR_BIT(48)},
+    {0x320000,              -1, MAP_BPR_BIT(49)},
+    {0x330000,              -1, MAP_BPR_BIT(50)},
+    {0x340000,              -1, MAP_BPR_BIT(51)},
+    {0x350000,              -1, MAP_BPR_BIT(52)},
+    {0x360000,              -1, MAP_BPR_BIT(53)},
+    {0x370000,              -1, MAP_BPR_BIT(54)},
+    {0x380000,              -1, MAP_BPR_BIT(55)},
+    {0x390000,              -1, MAP_BPR_BIT(56)},
+    {0x3a0000,              -1, MAP_BPR_BIT(57)},
+    {0x3b0000,              -1, MAP_BPR_BIT(58)},
+    {0x3c0000,              -1, MAP_BPR_BIT(59)},
+    {0x3d0000,              -1, MAP_BPR_BIT(60)},
+    {0x3e0000,              -1, MAP_BPR_BIT(61)},
+    {0x3f0000,              -1, MAP_BPR_BIT(63)},
+    {0x3f8000, MAP_BPR_BIT(73), MAP_BPR_BIT(72)},
+    {0x3fa000, MAP_BPR_BIT(75), MAP_BPR_BIT(74)},
+    {0x3fc000, MAP_BPR_BIT(77), MAP_BPR_BIT(76)},
+    {0x3fe000, MAP_BPR_BIT(79), MAP_BPR_BIT(78)},
+    {0x400000,              -1,              -1},
+};
+const int spiFlashBlockProtectionEntries = sizeof(spiFlashBlockProtection) / sizeof(spiFlashBlockProtection[0]);
+
+// Handle for device data for SPI driver
+spi_device_handle_t spiFlashHandle;
+
+// SPI flash connected to the SPI bus
+const R4A_SPI_FLASH spiFlash =
+{
+    {
+        &spiBus,            // SPI bus
+        &spiFlashHandle,    // Handle for the SPI flash device
+        1 * 1000 * 1000,    // Clock frequency
+        33,                 // Chip select bar pin
+        0,                  // Value to enable chip operations
+        0,                  // Clock polarity
+        0,                  // Clock phase
+    },
+    -1,                     // Hold pin
+    -1,                     // Write protect pin
+    spiFlashWriteEnable,    // Routine to update the SPI chip write enable pin
+    spiFlashDisplayStatus,  // Routine to display the SPI Flash status
+    spiFlashBlockProtection, // Flash block protection table
+    0x00400000,             // Flash size in bytes
+    10,                     // Length in bytes of the block protect register
+    STATUS_BUSY,            // Status bit indicating write activity
+    STATUS_WSE,             // Status bits indicating erase errors
+    STATUS_WSP              // Status bits indicating program errors
+};
+
+const R4A_SPI_FLASH * r4aSpiFlash;
+
+//****************************************
 // Web server
 //****************************************
 
@@ -328,6 +490,21 @@ void setup()
     if (status != pdPASS)
         r4aReportFatalError("Failed to create the core 0 task!");
     log_v("Core 0 task started");
+
+    // Initialize the SPI controller
+    log_v("r4aEsp32SpiBegin");
+    if (!r4aEsp32SpiBegin(&spiBus))
+        r4aReportFatalError("Failed to initialize the SPI controller!");
+
+    // Select the SPI flash device
+    log_v("Calling r4aEsp32SpiDeviceSelect");
+    if (!r4aEsp32SpiDeviceHandleInit(&spiFlash._flashChip))
+        r4aReportFatalError("Failed to select the flash device on the SPI bus!");
+
+    // Initialize the SPI flash
+    r4aSpiFlash = &spiFlash;
+    if (!r4aSpiFlashBegin(r4aSpiFlash))
+        r4aReportFatalError("Failed to initialize the SPI Flash!");
 
     // Start WiFi if enabled
     log_v("Calling r4aWifiBegin");
@@ -460,6 +637,9 @@ void loop()
         if (DEBUG_LOOP_CORE_1)
             callingRoutine("telnet.update");
         telnet.update(telnetEnable, r4aWifiStationOnline);
+
+        // Update the SPI Flash server
+        r4aSpiFlashServerUpdate(spiFlashServerEnable, r4aWifiStationOnline);
 
         // Update the web server
         if (DEBUG_LOOP_CORE_1)

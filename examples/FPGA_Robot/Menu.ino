@@ -87,6 +87,7 @@ void wifiMenuRestart(const R4A_MENU_ENTRY * menuEntry,
 enum MENU_TABLE_INDEX
 {
     MTI_DEBUG = R4A_MENU_MAIN + 1,
+    MTI_FLASH,
     MTI_GPIO,
     MTI_I2C,
     MTI_MOTOR,
@@ -103,6 +104,7 @@ const int menuTableIndexMax = MTI_MAX;
 const R4A_MENU_ENTRY debugMenuTable[] =
 {
     // Command  menuRoutine                 menuParam       HelpRoutine align   HelpText
+    {"f",       nullptr,                    MTI_FLASH,      nullptr,    0,      "Enter the flash menu"},
     {"g",       nullptr,                    MTI_GPIO,       nullptr,    0,      "Enter the GPIO menu"},
     {"h",       r4aEsp32MenuDisplayHeap,    0,              nullptr,    0,      "Display the heap"},
 #ifdef  USE_I2C
@@ -116,6 +118,32 @@ const R4A_MENU_ENTRY debugMenuTable[] =
     {"x",       nullptr,                    R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
 };
 #define DEBUG_MENU_ENTRIES      sizeof(debugMenuTable) / sizeof(debugMenuTable[0])
+
+// Flash menu
+const R4A_MENU_ENTRY flashMenuTable[] =
+{
+    // Command  menuRoutine                 menuParam               HelpRoutine         align   HelpText
+    {"abpre", r4aSpiFlashMenuBlockProtectionReadAll,  1,            nullptr,            0,      "All blocks read enabled"},
+    {"abprp", r4aSpiFlashMenuBlockProtectionReadAll,  0,            nullptr,            0,      "All blocks read protected"},
+    {"abpwe", r4aSpiFlashMenuBlockProtectionWriteAll, 1,            nullptr,            0,      "All blocks write enabled"},
+    {"abpwp", r4aSpiFlashMenuBlockProtectionWriteAll, 0,            nullptr,            0,      "All blocks write protected"},
+    {"bpd", spiFlashMenuBlockProtectionDump, 0,                     nullptr,            0,      "Dump the block protection table"},
+    {"bpr", r4aSpiFlashMenuBlockProtectionRead,  (intptr_t)"addr en", r4aMenuHelpSuffix, 7,     "Enable (1) or disable (0) reads from block containing addr"},
+    {"bps", r4aSpiFlashMenuBlockProtectionStatus, 0,                nullptr,            0,      "Read block protections"},
+    {"bpw", r4aSpiFlashMenuBlockProtectionWrite, (intptr_t)"addr en", r4aMenuHelpSuffix, 7,     "Enable (1) or disable (0) writes to block containing addr"},
+    {"ce",      r4aSpiFlashMenuEraseChip,   0,                      nullptr,            0,      "Erase the chip"},
+    {"dp",   r4aSpiFlashMenuReadParameters, (intptr_t)"addr len",   r4aMenuHelpSuffix,  8,      "Read parameters len bytes from addr"},
+    {"e4k",     r4aSpiFlashMenuErase4K,     (intptr_t)"addr",       r4aMenuHelpSuffix,  4,      "Erase a 4K block"},
+    {"e65k",    r4aSpiFlashMenuErase65K,    (intptr_t)"addr",       r4aMenuHelpSuffix,  4,      "Erase a 65K sector"},
+    {"id9e",    r4aSpiFlashMenuReadId9e,    0,                      nullptr,            0,      "Read 20 byte ID"},
+    {"id9f",    r4aSpiFlashMenuReadId9f,    0,                      nullptr,            0,      "Read 3 byte ID"},
+    {"rd",      r4aSpiFlashMenuReadData,    (intptr_t)"addr len",   r4aMenuHelpSuffix,  8,      "Read len bytes from addr"},
+    {"rs", r4aSpiFlashMenuReadStatusRegister, 0,                    nullptr,            0,      "Read status register"},
+    {"we",   r4aSpiFlashMenuWriteEnable,    1,                      nullptr,            0,      "Enable writes to SPI flash"},
+    {"wp",   r4aSpiFlashMenuWriteEnable,    0,                      nullptr,            0,      "Write protect SPI flash"},
+    {"x",       nullptr,                    R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
+};
+#define FLASH_MENU_ENTRIES      sizeof(flashMenuTable) / sizeof(flashMenuTable[0])
 
 // GPIO menu
 const R4A_MENU_ENTRY gpioMenuTable[] =
@@ -205,6 +233,7 @@ const R4A_MENU_TABLE menuTable[] =
     // menuName         preMenu routine firstEntry          entryCount
     {"Main Menu",       mainMenuPre,    mainMenuTable,      MAIN_MENU_ENTRIES},
     {"Debug Menu",      nullptr,        debugMenuTable,     DEBUG_MENU_ENTRIES},
+    {"Flash Menu",      nullptr,        flashMenuTable,     FLASH_MENU_ENTRIES},
     {"GPIO Menu",       nullptr,        gpioMenuTable,      GPIO_MENU_ENTRIES},
     {"I2C Menu",        nullptr,        r4aI2cMenuTable,    R4A_I2C_MENU_ENTRIES},
     {"Motor Menu",      nullptr,  r4aPca9685MotorMenuTable, R4A_PCA9685_MOTOR_MENU_ENTRIES},
