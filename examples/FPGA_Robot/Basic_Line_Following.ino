@@ -10,13 +10,27 @@
 
 #define BLF_DEBUG_STATES        0
 
+enum BLF_STATE
+{
+    BLF_STATE_STOP = 0,
+    BLF_STATE_FORWARD,
+};
+
+const char * blfStateTable[] =
+{
+    "Stop",
+    "Forward",
+};
+
 //****************************************
 // Locals
 //****************************************
 
-int blfTimeBefore = 0;  //Record each non-blocking time
-int blfTimeCount = 0;   //Record the number of non-blocking times
-int blfTimeFlag = 0;    //Record the blink time
+static int blfTimeBefore = 0;   //Record each non-blocking time
+static int blfTimeCount = 0;    //Record the number of non-blocking times
+static int blfTimeFlag = 0;     //Record the blink time
+
+static volatile uint8_t blfState;
 
 //*********************************************************************
 // The robotRunning routine calls this routine to actually perform
@@ -26,7 +40,12 @@ int blfTimeFlag = 0;    //Record the blink time
 // multiple times during the robot operation.
 void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 {
+    uint32_t currentUsec;
+    static int16_t previousLeftSpeed;
+    static int16_t previousRightSpeed;
+
     // Read the line sensors
+    currentUsec = micros();
     pcf8574.read(&lineSensors);
     lineSensors &= 7;
     if (BLF_DEBUG_STATES)
@@ -43,8 +62,9 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
     case 0b111:
     default:
         // No line or stop circle detected
-        r4aPca9685MotorBrakeAll();
+        robotMotorSetSpeeds(0, 0);
         r4aRobotStop(&robot, millis());
+        blfState = BLF_STATE_STOP;
         break;
 
     //     RcL
@@ -68,6 +88,14 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
         robotMotorSetSpeeds(blfSpeedFast, -blfSpeedMedium); // Turn right
         break;
     }
+
+    // Log the sensors
+    if (logBuffer && ((lineSensors != previousLineSensors)
+                        || (robotLeftSpeed != previousLeftSpeed)
+                        || (robotRightSpeed != previousRightSpeed)))
+        logData(currentUsec, blfState);
+    previousLeftSpeed = robotLeftSpeed;
+    previousRightSpeed = robotRightSpeed;
 }
 
 //*********************************************************************
@@ -75,6 +103,10 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 // delay state.
 void blfInit(R4A_ROBOT_CHALLENGE * object)
 {
+    // Attempt to allocate the log buffer
+    logInit(blfStateTable, BLF_STATE_STOP);
+
+    blfState = BLF_STATE_STOP;
     challengeInit();
 }
 
@@ -130,7 +162,26 @@ void blfStart(Print * display)
 // the challenge routine for the first time.
 void blfStart(R4A_ROBOT_CHALLENGE * object)
 {
+    uint32_t currentUsec;
+
+    // Remember the start time
+    currentUsec = micros();
+    logStartUsec = currentUsec;
+
+    // Read the line sensors
+    pcf8574.read(&lineSensors);
+    lineSensors &= 7;
+
+    // Start moving forward
+    robotLeftSpeed = 0;
+    robotRightSpeed = 0;
+    blfState = BLF_STATE_FORWARD;
     challengeStart();
+
+    // Log the sensors
+    if (logBuffer)
+        logData(currentUsec, blfState);
+    previousLineSensors = lineSensors;
 }
 
 //*********************************************************************
@@ -147,6 +198,23 @@ void blfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
 // perform any other actions.
 void blfStop(R4A_ROBOT_CHALLENGE * object)
 {
+    uint32_t currentUsec;
+
+    // Stop the robot
+    currentUsec = micros();
+    blfState = BLF_STATE_STOP;
+    robotMotorSetSpeeds(0, 0);
+
+    if (logBuffer)
+    {
+        // Read the line sensors
+        pcf8574.read(&lineSensors);
+        lineSensors &= 7;
+
+        // Log the sensors
+        logData(currentUsec, blfState);
+    }
+
     challengeStop();
 }
 
