@@ -41,8 +41,11 @@ static volatile uint8_t blfState;
 void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 {
     uint32_t currentUsec;
+    static int16_t previousLeftSpeed;
+    static int16_t previousRightSpeed;
 
     // Read the line sensors
+    currentUsec = micros();
     pcf8574.read(&lineSensors);
     lineSensors &= 7;
     if (BLF_DEBUG_STATES)
@@ -59,7 +62,7 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
     case 0b111:
     default:
         // No line or stop circle detected
-        r4aPca9685MotorBrakeAll();
+        robotMotorSetSpeeds(0, 0);
         r4aRobotStop(&robot, millis());
         blfState = BLF_STATE_STOP;
         break;
@@ -87,8 +90,12 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
     }
 
     // Log the sensors
-    if (logBuffer)
+    if (logBuffer && ((lineSensors != previousLineSensors)
+                        || (robotLeftSpeed != previousLeftSpeed)
+                        || (robotRightSpeed != previousRightSpeed)))
         logData(currentUsec, blfState);
+    previousLeftSpeed = robotLeftSpeed;
+    previousRightSpeed = robotRightSpeed;
 }
 
 //*********************************************************************

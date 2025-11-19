@@ -225,6 +225,7 @@ uint8_t * logBuffer;    // Buffer for logging
 uint32_t logStartUsec;  // Start time in microseconds
 
 uint8_t lineSensors;    // Last value of the line sensors
+uint8_t previousLineSensors;
 int16_t robotLeftSpeed;
 int16_t robotRightSpeed;
 

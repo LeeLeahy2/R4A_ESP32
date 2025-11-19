@@ -4,11 +4,84 @@
   Advanced line following support
 **********************************************************************/
 
+//****************************************
+// Constants
+//****************************************
+
+enum ALF_STATE
+{
+    ALF_STATE_STOP = 0,
+    ALF_STATE_FORWARD,
+};
+
+const char * alfStateTable[] =
+{
+    "Stop",
+    "Forward",
+};
+
+typedef void (* ALF_STATE_UPDATE)();
+
+// Forward routine declarations
+void alfForward();
+void alfStop();
+
+const ALF_STATE_UPDATE alfStateRoutine[] =
+{
+    alfStop,
+    alfForward,
+};
+
+//****************************************
+// Locals
+//****************************************
+
+static volatile uint8_t alfState;
+
 //*********************************************************************
 // Do the line following
 void alfChallenge(R4A_ROBOT_CHALLENGE * object)
 {
-    challengeHalt("Code missing in alfChallenge, reads sensors and make decisions to drive motors!");
+    uint32_t currentUsec;
+
+    // Read the line sensors
+    currentUsec = micros();
+    pcf8574.read(&lineSensors);
+    lineSensors &= 7;
+
+    // Determine if the line sensor value has changed
+    if (previousLineSensors != lineSensors)
+    {
+        previousLineSensors = lineSensors;
+
+        // Process the sensors
+        alfStateRoutine[alfState]();
+
+        // Log the sensors
+        if (logBuffer)
+            logData(currentUsec, alfState);
+    }
+}
+
+//*********************************************************************
+// Robot moving forward
+void alfForward()
+{
+    // Adjust the motors
+    switch (lineSensors)
+    {
+    //     RcL
+    case 0b000:
+    case 0b001:
+    case 0b010:
+    case 0b011:
+    case 0b100:
+    case 0b101:
+    case 0b110:
+    case 0b111: // Crossing a 90 degree turn, a T, or the circle, continue straight
+        challengeHalt("Code missing in alfChallenge, reads sensors and make decisions to drive motors!");
+        break;
+    }
 }
 
 //*********************************************************************
@@ -16,6 +89,10 @@ void alfChallenge(R4A_ROBOT_CHALLENGE * object)
 // delay state.
 void alfInit(R4A_ROBOT_CHALLENGE * object)
 {
+    // Attempt to allocate the log buffer
+    logInit(alfStateTable, ALF_STATE_STOP);
+
+    alfState = ALF_STATE_STOP;
     challengeInit();
 }
 
@@ -66,7 +143,25 @@ void alfStart(Print * display)
 // the challenge routine for the first time.
 void alfStart(R4A_ROBOT_CHALLENGE * object)
 {
+    uint32_t currentUsec;
+
+    // Remember the start time
+    currentUsec = micros();
+    logStartUsec = currentUsec;
+
+    // Read the line sensors
+    pcf8574.read(&lineSensors);
+    lineSensors &= 7;
+
+    // Start moving forward
+    robotMotorSetSpeeds(alfSpeedForward, alfSpeedForward);
+    alfState = ALF_STATE_FORWARD;
     challengeStart();
+
+    // Log the sensors
+    if (logBuffer)
+        logData(currentUsec, alfState);
+    previousLineSensors = lineSensors;
 }
 
 //*********************************************************************
@@ -82,8 +177,34 @@ void alfStartMenu(const struct _R4A_MENU_ENTRY * menuEntry,
 // Stop the robot and perform any other actions
 void alfStop(R4A_ROBOT_CHALLENGE * object)
 {
+    uint32_t currentUsec;
+
     // Stop the robot
+    currentUsec = micros();
+    alfState = ALF_STATE_STOP;
+    robotMotorSetSpeeds(0, 0);
+
+    if (logBuffer)
+    {
+        // Read the line sensors
+        pcf8574.read(&lineSensors);
+        lineSensors &= 7;
+
+        // Log the sensors
+        logData(currentUsec, alfState);
+    }
+
+    // Turn on the brake lights
     challengeStop();
+}
+
+//*********************************************************************
+// Stop the robot
+void alfStop()
+{
+    // Stop the robot
+    alfState = ALF_STATE_STOP;
+    r4aRobotStop(&robot, millis());
 }
 
 //*********************************************************************

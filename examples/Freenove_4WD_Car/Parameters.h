@@ -8,6 +8,12 @@
 #define __PARAMETERS_H__
 
 //****************************************
+// Advanced Line Following
+//****************************************
+
+int16_t alfSpeedForward;        // Speed going forward
+
+//****************************************
 // Basic Line Following (BLF)
 //****************************************
 
@@ -117,6 +123,10 @@ const char * wifiPassword4;
 
 const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
 {
+    // Advanced Line Following
+// Required    Type                  Minimum         Maximum        Address                     Name            Default Value
+    {true,  R4A_ESP32_NVM_PT_INT16,  0,              4096,          &alfSpeedForward,           "AlfForward",   800},
+
     // Basic Line Following (BLF)
 // Required    Type                  Minimum          Maximum   Address             Name            Default Value
     {true,  R4A_ESP32_NVM_PT_INT16,  (uint64_t)-4096,   4096,   &blfSpeedFast,      "blfFast",      4000},
