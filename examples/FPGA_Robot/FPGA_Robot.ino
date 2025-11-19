@@ -176,10 +176,28 @@ int16_t lsAdcReference;
 int16_t lsAdcValue;
 
 //****************************************
-// Line sensors
+// Logging
 //****************************************
 
-uint8_t lineSensors;        // Last value of the line sensors
+typedef struct _LOG_ENTRY
+{
+    uint32_t _microSec;
+    int16_t _leftSpeed;
+    int16_t _rightSpeed;
+    uint8_t _state;
+    uint8_t _lineSensors;
+    uint16_t _reserved;
+} LOG_ENTRY;
+
+uint8_t * logBuffer;    // Buffer for logging
+uint32_t logStartUsec;  // Start time in microseconds
+
+uint8_t lineSensors;    // Last value of the line sensors
+uint8_t previousLineSensors;
+int16_t robotLeftSpeed;
+int16_t robotRightSpeed;
+
+Print * logPrint;       // Network connection for logging
 
 //****************************************
 // Loop globals
@@ -606,6 +624,9 @@ void loop()
 
         // Update the SPI Flash server
         r4aSpiFlashServerUpdate(spiFlashServerEnable, r4aWifiStationOnline);
+
+        // Output the debug log data
+        while (logDataPrint());
 
         // Update the web server
         if (DEBUG_LOOP_CORE_1)
