@@ -111,6 +111,25 @@ void blfInit(R4A_ROBOT_CHALLENGE * object)
 }
 
 //*********************************************************************
+// Read the line sensors
+void blfReadLineSensors()
+{
+    // Read the line sensors
+#ifdef USE_SPARKFUN_SEN_13582
+    if (sx1509Present)
+        r4aSx1509RegisterRead(&sx1509,
+                              SX1509_DATA_A,
+                              &lineSensors);
+    else
+#endif  // USE_SPARKFUN_SEN_13582
+    if (pcf8574Present)
+    {
+        pcf8574.read(&lineSensors);
+        lineSensors &= 7;
+    }
+}
+
+//*********************************************************************
 // Start the line following
 void blfStart(Print * display)
 {
@@ -185,8 +204,7 @@ void blfStart(R4A_ROBOT_CHALLENGE * object)
     logStartUsec = currentUsec;
 
     // Read the line sensors
-    pcf8574.read(&lineSensors);
-    lineSensors &= 7;
+    blfReadLineSensors();
 
     // Start moving forward
     robotLeftSpeed = 0;
@@ -224,8 +242,7 @@ void blfStop(R4A_ROBOT_CHALLENGE * object)
     if (logBuffer)
     {
         // Read the line sensors
-        pcf8574.read(&lineSensors);
-        lineSensors &= 7;
+        blfReadLineSensors();
 
         // Log the sensors
         logData(currentUsec, blfState);
