@@ -115,6 +115,14 @@ void robotIdle(uint32_t currentMsec)
 // Returns true if successful, false otherwise
 bool robotMotorSetSpeeds(int16_t left, int16_t right, Print * display)
 {
+    // Skip of the speed is the same
+    if ((robotLeftSpeed == left) && (robotRightSpeed == right))
+        return true;
+
+    // Remember the new speeds
+    robotLeftSpeed = left;
+    robotRightSpeed = right;
+
     // Update motor speeds
     return motorFrontLeft.speed(left, display)
            && motorBackLeft.speed(left, display)

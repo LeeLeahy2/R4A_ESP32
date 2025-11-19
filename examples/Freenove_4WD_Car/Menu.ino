@@ -134,6 +134,15 @@ bool mainMenuPre(Print * display)
 }
 
 //*********************************************************************
+// Set the log print destination
+void menuSetLogPrint(const struct _R4A_MENU_ENTRY * menuEntry,
+                     const char * command,
+                     Print * display)
+{
+    logPrint = display;
+}
+
+//*********************************************************************
 // Stop the robot
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry
@@ -393,6 +402,7 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #endif  // USE_ZED_F9P
 #endif  // USE_I2C
     {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
+    {"log",     menuSetLogPrint,    0,              nullptr,    0,      "Set log print path"},
     {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
 #ifdef  USE_NTRIP
     {"NTRIP",   nullptr,            MTI_NTRIP,      nullptr,    0,      "Enter the NTRIP menu"},
