@@ -561,10 +561,13 @@ void loop()
     static uint32_t lastBatteryCheckMsec;
     static R4A_TIME_USEC_t loopEndTimeUsec;
     static uint32_t loopIndex;
+    bool saveLoopTime;
 
-    // Computing the time outside the loop
+    // Remember the start of the look
     currentUsec = esp_timer_get_time();
-    loopCore1OutTimeUsec[loopIndex] = currentUsec - loopEndTimeUsec;
+
+    // Determine if the loop times should be saved;
+    saveLoopTime = r4aRobotIsRunning(&robot);
 
     // Turn on the ESP32 WROVER blue LED when the battery power is OFF
     currentMsec = millis();
@@ -629,6 +632,24 @@ void loop()
     if (DEBUG_LOOP_CORE_1)
         callingRoutine("r4aSerialMenu");
     r4aSerialMenu(&serialMenu);
+
+    // Determine if the loop times should be saved
+    endUsec = esp_timer_get_time();
+    if (saveLoopTime)
+    {
+        // Count the loops
+        if (loopsCore1 < LOOP_CORE_1_TIME_ENTRIES)
+            loopsCore1 += 1;
+
+        // Computing the time outside the loop
+        loopCore1OutTimeUsec[loopIndex] = currentUsec - loopEndTimeUsec;
+
+        // Compute the time inside the loop
+        loopCore1TimeUsec[loopIndex] = endUsec - currentUsec;
+
+        // Set the next loop index
+        loopIndex = (loopIndex + 1) % LOOP_CORE_1_TIME_ENTRIES;
+    }
 
     // Update the loop time
     if (loopsCore1 < LOOP_CORE_1_TIME_ENTRIES)
@@ -753,10 +774,13 @@ void loopCore0()
     R4A_TIME_USEC_t endUsec;
     static R4A_TIME_USEC_t loopEndTimeUsec;
     static uint32_t loopIndex;
+    bool saveLoopTime;
 
-    // Computing the time outside the loop
+    // Remember the start of the look
     currentUsec = esp_timer_get_time();
-    loopCore0OutTimeUsec[loopIndex] = currentUsec - loopEndTimeUsec;
+
+    // Determine if the loop times should be saved;
+    saveLoopTime = r4aRobotIsRunning(&robot);
 
     // Get the time since boot
     currentMsec = millis();
@@ -766,13 +790,24 @@ void loopCore0()
         callingRoutine("r4aRobotUpdate");
     r4aRobotUpdate(&robot, currentMsec);
 
-    // Update the loop time
-    if (loopsCore0 < LOOP_CORE_0_TIME_ENTRIES)
-        loopsCore0 += 1;
+    // Determine if the loop times should be saved
     endUsec = esp_timer_get_time();
+    if (saveLoopTime)
+    {
+        // Count the loops
+        if (loopsCore0 < LOOP_CORE_0_TIME_ENTRIES)
+            loopsCore0 += 1;
+
+        // Computing the time outside the loop
+        loopCore0OutTimeUsec[loopIndex] = currentUsec - loopEndTimeUsec;
+
+        // Compute the time inside the loop
+        loopCore0TimeUsec[loopIndex] = endUsec - currentUsec;
+
+        // Set the next loop index
+        loopIndex = (loopIndex + 1) % LOOP_CORE_0_TIME_ENTRIES;
+    }
     loopEndTimeUsec = endUsec;
-    loopCore0TimeUsec[loopIndex] = endUsec - currentUsec;
-    loopIndex = (loopIndex + 1) % LOOP_CORE_0_TIME_ENTRIES;
 }
 
 //*********************************************************************
