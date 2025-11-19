@@ -103,6 +103,7 @@ enum MENU_TABLE_INDEX
     MTI_NVM,
     MTI_SERVO,
     MTI_START,
+    MTI_SYSTEM,
     MTI_TELNET,
     // Add new menu values before this line
     MTI_MAX
@@ -201,6 +202,28 @@ const R4A_MENU_ENTRY telnetMenuTable[] =
 };
 #define TELNET_MENU_ENTRIES  sizeof(telnetMenuTable) / sizeof(telnetMenuTable[0])
 
+// System menu
+const R4A_MENU_ENTRY systemMenuTable[] =
+{
+    // Command  menuRoutine         menuParam       HelpRoutine align   HelpText
+#ifdef  USE_I2C
+#endif  // USE_I2C
+    {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
+    {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
+    {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
+    {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
+#ifdef  USE_I2C
+    {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
+#endif  // USE_I2C
+    {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
+    {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
+    {"wd", r4aMenuBoolToggle, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
+    {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
+    {"wv", r4aMenuBoolToggle, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
+    {"x",       nullptr,            R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
+};
+#define SYSTEM_MENU_ENTRIES     sizeof(systemMenuTable) / sizeof(systemMenuTable[0])
+
 // Main menu
 const R4A_MENU_ENTRY mainMenuTable[] =
 {
@@ -209,21 +232,14 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"alf",     alfStartMenu,       0,              nullptr,    0,      "Advanced line following"},
     {"blf",     blfStartMenu,       0,              nullptr,    0,      "Basic line following"},
 #endif  // USE_I2C
-    {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
     {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
-    {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
     {"log",     menuSetLogPrint,    0,              nullptr,    0,      "Set log print path"},
     {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
     {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
 #ifdef  USE_I2C
     {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
-    {"Start",   nullptr,            MTI_START,      nullptr,    0,      "Start challenge at boot menu"},
 #endif  // USE_I2C
-    {"t",       nullptr,            MTI_TELNET,     nullptr,    0,      "Enter the telnet menu"},
-    {"w", r4aMenuBoolToggle, (intptr_t)&webServerEnable, r4aMenuBoolHelp, 0, "Toggle web server"},
-    {"wd", r4aMenuBoolToggle, (intptr_t)&r4aWifiDebug, r4aMenuBoolHelp, 0, "Toggle WiFi debugging"},
-    {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
-    {"wv", r4aMenuBoolToggle, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
+    {"system",  nullptr,            MTI_SYSTEM,     nullptr,    0,      "Enter the system menu"},
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
 };
 #define MAIN_MENU_ENTRIES       sizeof(mainMenuTable) / sizeof(mainMenuTable[0])
@@ -241,6 +257,7 @@ const R4A_MENU_TABLE menuTable[] =
     {"NVM Menu",        nullptr,      r4aEsp32NvmMenuTable, R4A_ESP32_NVM_MENU_ENTRIES},
     {"Servo Menu",      nullptr,        servoMenuTable,     SERVO_MENU_ENTRIES},
     {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
+    {"System Menu",     nullptr,        systemMenuTable,    SYSTEM_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
 };
 const int menuTableEntries = sizeof(menuTable) / sizeof(menuTable[0]);
