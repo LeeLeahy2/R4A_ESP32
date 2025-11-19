@@ -234,6 +234,7 @@ enum MENU_TABLE_INDEX
 #endif  // USE_SPARKFUN_SEN_13582
     MTI_SERVO,
     MTI_START,
+    MTI_SYSTEM,
     MTI_TELNET,
 #ifdef  USE_ZED_F9P
     MTI_WAY_POINT,
@@ -380,20 +381,12 @@ const R4A_MENU_ENTRY wayPointMenuTable[] =
 #define WAYPOINT_MENU_ENTRIES  sizeof(wayPointMenuTable) / sizeof(wayPointMenuTable[0])
 #endif  // USE_ZED_F9P
 
-// Main menu
-const R4A_MENU_ENTRY mainMenuTable[] =
+// System menu
+const R4A_MENU_ENTRY systemMenuTable[] =
 {
     // Command  menuRoutine         menuParam       HelpRoutine align   HelpText
-#ifdef  USE_I2C
-    {"alf",     alfStartMenu,       0,              nullptr,    0,      "Advanced line following"},
-    {"blf",     blfStartMenu,       0,              nullptr,    0,      "Basic line following"},
-    {"blt",     bltStartMenu,       0,              nullptr,    0,      "Basic light tracking"},
-#endif  // USE_I2C
 #ifdef  USE_OV2640
     {"c", r4aMenuBoolToggle, (intptr_t)&ov2640Enable, r4aMenuBoolHelp, 0, "Toggle OV2640 camera"},
-#ifdef  USE_I2C
-    {"clf",     clfStartMenu,       0,              nullptr,    0,      "Camera line following"},
-#endif  // USE_I2C
 #endif  // USE_OV2640
     {"d",       nullptr,            MTI_DEBUG,      nullptr,    0,      "Enter the debug menu"},
 #ifdef  USE_I2C
@@ -401,17 +394,12 @@ const R4A_MENU_ENTRY mainMenuTable[] =
     {"g",       nullptr,            MTI_GNSS,       nullptr,    0,      "Enter the GNSS menu"},
 #endif  // USE_ZED_F9P
 #endif  // USE_I2C
-    {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
-    {"log",     menuSetLogPrint,    0,              nullptr,    0,      "Set log print path"},
     {"l",       loopTimesMenu,      0,              nullptr,    0,      "Loop times"},
 #ifdef  USE_NTRIP
     {"NTRIP",   nullptr,            MTI_NTRIP,      nullptr,    0,      "Enter the NTRIP menu"},
 #endif  // USE_NTRIP
-    {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
-    {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
 #ifdef  USE_I2C
     {"robot",   nullptr,            MTI_ROBOT,      nullptr,    0,      "Enter the robot menu"},
-    {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
 #ifdef  USE_SPARKFUN_SEN_13582
     {"sen",     nullptr,            MTI_SEN13582,   nullptr,    0,      "Enter the SparkFun SEN-13582 menu"},
 #endif  // USE_SPARKFUN_SEN_13582
@@ -423,13 +411,43 @@ const R4A_MENU_ENTRY mainMenuTable[] =
 #ifdef  USE_I2C
 #ifdef  USE_ZED_F9P
     {"wp",      nullptr,            MTI_WAY_POINT,  nullptr,    0,      "Enter the waypoint menu"},
+#endif  // USE_ZED_F9P
+#endif  // USE_I2C
+    {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
+    {"wv", r4aMenuBoolToggle, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
+    {"x",       nullptr,            R4A_MENU_MAIN,  nullptr,    0,      "Return to the main menu"},
+};
+#define SYSTEM_MENU_ENTRIES     sizeof(systemMenuTable) / sizeof(systemMenuTable[0])
+
+// Main menu
+const R4A_MENU_ENTRY mainMenuTable[] =
+{
+    // Command  menuRoutine         menuParam       HelpRoutine align   HelpText
+#ifdef  USE_I2C
+    {"alf",     alfStartMenu,       0,              nullptr,    0,      "Advanced line following"},
+    {"blf",     blfStartMenu,       0,              nullptr,    0,      "Basic line following"},
+    {"blt",     bltStartMenu,       0,              nullptr,    0,      "Basic light tracking"},
+#endif  // USE_I2C
+#ifdef  USE_OV2640
+#ifdef  USE_I2C
+    {"clf",     clfStartMenu,       0,              nullptr,    0,      "Camera line following"},
+#endif  // USE_I2C
+#endif  // USE_OV2640
+    {"i",  r4aMenuBoolToggle, (intptr_t)&ignoreBatteryCheck, r4aMenuBoolHelp, 0, "Ignore the battery check"},
+    {"log",     menuSetLogPrint,    0,              nullptr,    0,      "Set log print path"},
+    {"nvm",     nullptr,            MTI_NVM,        nullptr,    0,      "Enter the NVM menu"},
+    {"r",  r4aEsp32MenuSystemReset, 0,              nullptr,    0,      "System reset"},
+#ifdef  USE_I2C
+    {"s",       robotMenuStop,      0,              nullptr,    0,      "Stop the robot"},
+#endif  // USE_I2C
+    {"system",  nullptr,            MTI_SYSTEM,     nullptr,    0,      "Enter the system menu"},
+#ifdef  USE_I2C
+#ifdef  USE_ZED_F9P
 #ifdef  USE_WAYPOINT_FOLLOWING
     {"wpf",     wpfStartMenu,       0,              nullptr,    0,      "Waypoint following"},
 #endif  // USE_WAYPOINT_FOLLOWING
 #endif  // USE_ZED_F9P
 #endif  // USE_I2C
-    {"wr",      wifiMenuRestart,    0,              nullptr,    0,      "Restart WiFi"},
-    {"wv", r4aMenuBoolToggle, (intptr_t)&r4aWifiVerbose, r4aMenuBoolHelp, 0, "Toggle WiFi verbose output"},
     {"x",       nullptr,            R4A_MENU_NONE,  nullptr,    0,      "Exit the menu system"},
 };
 #define MAIN_MENU_ENTRIES       sizeof(mainMenuTable) / sizeof(mainMenuTable[0])
@@ -457,6 +475,7 @@ const R4A_MENU_TABLE menuTable[] =
 #endif  // USE_SPARKFUN_SEN_13582
     {"Servo Menu",      nullptr,        servoMenuTable,     SERVO_MENU_ENTRIES},
     {"Start Menu",      nullptr,        startMenuTable,     START_MENU_ENTRIES},
+    {"System Menu",     nullptr,        systemMenuTable,    SYSTEM_MENU_ENTRIES},
     {"Telnet Menu",     nullptr,        telnetMenuTable,    TELNET_MENU_ENTRIES},
 #ifdef  USE_ZED_F9P
     {"Waypoint Menu",   wpMenuPre,      wayPointMenuTable,  WAYPOINT_MENU_ENTRIES},
