@@ -186,9 +186,6 @@ void setup()
     if (r4aWifiStationOn(__FILE__, __LINE__) == false)
         r4aReportFatalError("Failed to connect to a WiFi Access Porint!");
 
-    // Start the telnet server
-    telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
-
     // Wait for a telnet client
     Serial.printf("Waiting for telnet client connection to %s:%d\r\n",
                   WiFi.STA.localIP().toString().c_str(), TELNET_PORT);
@@ -196,7 +193,7 @@ void setup()
     while (telnet.hasClient() == false)
     {
         delay(100);
-        telnet.update(WiFi.STA.connected());
+        telnet.update(true, WiFi.STA.connected());
     }
     Serial.printf("Telnet client connected\r\n");
     telnet.printf("%s\r\n", __FILE__);
@@ -232,24 +229,8 @@ void loop()
     // Determine if WiFi is connected
     wifiConnected = WiFi.STA.connected();
 
-    // Notify the telnet server of WiFi changes
-    if (previousConnected != wifiConnected)
-    {
-        previousConnected = wifiConnected;
-        if (wifiConnected)
-        {
-            telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
-            Serial.printf("Telnet: %s:%d\r\n", WiFi.localIP().toString().c_str(),
-                          telnet.port());
-        }
-        else
-        {
-            telnet.end();
-        }
-    }
-
     // Update the telnet clients
-    telnet.update(wifiConnected);
+    telnet.update(true, wifiConnected);
 
     // Stop the robot when the telnet clients disconnect
     if ((telnet.hasClient() == false) && r4aRobotIsActive(&robot))
