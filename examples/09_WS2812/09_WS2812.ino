@@ -125,7 +125,6 @@ void loop()
     float batteryVoltage;
     uint32_t currentMsec;
     static uint32_t lastBatteryCheckMsec;
-    static bool previousConnected;
 
     // Turn on the ESP32 WROVER blue LED when the battery power is OFF
     currentMsec = millis();
@@ -148,25 +147,8 @@ void loop()
         log_v("r4aNtpUpdate");
         r4aNtpUpdate(r4aWifiStationOnline);
 
-        // Notify the telnet server of WiFi changes
-        if (previousConnected != r4aWifiStationOnline)
-        {
-            previousConnected = r4aWifiStationOnline;
-            if (r4aWifiStationOnline)
-            {
-                log_v("telnet.begin");
-                telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
-                Serial.printf("Telnet: %s:%d\r\n", WiFi.localIP().toString().c_str(),
-                              telnet.port());
-            }
-            else
-            {
-                log_v("telnet.end");
-                telnet.end();
-            }
-        }
         log_v("telnet.update");
-        telnet.update(r4aWifiStationOnline);
+        telnet.update(true, r4aWifiStationOnline);
     }
 
     // Process serial commands
