@@ -348,25 +348,8 @@ void loop()
             r4aNtpUpdate(r4aWifiStationOnline);
         }
 
-        // Notify the telnet server of WiFi changes
-        if (previousConnected != r4aWifiStationOnline)
-        {
-            previousConnected = r4aWifiStationOnline;
-            if (r4aWifiStationOnline)
-            {
-                log_v("telnet.begin");
-                telnet.begin(WiFi.STA.localIP(), TELNET_PORT);
-                Serial.printf("Telnet: %s:%d\r\n", WiFi.localIP().toString().c_str(),
-                              telnet.port());
-            }
-            else
-            {
-                log_v("telnet.end");
-                telnet.end();
-            }
-        }
         log_v("telnet.update");
-        telnet.update(r4aWifiStationOnline);
+        telnet.update(true, r4aWifiStationOnline);
     }
 
     // Perform the robot challenge
