@@ -161,6 +161,10 @@ bool logDataPrint()
     {
         logPrint->printf("\r\n");
 
+        // Display the loop times
+        loopTimesMenu(nullptr, nullptr, logPrint);
+        logPrint->printf("\r\n");
+
         // Display the parameters
         logPrint->printf("Parameters\r\n");
         logPrint->printf("----------\r\n");
