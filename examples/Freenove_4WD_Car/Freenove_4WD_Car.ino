@@ -356,6 +356,7 @@ const int r4aWifiSsidPasswordEntries = sizeof(r4aWifiSsidPassword)
 // Entry point for the application
 void setup()
 {
+    R4A_I2C_BUS * i2cBus;
     BaseType_t status;
 
     // Initialize the USB serial port
@@ -408,245 +409,6 @@ void setup()
     if (status != pdPASS)
         r4aReportFatalError("Failed to create the core 0 task!");
     log_v("Core 0 task started");
-
-    // Initialize the SPI controller and WS2812 LEDs
-    R4A_4WD_CAR_SPI_WS2812_SETUP(1);
-
-    // Start WiFi if enabled
-    log_v("Calling r4aWifiBegin");
-    r4aWifiBegin();
-
-    // Initialize the NTP client
-    if (ntpEnable)
-    {
-        log_v("Calling r4aNtpSetup");
-        r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
-    }
-
-    // Initialize the web server
-    r4aWebServerInit(CAMERA_USER_WEB_SERVER);
-
-    // Enable web server debugging
-    r4aWebServerDebug = webServerDebug ? &Serial : nullptr;
-
-    // Allocate the loop buffers
-    uint32_t length = sizeof(R4A_TIME_USEC_t) * LOOP_CORE_1_TIME_ENTRIES;
-    loopCore1TimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 loop time buffer (loopCore1TimeUsec)");
-    if (!loopCore1TimeUsec)
-        r4aReportFatalError("Failed to allocate loopCore1TimeUsec!");
-    loopCore1OutTimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 out of loop time buffer (loopCore1OutTimeUsec)");
-    if (!loopCore1OutTimeUsec)
-        r4aReportFatalError("Failed to allocate loopCore1OutTimeUsec!");
-
-    //****************************************
-    // Synchronize with core 0
-    //****************************************
-
-    // Wait for the other core to finish initialization
-    log_v("Waiting for setupCore0 to complete");
-    while (!core0Initialized)
-        delayMicroseconds(1);
-
-    // Initialize the camera
-#ifdef USE_OV2640
-    r4aCameraUserAdd(CAMERA_USER_DISABLED);
-    if (ov2640Present)
-    {
-        if (ov2640Enable == false)
-        {
-            ov2640Present = false;
-            Serial.printf("WARNING: OV2640 camera is disabled!\r\n");
-        }
-        else
-        {
-            log_v("Calling r4aOv2640Setup");
-            Serial.printf("Initializing the OV2640 camera\r\n");
-            if (r4aOv2640Setup(&ov2640))
-                r4aCameraUserRemove(CAMERA_USER_DISABLED);
-        }
-    }
-#endif  // USE_OV2640
-
-    //****************************************
-    // Core 1 completed initialization
-    //****************************************
-
-    // Finished with the initialization
-    log_v("setup complete");
-    core1Initialized = true;
-
-    //****************************************
-    // Start the requested challenge
-    //****************************************
-
-    if (startIndex && (startIndex < CHALLENGE_MAX))
-    {
-        bool ignore;
-
-        ignore = ignoreBatteryCheck;
-        ignoreBatteryCheck = true;
-        challengeList[startIndex](&Serial);
-        ignoreBatteryCheck = ignore;
-    }
-
-    //****************************************
-    // Execute loop forever
-    //****************************************
-}
-
-//*********************************************************************
-// Idle loop for core 1 of the application
-void loop()
-{
-    uint32_t currentMsec;
-    R4A_TIME_USEC_t currentUsec;
-    R4A_TIME_USEC_t endUsec;
-    static uint32_t lastBatteryCheckMsec;
-    static R4A_TIME_USEC_t loopEndTimeUsec;
-    static uint32_t loopIndex;
-    bool saveLoopTime;
-
-    // Remember the start of the look
-    currentUsec = esp_timer_get_time();
-
-    // Determine if the loop times should be saved;
-    saveLoopTime = r4aRobotIsRunning(&robot);
-
-    // Turn on the ESP32 WROVER blue LED when the battery power is OFF
-    currentMsec = millis();
-    if (enableBatteryCheck)
-    {
-        if ((currentMsec - lastBatteryCheckMsec) >= 100)
-        {
-            lastBatteryCheckMsec = currentMsec;
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("READ_BATTERY_VOLTAGE");
-            float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
-            int blueLED = (batteryVoltage > 2.)
-                        ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
-            digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
-        }
-    }
-
-    // Update the location
-#ifdef  USE_ZED_F9P
-    if (zedf9pPresent)
-    {
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("zedf9p.update");
-        zedf9p.update(currentMsec, nullptr);
-    }
-#endif  // USE_ZED_F9P
-
-    // Update the LEDs
-    if (DEBUG_LOOP_CORE_1)
-        callingRoutine("car.ledsUpdate");
-    car.ledsUpdate(currentMsec);
-
-    // Update the WiFi status
-    r4aWifiUpdate();
-
-    // Determine if WiFi station mode is configured
-    if (r4aWifiSsidPasswordEntries)
-    {
-        // Check for NTP updates
-        if (ntpEnable && (r4aNtpIsTimeValid() == false))
-        {
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("r4aNtpUpdate");
-            r4aNtpUpdate(r4aWifiStationOnline);
-        }
-
-#ifdef  USE_NTRIP
-        // Update the NTRIP client state
-        if (r4aNtripClientEnable)
-        {
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("r4aNtripClientUpdate");
-            r4aNtripClientUpdate(r4aWifiStationOnline, &Serial);
-        }
-#endif  // USE_NTRIP
-
-        // Update the telnet server and clients
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("telnet.update");
-        telnet.update(telnetEnable, r4aWifiStationOnline);
-
-        // Output the debug log data
-        while (logDataPrint());
-
-        // Update the web server
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("r4aWebServerUpdate");
-        r4aWebServerUpdate(&webServer, r4aWifiStationOnline && webServerEnable);
-    }
-
-#ifdef  USE_OV2640
-    // Discard frame buffers
-    if (r4aCameraUsers == 0)
-    {
-        if (DEBUG_LOOP_CORE_1)
-            callingRoutine("r4aCameraFrameBufferGet");
-        camera_fb_t * frameBuffer = r4aCameraFrameBufferGet();
-        if (frameBuffer)
-        {
-            if (DEBUG_LOOP_CORE_1)
-                callingRoutine("r4aCameraFrameBufferFree");
-            r4aCameraFrameBufferFree(frameBuffer);
-        }
-    }
-#endif  // USE_OV2640
-
-    // Display the robot's runtime
-    if (robotRunTime && r4aRobotIsRunning(&robot))
-    {
-        static uint32_t lastMsec;
-        if ((currentMsec - lastMsec) >= 100)
-        {
-            lastMsec = currentMsec;
-            robotDisplayTime(r4aRobotGetRunTime(&robot, currentMsec));
-        }
-    }
-
-    // Update the time display
-    else if (robotNtpTime && r4aNtpIsTimeValid() && (!r4aRobotIsActive(&robot)))
-        vk16k33NtpTime(currentMsec);
-
-    // Process serial commands
-    if (DEBUG_LOOP_CORE_1)
-        callingRoutine("r4aSerialMenu");
-    r4aSerialMenu(&serialMenu);
-
-    // Determine if the loop times should be saved
-    endUsec = esp_timer_get_time();
-    if (saveLoopTime)
-    {
-        // Count the loops
-        if (loopsCore1 < LOOP_CORE_1_TIME_ENTRIES)
-            loopsCore1 += 1;
-
-        // Computing the time outside the loop
-        loopCore1OutTimeUsec[loopIndex] = currentUsec - loopEndTimeUsec;
-
-        // Compute the time inside the loop
-        loopCore1TimeUsec[loopIndex] = endUsec - currentUsec;
-
-        // Set the next loop index
-        loopIndex = (loopIndex + 1) % LOOP_CORE_1_TIME_ENTRIES;
-    }
-
-    // Update the loop time
-    loopEndTimeUsec = endUsec;
-}
-
-//*********************************************************************
-// Setup for core 0
-void setupCore0(void *parameter)
-{
-    R4A_I2C_BUS * i2cBus;
-
-    // Display the core number
-    log_v("setupCore0() running on core %d", xPortGetCoreID());
 
 #ifdef USE_I2C
     // Initialize the I2C bus
@@ -735,6 +497,148 @@ void setupCore0(void *parameter)
                  robotDisplayTime);      // Time display routine
 
     // Allocate the loop buffers
+    uint32_t length = sizeof(R4A_TIME_USEC_t) * LOOP_CORE_1_TIME_ENTRIES;
+    loopCore1TimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 loop time buffer (loopCore1TimeUsec)");
+    if (!loopCore1TimeUsec)
+        r4aReportFatalError("Failed to allocate loopCore1TimeUsec!");
+    loopCore1OutTimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 1 out of loop time buffer (loopCore1OutTimeUsec)");
+    if (!loopCore1OutTimeUsec)
+        r4aReportFatalError("Failed to allocate loopCore1OutTimeUsec!");
+
+    //****************************************
+    // Synchronize with core 0
+    //****************************************
+
+    // Wait for the other core to finish initialization
+    log_v("Waiting for setupCore0 to complete");
+    while (!core0Initialized)
+        delayMicroseconds(1);
+
+    //****************************************
+    // Core 1 completed initialization
+    //****************************************
+
+    // Finished with the initialization
+    log_v("setup complete");
+    core1Initialized = true;
+
+    //****************************************
+    // Start the requested challenge
+    //****************************************
+
+    if (startIndex && (startIndex < CHALLENGE_MAX))
+    {
+        bool ignore;
+
+        ignore = ignoreBatteryCheck;
+        ignoreBatteryCheck = true;
+        challengeList[startIndex](&Serial);
+        ignoreBatteryCheck = ignore;
+    }
+
+    //****************************************
+    // Execute loop forever
+    //****************************************
+}
+
+//*********************************************************************
+// Idle loop for core 1 of the application
+void loop()
+{
+    uint32_t currentMsec;
+    R4A_TIME_USEC_t currentUsec;
+    R4A_TIME_USEC_t endUsec;
+    static R4A_TIME_USEC_t loopEndTimeUsec;
+    static uint32_t loopIndex;
+    bool saveLoopTime;
+
+    // Remember the start of the look
+    currentUsec = esp_timer_get_time();
+
+    // Determine if the loop times should be saved;
+    saveLoopTime = r4aRobotIsRunning(&robot);
+
+    // Get the time since boot
+    currentMsec = millis();
+
+#ifdef  USE_ZED_F9P
+    // Update the location
+    if (zedf9pPresent)
+    {
+        static uint32_t lastGnssI2cPollMsec;
+        if ((currentMsec - lastGnssI2cPollMsec) >= r4aZedF9pPollMsec)
+        {
+            lastGnssI2cPollMsec = currentMsec;
+            if (DEBUG_LOOP_CORE_1)
+                callingRoutine("zedf9p.i2cPoll");
+            zedf9p.i2cPoll();
+        }
+    }
+#endif  // USE_ZED_F9P
+
+#ifdef  USE_NTRIP
+    // Send navigation data to the GNSS radio
+    if (r4aNtripClientEnable)
+    {
+        if (DEBUG_LOOP_CORE_1)
+            callingRoutine("r4aNtripClientRbRemoveData");
+        r4aNtripClientRbRemoveData(&Serial);
+    }
+#endif  // USE_NTRIP
+
+    // Perform the robot challenge
+    if (DEBUG_LOOP_CORE_1)
+        callingRoutine("r4aRobotUpdate");
+    r4aRobotUpdate(&robot, currentMsec);
+
+    // Determine if the loop times should be saved
+    endUsec = esp_timer_get_time();
+    if (saveLoopTime)
+    {
+        // Count the loops
+        if (loopsCore1 < LOOP_CORE_1_TIME_ENTRIES)
+            loopsCore1 += 1;
+
+        // Computing the time outside the loop
+        loopCore1OutTimeUsec[loopIndex] = currentUsec - loopEndTimeUsec;
+
+        // Compute the time inside the loop
+        loopCore1TimeUsec[loopIndex] = endUsec - currentUsec;
+
+        // Set the next loop index
+        loopIndex = (loopIndex + 1) % LOOP_CORE_1_TIME_ENTRIES;
+    }
+    loopEndTimeUsec = endUsec;
+}
+
+//*********************************************************************
+// Setup for core 0
+void setupCore0(void *parameter)
+{
+    // Display the core number
+    log_v("setupCore0() running on core %d", xPortGetCoreID());
+
+    // Initialize the SPI controller and WS2812 LEDs
+    R4A_4WD_CAR_SPI_WS2812_SETUP(1);
+
+    // Start WiFi if enabled
+    log_v("Calling r4aWifiBegin");
+    r4aWifiBegin();
+
+    // Initialize the NTP client
+    if (ntpEnable)
+    {
+        log_v("Calling r4aNtpSetup");
+        r4aNtpSetup(-10 * R4A_SECONDS_IN_AN_HOUR, true);
+    }
+
+    // Initialize the web server
+    r4aWebServerInit(CAMERA_USER_WEB_SERVER);
+
+    // Enable web server debugging
+    r4aWebServerDebug = webServerDebug ? &Serial : nullptr;
+
+    // Allocate the loop buffers
     uint32_t length = sizeof(R4A_TIME_USEC_t) * LOOP_CORE_0_TIME_ENTRIES;
     loopCore0TimeUsec = (R4A_TIME_USEC_t *)r4aMalloc(length, "Core 0 loop time buffer (loopCore0TimeUsec)");
     if (!loopCore0TimeUsec)
@@ -762,12 +666,31 @@ void setupCore0(void *parameter)
     while (!core1Initialized)
         delayMicroseconds(1);
 
-    log_v("Calling loopCore0");
+    // Initialize the camera
+#ifdef USE_OV2640
+    r4aCameraUserAdd(CAMERA_USER_DISABLED);
+    if (ov2640Present)
+    {
+        if (ov2640Enable == false)
+        {
+            ov2640Present = false;
+            Serial.printf("WARNING: OV2640 camera is disabled!\r\n");
+        }
+        else
+        {
+            log_v("Calling r4aOv2640Setup");
+            Serial.printf("Initializing the OV2640 camera\r\n");
+            if (r4aOv2640Setup(&ov2640))
+                r4aCameraUserRemove(CAMERA_USER_DISABLED);
+        }
+    }
+#endif  // USE_OV2640
 
     //****************************************
     // Execute loopCore0 forever
     //****************************************
 
+    log_v("Calling loopCore0");
     while (1)
         loopCore0();
 }
@@ -779,6 +702,7 @@ void loopCore0()
     uint32_t currentMsec;
     R4A_TIME_USEC_t currentUsec;
     R4A_TIME_USEC_t endUsec;
+    static uint32_t lastBatteryCheckMsec;
     static R4A_TIME_USEC_t loopEndTimeUsec;
     static uint32_t loopIndex;
     bool saveLoopTime;
@@ -789,38 +713,110 @@ void loopCore0()
     // Determine if the loop times should be saved;
     saveLoopTime = r4aRobotIsRunning(&robot);
 
-    // Get the time since boot
+    // Turn on the ESP32 WROVER blue LED when the battery power is OFF
     currentMsec = millis();
+    if (enableBatteryCheck)
+    {
+        if ((currentMsec - lastBatteryCheckMsec) >= 100)
+        {
+            lastBatteryCheckMsec = currentMsec;
+            if (DEBUG_LOOP_CORE_0)
+                callingRoutine("READ_BATTERY_VOLTAGE");
+            float batteryVoltage = READ_BATTERY_VOLTAGE(nullptr);
+            int blueLED = (batteryVoltage > 2.)
+                        ? ESP32_WROVER_BLUE_LED_ON : ESP32_WROVER_BLUE_LED_OFF;
+            digitalWrite(BLUE_LED_BUZZER_PIN, blueLED);
+        }
+    }
 
-#ifdef  USE_ZED_F9P
     // Update the location
+#ifdef  USE_ZED_F9P
     if (zedf9pPresent)
     {
-        static uint32_t lastGnssI2cPollMsec;
-        if ((currentMsec - lastGnssI2cPollMsec) >= r4aZedF9pPollMsec)
-        {
-            lastGnssI2cPollMsec = currentMsec;
-            if (DEBUG_LOOP_CORE_0)
-                callingRoutine("zedf9p.i2cPoll");
-            zedf9p.i2cPoll();
-        }
+        if (DEBUG_LOOP_CORE_0)
+            callingRoutine("zedf9p.update");
+        zedf9p.update(currentMsec, nullptr);
     }
 #endif  // USE_ZED_F9P
 
-#ifdef  USE_NTRIP
-    // Send navigation data to the GNSS radio
-    if (r4aNtripClientEnable)
+    // Update the LEDs
+    if (DEBUG_LOOP_CORE_0)
+        callingRoutine("car.ledsUpdate");
+    car.ledsUpdate(currentMsec);
+
+    // Update the WiFi status
+    r4aWifiUpdate();
+
+    // Determine if WiFi station mode is configured
+    if (r4aWifiSsidPasswordEntries)
     {
-        if (DEBUG_LOOP_CORE_0)
-            callingRoutine("r4aNtripClientRbRemoveData");
-        r4aNtripClientRbRemoveData(&Serial);
-    }
+        // Check for NTP updates
+        if (ntpEnable && (r4aNtpIsTimeValid() == false))
+        {
+            if (DEBUG_LOOP_CORE_0)
+                callingRoutine("r4aNtpUpdate");
+            r4aNtpUpdate(r4aWifiStationOnline);
+        }
+
+#ifdef  USE_NTRIP
+        // Update the NTRIP client state
+        if (r4aNtripClientEnable)
+        {
+            if (DEBUG_LOOP_CORE_0)
+                callingRoutine("r4aNtripClientUpdate");
+            r4aNtripClientUpdate(r4aWifiStationOnline, &Serial);
+        }
 #endif  // USE_NTRIP
 
-    // Perform the robot challenge
+        // Update the telnet server and clients
+        if (DEBUG_LOOP_CORE_0)
+            callingRoutine("telnet.update");
+        telnet.update(telnetEnable, r4aWifiStationOnline);
+
+        // Output the debug log data
+        while (logDataPrint());
+
+        // Update the web server
+        if (DEBUG_LOOP_CORE_0)
+            callingRoutine("r4aWebServerUpdate");
+        r4aWebServerUpdate(&webServer, r4aWifiStationOnline && webServerEnable);
+    }
+
+#ifdef  USE_OV2640
+    // Discard frame buffers
+    if (r4aCameraUsers == 0)
+    {
+        if (DEBUG_LOOP_CORE_0)
+            callingRoutine("r4aCameraFrameBufferGet");
+        camera_fb_t * frameBuffer = r4aCameraFrameBufferGet();
+        if (frameBuffer)
+        {
+            if (DEBUG_LOOP_CORE_0)
+                callingRoutine("r4aCameraFrameBufferFree");
+            r4aCameraFrameBufferFree(frameBuffer);
+        }
+    }
+#endif  // USE_OV2640
+
+    // Display the robot's runtime
+    if (robotRunTime && r4aRobotIsRunning(&robot))
+    {
+        static uint32_t lastMsec;
+        if ((currentMsec - lastMsec) >= 100)
+        {
+            lastMsec = currentMsec;
+            robotDisplayTime(r4aRobotGetRunTime(&robot, currentMsec));
+        }
+    }
+
+    // Update the time display
+    else if (robotNtpTime && r4aNtpIsTimeValid() && (!r4aRobotIsActive(&robot)))
+        vk16k33NtpTime(currentMsec);
+
+    // Process serial commands
     if (DEBUG_LOOP_CORE_0)
-        callingRoutine("r4aRobotUpdate");
-    r4aRobotUpdate(&robot, currentMsec);
+        callingRoutine("r4aSerialMenu");
+    r4aSerialMenu(&serialMenu);
 
     // Determine if the loop times should be saved
     endUsec = esp_timer_get_time();
@@ -839,6 +835,8 @@ void loopCore0()
         // Set the next loop index
         loopIndex = (loopIndex + 1) % LOOP_CORE_0_TIME_ENTRIES;
     }
+
+    // Update the loop time
     loopEndTimeUsec = endUsec;
 }
 
