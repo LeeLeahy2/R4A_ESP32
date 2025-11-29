@@ -153,6 +153,8 @@ void blfStart(Print * display)
     };
 #endif  // USE_SPARKFUN_SEN_13582
     R4A_ROBOT_CHALLENGE * challengeStructure;
+    const char * const * sensorTable;
+    uint8_t sensorMask;
     float voltage;
 
     // Verify the I2C bus configuration
@@ -167,8 +169,24 @@ void blfStart(Print * display)
         return;
     }
 
+    // Determine the sensor being used
+    challengeStructure = &basicLineFollowing;
+    sensorTable = pcf8574SensorTable;
+    sensorMask = 7;
+#ifdef USE_SPARKFUN_SEN_13582
+    if (sx1509Present)
+    {
+        challengeStructure = &blfSx1509LineFollowing;
+        sensorTable = sx1509SensorTable;
+        sensorMask = 255;
+    }
+#endif  // USE_SPARKFUN_SEN_13582
+
     // Attempt to allocate the log buffer
-    if (logInit(blfStateTable, BLF_STATE_STOP) == false)
+    if (logInit(blfStateTable,
+                BLF_STATE_STOP,
+                sensorTable,
+                sensorMask) == false)
     {
         display->printf("ERROR: Failed to allocate log buffer!\r\n");
         return;
@@ -182,18 +200,11 @@ void blfStart(Print * display)
         display->println("WARNING: Battery voltage to run the robot!");
     }
     else
-    {
         // Start the robot challenge if the robot is not active
-        challengeStructure = &basicLineFollowing;
-#ifdef USE_SPARKFUN_SEN_13582
-        if (sx1509Present)
-            challengeStructure = &blfSx1509LineFollowing;
-#endif  // USE_SPARKFUN_SEN_13582
         r4aRobotStart(&robot,
                       challengeStructure,
                       robotStartDelaySec,
                       display);
-    }
 }
 
 //*********************************************************************

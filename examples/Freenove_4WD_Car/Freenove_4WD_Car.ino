@@ -12,6 +12,7 @@
 
 #include <R4A_Freenove_4WD_Car.h>   // Freenove 4WD Car configuration
 #include <R4A_SparkFun.h>           // SparkFun Electronics boards
+#include "Sensor_Table.h"
 
 #define USE_I2C
 //#define USE_NTRIP

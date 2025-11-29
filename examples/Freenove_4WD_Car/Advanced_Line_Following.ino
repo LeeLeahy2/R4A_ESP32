@@ -106,6 +106,8 @@ void alfStart(Print * display)
         "Advanced Line Following",          // _name
         R4A_CHALLENGE_SEC_LINE_FOLLOWING    // Challenge duration in seconds
     };
+    uint8_t sensorMask;
+    const char * const * sensorTable;
     float voltage;
 
     // Verify the I2C bus configuration
@@ -120,8 +122,15 @@ void alfStart(Print * display)
         return;
     }
 
+    // Determine the sensor being used
+    sensorTable = pcf8574SensorTable;
+    sensorMask = 7;
+
     // Attempt to allocate the log buffer
-    if (logInit(alfStateTable, ALF_STATE_STOP) == false)
+    if (logInit(alfStateTable,
+                ALF_STATE_STOP,
+                sensorTable,
+                sensorMask) == false)
     {
         display->printf("ERROR: Failed to allocate log buffer!\r\n");
         return;

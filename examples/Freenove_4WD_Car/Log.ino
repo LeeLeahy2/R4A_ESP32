@@ -27,6 +27,8 @@ const char * const logSpaces = "                                                
 volatile uint8_t * logBufHead;  // Log entry insertion location
 volatile uint8_t * logBufTail;  // Log entry removal location
 bool logPrintHeader;
+uint8_t logSensorMask;
+const char * const * logSensorTable;
 const char ** logStateTable;
 uint8_t logStopState;
 
@@ -69,16 +71,21 @@ void logData(uint32_t currentUsec, uint8_t state)
 
 //*********************************************************************
 // Initialize the log buffer
-bool logInit(const char ** stateTable, uint8_t stopState)
+bool logInit(const char ** stateTable,
+             uint8_t stopState,
+             const char * const * sensorTable,
+             uint8_t sensorMask)
 {
     // Attempt to allocate the log buffer
-    if (stateTable)
+    if (stateTable && sensorTable)
     {
         if (logBuffer == nullptr)
             logBuffer = (uint8_t *)r4aMalloc(logBufferSize, "Log Buffer");
 
         // Save the state table and stop state
         logStateTable = stateTable;
+        logSensorTable = sensorTable;
+        logSensorMask = sensorMask;
         logStopState = stopState;
         logStartUsec = 0;
         logPrintHeader = true;
@@ -102,17 +109,7 @@ bool logDataPrint()
     static uint32_t previousUsec;
     uint32_t seconds;
     int sensorLength;
-    const char * sensorTable[8] =
-    {
-        ".       .", // 0
-        ".     |x|", // 1
-        ".  |x|  .", // 2
-        ".  |xxxx|", // 3
-        "|x|     .", // 4
-        "|x|   |x|", // 5
-        "|xxxx|  .", // 6
-        "|xxxxxxx|", // 7
-    };
+    uint8_t sensors;
 
     logEntry = (LOG_ENTRY *)logBufTail;
     logNext = logEntry + 1;
@@ -164,7 +161,7 @@ bool logDataPrint()
         // Finish displaying the log header
         logPrint->printf("--------------------------------------------------------------------------------\r\n");
         logPrint->printf("\r\n");
-        sensorLength = strlen(sensorTable[0]);
+        sensorLength = strlen(logSensorTable[0]);
         logDisplayHeader(sensorLength, logPrint);
         logDisplayHeaderDashes(sensorLength, logPrint);
 
@@ -182,13 +179,14 @@ bool logDataPrint()
     deltaUsec -= deltaSec * 1000 * 1000;
 
     // Format the log entry
+    sensors = logEntry->_lineSensors & logSensorMask;
     sprintf(line, "%6ld.%06ld, %6ld.%06ld: %5d  %s  %5d  %s\r\n",
             seconds,
             microseconds,
             deltaSec,
             deltaUsec,
             logEntry->_leftSpeed,
-            sensorTable[logEntry->_lineSensors],
+            logSensorTable[sensors],
             logEntry->_rightSpeed,
             logStateTable[logEntry->_state]);
     previousUsec = logEntry->_microSec;
@@ -202,7 +200,7 @@ bool logDataPrint()
     // Done printing the data
     if (logEntry->_state == logStopState)
     {
-        sensorLength = strlen(sensorTable[0]);
+        sensorLength = strlen(logSensorTable[0]);
         logDisplayHeaderDashes(sensorLength, logPrint);
         logDisplayHeader(sensorLength, logPrint);
         logPrint->printf("\r\n");
