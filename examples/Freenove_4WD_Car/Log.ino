@@ -160,6 +160,14 @@ bool logDataPrint()
     if (logEntry->_state == logStopState)
     {
         logPrint->printf("\r\n");
+
+        // Display the parameters
+        logPrint->printf("Parameters\r\n");
+        logPrint->printf("----------\r\n");
+        r4aEsp32NvmDisplayParameters(nvmParameters, nvmParameterCount, logPrint);
+        logPrint->printf("\r\n");
+
+        // Disable further logging
         logPrint = nullptr;
     }
     return true;
