@@ -266,14 +266,14 @@ void blfSx1509Challenge(R4A_ROBOT_CHALLENGE * object)
                           &lineSensors);
     if (BLF_DEBUG_STATES)
         Serial.printf("l %d %d %d %d %d %d %d %d r\r\n",
-                      lineSensors & 1,
-                      (lineSensors & 2) ? 1 : 0,
-                      (lineSensors & 4) ? 1 : 0,
-                      (lineSensors & 8) ? 1 : 0,
-                      (lineSensors & 0x10) ? 1 : 0,
-                      (lineSensors & 0x20) ? 1 : 0,
+                      (lineSensors & 0x80) ? 1 : 0,
                       (lineSensors & 0x40) ? 1 : 0,
-                      (lineSensors & 0x80) ? 1 : 0);
+                      (lineSensors & 0x20) ? 1 : 0,
+                      (lineSensors & 0x10) ? 1 : 0,
+                      (lineSensors & 8) ? 1 : 0,
+                      (lineSensors & 4) ? 1 : 0,
+                      (lineSensors & 2) ? 1 : 0,
+                      lineSensors & 1);
 
     // Update the robot direction
     switch (lineSensors)
