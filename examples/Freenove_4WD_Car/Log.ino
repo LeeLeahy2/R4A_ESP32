@@ -10,13 +10,22 @@
 
 const size_t logBufferSize = 256 * sizeof(LOG_ENTRY);
 
+#define LOG_STATE_WIDTH         20
+
+#define LOG_DASHES_LENGTH       80
+#define LOG_SPACES_LENGTH       80
+
 //****************************************
 // Locals
 //****************************************
 
+//                                       1         2         3         4         5         6         7         8
+//                              12345678901234567890123456789012345678901234567890123456789012345678901234567890
+const char * const logDashes = "--------------------------------------------------------------------------------";
+const char * const logSpaces = "                                                                                ";
+
 volatile uint8_t * logBufHead;  // Log entry insertion location
 volatile uint8_t * logBufTail;  // Log entry removal location
-uint32_t logPreviousUsec;
 bool logPrintHeader;
 const char ** logStateTable;
 uint8_t logStopState;
@@ -76,7 +85,7 @@ void logInit(const char ** stateTable, uint8_t stopState)
         logStateTable = stateTable;
         logStopState = stopState;
         logStartUsec = 0;
-        logPreviousUsec = 0;
+        logPrintHeader = true;
     }
 }
 
@@ -90,7 +99,9 @@ bool logDataPrint()
     LOG_ENTRY * logEntry;
     LOG_ENTRY * logNext;
     uint32_t microseconds;
+    static uint32_t previousUsec;
     uint32_t seconds;
+    int sensorLength;
     const char * sensorTable[8] =
     {
         ".       .", // 0
@@ -121,12 +132,44 @@ bool logDataPrint()
     if (logBufHead == logBufTail)   // Empty list
         return false;
 
+    // Display the header if necessary
     if (logPrintHeader)
     {
         logPrintHeader = false;
+        logPrint->printf("\r\n");
+        logPrint->printf("--------------------------------------------------------------------------------\r\n");
+        logPrint->printf("%s\r\n", robot._challenge->_name);
+
+        // Display the current time
+        if (ntpEnable && r4aNtpIsTimeValid())
+            r4aNtpDisplayDateTime(logPrint);
+
+        // Display the WIFI status
+        const char * hostName = r4aWifiHostName;
+        if (hostName)
+            logPrint->printf("%s (%s): %s channel %d\r\n",
+                             hostName,
+                             WiFi.localIP().toString().c_str(),
+                             r4aWifiStationSsid(),
+                             r4aWifiChannel);
+        else
+            logPrint->printf("%s: %s channel %d\r\n",
+                             WiFi.localIP().toString().c_str(),
+                             r4aWifiStationSsid(),
+                             r4aWifiChannel);
+
+        // Display the battery voltage
+        DISPLAY_BATTERY_VOLTAGE(logPrint);
+
+        // Finish displaying the log header
+        logPrint->printf("--------------------------------------------------------------------------------\r\n");
+        logPrint->printf("\r\n");
+        sensorLength = strlen(sensorTable[0]);
+        logDisplayHeader(sensorLength, logPrint);
+        logDisplayHeaderDashes(sensorLength, logPrint);
 
         // Set the start time
-        logPreviousUsec = logEntry->_microSec;
+        previousUsec = logEntry->_microSec;
     }
 
     // Compute the challenge time and delta time
@@ -134,7 +177,7 @@ bool logDataPrint()
     seconds = microseconds / (1000 * 1000);
     microseconds -= seconds * 1000 * 1000;
 
-    deltaUsec = logEntry->_microSec - logPreviousUsec;
+    deltaUsec = logEntry->_microSec - previousUsec;
     deltaSec = deltaUsec / (1000 * 1000);
     deltaUsec -= deltaSec * 1000 * 1000;
 
@@ -148,7 +191,7 @@ bool logDataPrint()
             sensorTable[logEntry->_lineSensors],
             logEntry->_rightSpeed,
             logStateTable[logEntry->_state]);
-    logPreviousUsec = logEntry->_microSec;
+    previousUsec = logEntry->_microSec;
 
     // Display the log entry
     logPrint->printf("%s", line);
@@ -159,6 +202,9 @@ bool logDataPrint()
     // Done printing the data
     if (logEntry->_state == logStopState)
     {
+        sensorLength = strlen(sensorTable[0]);
+        logDisplayHeaderDashes(sensorLength, logPrint);
+        logDisplayHeader(sensorLength, logPrint);
         logPrint->printf("\r\n");
 
         // Display the loop times
@@ -171,8 +217,61 @@ bool logDataPrint()
         r4aEsp32NvmDisplayParameters(nvmParameters, nvmParameterCount, logPrint);
         logPrint->printf("\r\n");
 
+        // Display the current time
+        if (ntpEnable && r4aNtpIsTimeValid())
+        {
+            logPrint->printf("--------------------------------------------------------------------------------\r\n");
+            r4aNtpDisplayDateTime(logPrint);
+            logPrint->printf("--------------------------------------------------------------------------------\r\n");
+            logPrint->printf("\r\n");
+        }
+
         // Disable further logging
         logPrint = nullptr;
     }
     return true;
+}
+
+//*********************************************************************
+// Display the header for the log
+void logDisplayHeader(int sensorHeaderWidth, Print * display)
+{
+    const char * const headerLeft = " Elapsed Time     Delta Time   Left  ";
+    const char * const headerSensors = "Sensors";
+    const char * const headerRight = "  Right  State\r\n";
+    int sensorLength;
+    int spacesLeft;
+    int spacesRight;
+
+    // Determine left and right spaces
+    sensorLength = strlen(headerSensors);
+    spacesLeft = LOG_SPACES_LENGTH - ((sensorHeaderWidth - sensorLength) >> 1);
+    spacesRight = LOG_SPACES_LENGTH - ((sensorHeaderWidth - sensorLength + 1) >> 1);
+
+    // Display the header
+    display->printf("%s%s%s%s%s\r\n",
+                    headerLeft,
+                    &logSpaces[spacesLeft],
+                    headerSensors,
+                    &logSpaces[spacesRight],
+                    headerRight);
+}
+
+//*********************************************************************
+// Display the dashes for the log header
+void logDisplayHeaderDashes(int sensorHeaderWidth, Print * display)
+{
+    const char * const dashesLeft = "-------------  -------------  -----  ";
+    const char * const dashesRight = "  -----  ";
+    int dashesSensors;
+    int dashesState;
+
+    // Determine sensors and state dashes
+    dashesSensors = LOG_DASHES_LENGTH - sensorHeaderWidth;
+    dashesState = LOG_DASHES_LENGTH - LOG_STATE_WIDTH;
+    display->printf("%s%s%s%s\r\n",
+                    dashesLeft,
+                    &logDashes[dashesSensors],
+                    dashesRight,
+                    &logDashes[dashesState]);
 }
