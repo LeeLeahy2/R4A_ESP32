@@ -103,9 +103,6 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
 // delay state.
 void blfInit(R4A_ROBOT_CHALLENGE * object)
 {
-    // Attempt to allocate the log buffer
-    logInit(blfStateTable, BLF_STATE_STOP);
-
     blfState = BLF_STATE_STOP;
     challengeInit();
 }
@@ -167,6 +164,13 @@ void blfStart(Print * display)
     if ((!sx1509Present) && (!pcf8574Present))
     {
         display->printf("ERROR: PCF8574 (line sensor) not responding on I2C bus!\r\n");
+        return;
+    }
+
+    // Attempt to allocate the log buffer
+    if (logInit(blfStateTable, BLF_STATE_STOP) == false)
+    {
+        display->printf("ERROR: Failed to allocate log buffer!\r\n");
         return;
     }
 

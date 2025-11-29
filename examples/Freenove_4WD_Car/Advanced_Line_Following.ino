@@ -89,9 +89,6 @@ void alfForward()
 // delay state.
 void alfInit(R4A_ROBOT_CHALLENGE * object)
 {
-    // Attempt to allocate the log buffer
-    logInit(alfStateTable, ALF_STATE_STOP);
-
     alfState = ALF_STATE_STOP;
     challengeInit();
 }
@@ -120,6 +117,13 @@ void alfStart(Print * display)
     if (!pcf8574Present)
     {
         display->printf("ERROR: PCF8574 (line sensor) not responding on I2C bus!\r\n");
+        return;
+    }
+
+    // Attempt to allocate the log buffer
+    if (logInit(alfStateTable, ALF_STATE_STOP) == false)
+    {
+        display->printf("ERROR: Failed to allocate log buffer!\r\n");
         return;
     }
 

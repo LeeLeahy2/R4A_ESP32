@@ -69,24 +69,24 @@ void logData(uint32_t currentUsec, uint8_t state)
 
 //*********************************************************************
 // Initialize the log buffer
-void logInit(const char ** stateTable, uint8_t stopState)
+bool logInit(const char ** stateTable, uint8_t stopState)
 {
     // Attempt to allocate the log buffer
-    if (stateTable && (logBuffer == nullptr))
+    if (stateTable)
     {
-        logBuffer = (uint8_t *)r4aMalloc(logBufferSize, "Log Buffer");
-        if (logBuffer)
-        {
-            logBufHead = logBuffer;
-            logBufTail = logBuffer;
-        }
+        if (logBuffer == nullptr)
+            logBuffer = (uint8_t *)r4aMalloc(logBufferSize, "Log Buffer");
 
         // Save the state table and stop state
         logStateTable = stateTable;
         logStopState = stopState;
         logStartUsec = 0;
         logPrintHeader = true;
+        logBufHead = logBuffer;
+        logBufTail = logBuffer;
+        return (logBuffer != nullptr);
     }
+    return false;
 }
 
 //*********************************************************************
