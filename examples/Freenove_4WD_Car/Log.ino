@@ -16,6 +16,8 @@ const size_t logBufferSize = 256 * sizeof(LOG_ENTRY);
 
 volatile uint8_t * logBufHead;  // Log entry insertion location
 volatile uint8_t * logBufTail;  // Log entry removal location
+uint32_t logPreviousUsec;
+bool logPrintHeader;
 const char ** logStateTable;
 uint8_t logStopState;
 
@@ -74,6 +76,7 @@ void logInit(const char ** stateTable, uint8_t stopState)
         logStateTable = stateTable;
         logStopState = stopState;
         logStartUsec = 0;
+        logPreviousUsec = 0;
     }
 }
 
@@ -81,9 +84,13 @@ void logInit(const char ** stateTable, uint8_t stopState)
 // Display the robot state change
 bool logDataPrint()
 {
+    uint32_t deltaSec;
+    uint32_t deltaUsec;
     static char line[128];
     LOG_ENTRY * logEntry;
     LOG_ENTRY * logNext;
+    uint32_t microseconds;
+    uint32_t seconds;
     const char * sensorTable[8] =
     {
         ".       .", // 0
@@ -95,8 +102,6 @@ bool logDataPrint()
         "|xxxx|  .", // 6
         "|xxxxxxx|", // 7
     };
-    uint32_t seconds;
-    uint32_t microseconds;
 
     logEntry = (LOG_ENTRY *)logBufTail;
     logNext = logEntry + 1;
@@ -116,17 +121,34 @@ bool logDataPrint()
     if (logBufHead == logBufTail)   // Empty list
         return false;
 
-    // Format the log entry
+    if (logPrintHeader)
+    {
+        logPrintHeader = false;
+
+        // Set the start time
+        logPreviousUsec = logEntry->_microSec;
+    }
+
+    // Compute the challenge time and delta time
     microseconds = logEntry->_microSec - logStartUsec;
     seconds = microseconds / (1000 * 1000);
     microseconds -= seconds * 1000 * 1000;
-    sprintf(line, "%6ld.%06ld: %5d  %s  %5d  %s\r\n",
+
+    deltaUsec = logEntry->_microSec - logPreviousUsec;
+    deltaSec = deltaUsec / (1000 * 1000);
+    deltaUsec -= deltaSec * 1000 * 1000;
+
+    // Format the log entry
+    sprintf(line, "%6ld.%06ld, %6ld.%06ld: %5d  %s  %5d  %s\r\n",
             seconds,
             microseconds,
+            deltaSec,
+            deltaUsec,
             logEntry->_leftSpeed,
             sensorTable[logEntry->_lineSensors],
             logEntry->_rightSpeed,
             logStateTable[logEntry->_state]);
+    logPreviousUsec = logEntry->_microSec;
 
     // Display the log entry
     logPrint->printf("%s", line);
