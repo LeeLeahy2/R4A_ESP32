@@ -220,6 +220,7 @@ typedef struct _LOG_ENTRY
     uint8_t _state;
     uint8_t _lineSensors;
     uint16_t _reserved;
+    uint32_t _loopCount;
 } LOG_ENTRY;
 
 uint8_t * logBuffer;    // Buffer for logging
@@ -235,6 +236,8 @@ Print * logPrint;       // Network connection for logging
 //****************************************
 // Loop globals
 //****************************************
+
+uint32_t loopCount;
 
 #define LOOP_CORE_0_TIME_ENTRIES    8192
 #define LOOP_CORE_1_TIME_ENTRIES    8192
@@ -590,6 +593,9 @@ void loop()
     if (DEBUG_LOOP_CORE_1)
         callingRoutine("r4aRobotUpdate");
     r4aRobotUpdate(&robot, currentMsec);
+
+    // Account for this loop
+    loopCount += 1;
 
     // Determine if the loop times should be saved
     endUsec = esp_timer_get_time();

@@ -10,7 +10,7 @@
 
 const size_t logBufferSize = 256 * sizeof(LOG_ENTRY);
 
-#define LOG_STATE_WIDTH         20
+#define LOG_STATE_WIDTH         17
 
 #define LOG_DASHES_LENGTH       80
 #define LOG_SPACES_LENGTH       80
@@ -64,6 +64,7 @@ void logData(uint32_t currentUsec, uint8_t state)
     logEntry->_state = state;
     logEntry->_lineSensors = lineSensors;
     logEntry->_reserved = 0;
+    logEntry->_loopCount = loopCount;
 
     // Insert this entry into the log buffer
     logBufHead = (uint8_t *)logNext;
@@ -106,7 +107,8 @@ bool logDataPrint()
     LOG_ENTRY * logEntry;
     LOG_ENTRY * logNext;
     uint32_t microseconds;
-    static uint32_t previousUsec;
+    static LOG_ENTRY previousEntry;
+    uint8_t previousState;
     uint32_t seconds;
     int sensorLength;
     uint8_t sensors;
@@ -132,7 +134,6 @@ bool logDataPrint()
     // Display the header if necessary
     if (logPrintHeader)
     {
-        logPrintHeader = false;
         logPrint->printf("\r\n");
         logPrint->printf("--------------------------------------------------------------------------------\r\n");
         logPrint->printf("%s\r\n", robot._challenge->_name);
@@ -164,42 +165,54 @@ bool logDataPrint()
         sensorLength = strlen(logSensorTable[0]);
         logDisplayHeader(sensorLength, logPrint);
         logDisplayHeaderDashes(sensorLength, logPrint);
+    }
+    else
+    {
+        // Compute the challenge time and delta time
+        microseconds = logEntry->_microSec - logStartUsec;
+        seconds = microseconds / (1000 * 1000);
+        microseconds -= seconds * 1000 * 1000;
 
-        // Set the start time
-        previousUsec = logEntry->_microSec;
+        deltaUsec = logEntry->_microSec - previousEntry._microSec;
+        deltaSec = deltaUsec / (1000 * 1000);
+        deltaUsec -= deltaSec * 1000 * 1000;
+
+        // Format the log entry
+        sensors = previousEntry._lineSensors & logSensorMask;
+        sprintf(line, "%6ld.%06ld, %6ld.%06ld: %5d  %s  %5d %7d  %s\r\n",
+                seconds,
+                microseconds,
+                deltaSec,
+                deltaUsec,
+                previousEntry._leftSpeed,
+                logSensorTable[sensors],
+                previousEntry._rightSpeed,
+                logEntry->_loopCount - previousEntry._loopCount,
+                logStateTable[previousEntry._state]);
+
+        // Display the log entry
+        logPrint->printf("%s", line);
     }
 
-    // Compute the challenge time and delta time
-    microseconds = logEntry->_microSec - logStartUsec;
-    seconds = microseconds / (1000 * 1000);
-    microseconds -= seconds * 1000 * 1000;
+    // Save the previous entry
+    previousState = previousEntry._state;
+    memcpy(&previousEntry, logEntry, sizeof(previousEntry));
 
-    deltaUsec = logEntry->_microSec - previousUsec;
-    deltaSec = deltaUsec / (1000 * 1000);
-    deltaUsec -= deltaSec * 1000 * 1000;
-
-    // Format the log entry
-    sensors = logEntry->_lineSensors & logSensorMask;
-    sprintf(line, "%6ld.%06ld, %6ld.%06ld: %5d  %s  %5d  %s\r\n",
-            seconds,
-            microseconds,
-            deltaSec,
-            deltaUsec,
-            logEntry->_leftSpeed,
-            logSensorTable[sensors],
-            logEntry->_rightSpeed,
-            logStateTable[logEntry->_state]);
-    previousUsec = logEntry->_microSec;
-
-    // Display the log entry
-    logPrint->printf("%s", line);
-
-    // Remove this entry from the log buffer
-    logBufTail = (uint8_t *)logNext;
+    // Log the start entry
+    if (logPrintHeader)
+    {
+        logPrintHeader = false;
+        return logDataPrint();
+    }
 
     // Done printing the data
     if (logEntry->_state == logStopState)
     {
+        // Display the change that caused the stop
+        if (previousState != logStopState)
+            return logDataPrint();
+
+        // Add a header below the log
         sensorLength = strlen(logSensorTable[0]);
         logDisplayHeaderDashes(sensorLength, logPrint);
         logDisplayHeader(sensorLength, logPrint);
@@ -227,6 +240,11 @@ bool logDataPrint()
         // Disable further logging
         logPrint = nullptr;
     }
+
+    // Remove this entry from the log buffer
+    logBufTail = (uint8_t *)logNext;
+
+    // Successfully output the data
     return true;
 }
 
@@ -236,7 +254,7 @@ void logDisplayHeader(int sensorHeaderWidth, Print * display)
 {
     const char * const headerLeft = " Elapsed Time     Delta Time   Left  ";
     const char * const headerSensors = "Sensors";
-    const char * const headerRight = "  Right  State\r\n";
+    const char * const headerRight = "  Right   Loops  State\r\n";
     int sensorLength;
     int spacesLeft;
     int spacesRight;
@@ -260,7 +278,7 @@ void logDisplayHeader(int sensorHeaderWidth, Print * display)
 void logDisplayHeaderDashes(int sensorHeaderWidth, Print * display)
 {
     const char * const dashesLeft = "-------------  -------------  -----  ";
-    const char * const dashesRight = "  -----  ";
+    const char * const dashesRight = "  -----  ------  ";
     int dashesSensors;
     int dashesState;
 
