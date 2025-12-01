@@ -90,8 +90,8 @@ bool logInit(const char ** stateTable,
         logStopState = stopState;
         logStartUsec = 0;
         logPrintHeader = true;
-        logBufHead = logBuffer;
         logBufTail = logBuffer;
+        logBufHead = logBuffer;
         return (logBuffer != nullptr);
     }
     return false;
@@ -239,6 +239,9 @@ bool logDataPrint()
 
         // Disable further logging
         logPrint = nullptr;
+        logBufHead = nullptr;
+        logBufTail = nullptr;
+        logNext = nullptr;
     }
 
     // Remove this entry from the log buffer
@@ -254,7 +257,7 @@ void logDisplayHeader(int sensorHeaderWidth, Print * display)
 {
     const char * const headerLeft = " Elapsed Time     Delta Time   Left  ";
     const char * const headerSensors = "Sensors";
-    const char * const headerRight = "  Right   Loops  State\r\n";
+    const char * const headerRight = "  Right   Loops  State";
     int sensorLength;
     int spacesLeft;
     int spacesRight;
