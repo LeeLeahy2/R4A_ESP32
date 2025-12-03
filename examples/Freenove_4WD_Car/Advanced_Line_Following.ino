@@ -59,7 +59,7 @@ void alfChallenge(R4A_ROBOT_CHALLENGE * object)
 
         // Log the sensors
         if (logBuffer)
-            logData(currentUsec, alfState);
+            logLineSensorData(currentUsec, alfState);
     }
 }
 
@@ -173,7 +173,7 @@ void alfStart(R4A_ROBOT_CHALLENGE * object)
 
     // Log the sensors
     if (logBuffer)
-        logData(currentUsec, alfState);
+        logLineSensorData(currentUsec, alfState);
     previousLineSensors = lineSensors;
 }
 
@@ -204,7 +204,7 @@ void alfStop(R4A_ROBOT_CHALLENGE * object)
         lineSensors &= 7;
 
         // Log the sensors
-        logData(currentUsec, alfState);
+        logLineSensorData(currentUsec, alfState);
     }
 
     // Turn on the brake lights

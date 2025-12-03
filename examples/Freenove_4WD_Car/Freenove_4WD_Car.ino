@@ -780,7 +780,7 @@ void loopCore0()
         telnet.update(telnetEnable, r4aWifiStationOnline);
 
         // Output the debug log data
-        while (logDataPrint());
+        while (logPrintData());
 
         // Update the web server
         if (DEBUG_LOOP_CORE_0)

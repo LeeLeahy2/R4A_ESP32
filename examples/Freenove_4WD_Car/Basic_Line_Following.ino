@@ -93,7 +93,7 @@ void blfChallenge(R4A_ROBOT_CHALLENGE * object)
     if (logBuffer && ((lineSensors != previousLineSensors)
                         || (robotLeftSpeed != previousLeftSpeed)
                         || (robotRightSpeed != previousRightSpeed)))
-        logData(currentUsec, blfState);
+        logLineSensorData(currentUsec, blfState);
     previousLeftSpeed = robotLeftSpeed;
     previousRightSpeed = robotRightSpeed;
 }
@@ -229,7 +229,7 @@ void blfStart(R4A_ROBOT_CHALLENGE * object)
 
     // Log the sensors
     if (logBuffer)
-        logData(currentUsec, blfState);
+        logLineSensorData(currentUsec, blfState);
     previousLineSensors = lineSensors;
 }
 
@@ -260,7 +260,7 @@ void blfStop(R4A_ROBOT_CHALLENGE * object)
         blfReadLineSensors();
 
         // Log the sensors
-        logData(currentUsec, blfState);
+        logLineSensorData(currentUsec, blfState);
     }
 
     challengeStop();
