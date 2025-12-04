@@ -8,12 +8,33 @@
 // Constants
 //****************************************
 
-const size_t logBufferSize = 256 * sizeof(LOG_ENTRY);
+const size_t logBufferSize = 8192;
 
 #define LOG_STATE_WIDTH         17
 
 #define LOG_DASHES_LENGTH       80
 #define LOG_SPACES_LENGTH       80
+
+//****************************************
+// New Types
+//****************************************
+
+typedef struct _LOG_ENTRY
+{
+    uint32_t _microSec;
+    int16_t _leftSpeed;
+    int16_t _rightSpeed;
+    uint8_t _state;
+    uint8_t _lineSensors;
+    uint16_t _reserved;
+    uint32_t _loopCount;
+} LOG_ENTRY;
+
+//****************************************
+// Forward routines declarations
+//****************************************
+
+bool logLineSensorPrint(LOG_ENTRY * logEntry, LOG_ENTRY * logNext);
 
 //****************************************
 // Locals

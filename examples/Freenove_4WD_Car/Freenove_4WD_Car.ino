@@ -212,17 +212,6 @@ int16_t lsAdcValue;
 // Logging
 //****************************************
 
-typedef struct _LOG_ENTRY
-{
-    uint32_t _microSec;
-    int16_t _leftSpeed;
-    int16_t _rightSpeed;
-    uint8_t _state;
-    uint8_t _lineSensors;
-    uint16_t _reserved;
-    uint32_t _loopCount;
-} LOG_ENTRY;
-
 uint8_t * logBuffer;    // Buffer for logging
 uint32_t logStartUsec;  // Start time in microseconds
 
