@@ -27,7 +27,7 @@ enum LOG_TYPE
 typedef struct _LOG_ENTRY
 {
     uint8_t _logType;
-    uint8_t _reserved;
+    uint8_t _pow2Length;
     uint8_t _state;
     uint8_t _data8;
     uint32_t _microSec;
@@ -99,7 +99,7 @@ bool logInit(const char ** stateTable,
 
 //*********************************************************************
 // Log the line sensor data and robot state
-void logLineSensorData(uint32_t currentUsec, uint8_t state)
+void logLineSensorData(uint32_t currentUsec, uint8_t state, uint8_t pow2Length)
 {
     LOG_ENTRY * logEntry;
     LOG_ENTRY * logNext;
@@ -112,7 +112,10 @@ void logLineSensorData(uint32_t currentUsec, uint8_t state)
 
     // Determine the next buffer location
     logEntry = (LOG_ENTRY *)logBufHead;
-    logNext = logEntry + 1;
+    if (logEntry->_pow2Length)
+        logNext = (LOG_ENTRY *)((uint8_t *)logEntry + (1 << logEntry->_pow2Length));
+    else
+        logNext = logEntry;
     if (logNext >= (LOG_ENTRY *)&logBuffer[logBufferSize])
         logNext = (LOG_ENTRY *)logBuffer;
 
@@ -125,7 +128,7 @@ void logLineSensorData(uint32_t currentUsec, uint8_t state)
 
     // Add an entry to the log buffer
     logEntry->_logType = LOG_TYPE_LINE_SENSOR;
-    logEntry->_reserved = 0;
+    logEntry->_pow2Length = pow2Length;
     logEntry->_state = state;
     logEntry->_data8 = lineSensors;
     logEntry->_microSec = currentUsec;
@@ -337,7 +340,10 @@ bool logPrintData()
 
     // Compute the location of the next log entry
     logEntry = (LOG_ENTRY *)logBufTail;
-    logNext = logEntry + 1;
+    if (logEntry->_pow2Length)
+        logNext = (LOG_ENTRY *)((uint8_t *)logEntry + (1 << logEntry->_pow2Length));
+    else
+        logNext = logEntry;
     if (logNext >= (LOG_ENTRY *)&logBuffer[logBufferSize])
         logNext = (LOG_ENTRY *)logBuffer;
 

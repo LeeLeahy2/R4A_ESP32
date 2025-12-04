@@ -222,6 +222,8 @@ int16_t robotRightSpeed;
 
 Print * logPrint;       // Network connection for logging
 
+#define LOG_LINE_SENSOR_DATA_POW2LENGTH     4
+
 //****************************************
 // Loop globals
 //****************************************
