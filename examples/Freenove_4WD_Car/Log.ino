@@ -29,7 +29,7 @@ typedef struct _LOG_ENTRY
     uint8_t _logType;
     uint8_t _reserved;
     uint8_t _state;
-    uint8_t _lineSensors;
+    uint8_t _data8;
     uint32_t _microSec;
     uint32_t _loopCount;
     int16_t _leftSpeed;
@@ -127,7 +127,7 @@ void logLineSensorData(uint32_t currentUsec, uint8_t state)
     logEntry->_logType = LOG_TYPE_LINE_SENSOR;
     logEntry->_reserved = 0;
     logEntry->_state = state;
-    logEntry->_lineSensors = lineSensors;
+    logEntry->_data8 = lineSensors;
     logEntry->_microSec = currentUsec;
     logEntry->_loopCount = loopCount;
     logEntry->_leftSpeed = robotLeftSpeed;
@@ -242,7 +242,7 @@ bool logLineSensorPrint(LOG_ENTRY * logEntry, LOG_ENTRY * logNext)
         deltaUsec -= deltaSec * 1000 * 1000;
 
         // Format the log entry
-        sensors = previousEntry._lineSensors & logSensorMask;
+        sensors = previousEntry._data8 & logSensorMask;
         sprintf(line, "%6ld.%06ld, %6ld.%06ld: %5d  %s  %5d %7d  %s\r\n",
                 seconds,
                 microseconds,
