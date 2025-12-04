@@ -15,26 +15,43 @@ const size_t logBufferSize = 8192;
 #define LOG_DASHES_LENGTH       80
 #define LOG_SPACES_LENGTH       80
 
+enum LOG_TYPE
+{
+    LOG_TYPE_LINE_SENSOR = 0,
+};
+
 //****************************************
 // New Types
 //****************************************
 
 typedef struct _LOG_ENTRY
 {
-    uint32_t _microSec;
-    int16_t _leftSpeed;
-    int16_t _rightSpeed;
+    uint8_t _logType;
+    uint8_t _reserved;
     uint8_t _state;
     uint8_t _lineSensors;
-    uint16_t _reserved;
+    uint32_t _microSec;
     uint32_t _loopCount;
+    int16_t _leftSpeed;
+    int16_t _rightSpeed;
 } LOG_ENTRY;
+
+typedef bool (*LOG_PRINT_DATA_ROUTINE)(LOG_ENTRY * logEntry, LOG_ENTRY * logNext);
 
 //****************************************
 // Forward routines declarations
 //****************************************
 
 bool logLineSensorPrint(LOG_ENTRY * logEntry, LOG_ENTRY * logNext);
+
+//****************************************
+// Log data routines
+//****************************************
+
+const LOG_PRINT_DATA_ROUTINE logPrintDataRoutine[] =
+{
+    logLineSensorPrint,
+};
 
 //****************************************
 // Locals
@@ -107,13 +124,14 @@ void logLineSensorData(uint32_t currentUsec, uint8_t state)
     }
 
     // Add an entry to the log buffer
-    logEntry->_microSec = currentUsec;
-    logEntry->_leftSpeed = robotLeftSpeed;
-    logEntry->_rightSpeed = robotRightSpeed;
+    logEntry->_logType = LOG_TYPE_LINE_SENSOR;
+    logEntry->_reserved = 0;
     logEntry->_state = state;
     logEntry->_lineSensors = lineSensors;
-    logEntry->_reserved = 0;
+    logEntry->_microSec = currentUsec;
     logEntry->_loopCount = loopCount;
+    logEntry->_leftSpeed = robotLeftSpeed;
+    logEntry->_rightSpeed = robotRightSpeed;
 
     // Insert this entry into the log buffer
     logBufHead = (uint8_t *)logNext;
@@ -324,5 +342,5 @@ bool logPrintData()
         logNext = (LOG_ENTRY *)logBuffer;
 
     // Print the log entry
-    return logLineSensorPrint(logEntry, logNext);
+    return logPrintDataRoutine[logEntry->_logType](logEntry, logNext);
 }
