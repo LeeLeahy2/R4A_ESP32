@@ -100,14 +100,4 @@ void clfStop(R4A_ROBOT_CHALLENGE * object)
     challengeStop();
 }
 
-//*********************************************************************
-// Start the line following at boot
-void menuStartClf(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
-{
-    startIndex = CHALLENGE_CLF;
-    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
-}
-
 #endif  // USE_OV2640

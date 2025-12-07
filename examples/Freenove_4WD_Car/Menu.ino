@@ -156,12 +156,12 @@ void robotMenuStop(const R4A_MENU_ENTRY * menuEntry,
 }
 
 //*********************************************************************
-// Start the line following at boot
-void startNone(const struct _R4A_MENU_ENTRY * menuEntry,
-               const char * command,
-               Print * display)
+// Start the challenge at boot
+void startChallengeAtBoot(const struct _R4A_MENU_ENTRY * menuEntry,
+                          const char * command,
+                          Print * display)
 {
-    startIndex = CHALLENGE_NONE;
+    startIndex = (uint8_t)menuEntry->menuParameter;
     r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
 }
 
@@ -321,20 +321,20 @@ const R4A_MENU_ENTRY servoMenuTable[] =
 // Start menu
 const R4A_MENU_ENTRY startMenuTable[] =
 {
-    // Command  menuRoutine         menuParam               HelpRoutine         align   HelpText
-    {"alf",     menuStartAlf,       0,                      nullptr,            0,      "Start advanced line following at boot"},
-    {"blf",     menuStartBlf,       0,                      nullptr,            0,      "Start basic line following at boot"},
-    {"blt",     menuStartBlt,       0,                      nullptr,            0,      "Start basic light tracking at boot"},
+    // Command  menuRoutine             menuParam           HelpRoutine     align   HelpText
+    {"alf",     startChallengeAtBoot,   CHALLENGE_ALF,      nullptr,        0,      "Start advanced line following at boot"},
+    {"blf",     startChallengeAtBoot,   CHALLENGE_BLF,      nullptr,        0,      "Start basic line following at boot"},
+    {"blt",     startChallengeAtBoot,   CHALLENGE_BLT,      nullptr,        0,      "Start basic light tracking at boot"},
 #ifdef  USE_OV2640
-    {"clf",     menuStartClf,       0,                      nullptr,            0,      "Start camera line following at boot"},
+    {"clf",     startChallengeAtBoot,   CHALLENGE_CLF,      nullptr,        0,      "Start camera line following at boot"},
 #endif  // USE_OV2640
-    {"None",    startNone,          0,                      nullptr,            0,      "Don't start anything at boot"},
+    {"None",    startChallengeAtBoot,   CHALLENGE_NONE,     nullptr,        0,      "Don't start anything at boot"},
 #ifdef  USE_ZED_F9P
 #ifdef  USE_WAYPOINT_FOLLOWING
-    {"wpf",     menuStartWpf,       0,                      nullptr,            0,      "Start waypoint following at boot"},
+    {"wpf",     startChallengeAtBoot,   CHALLENGE_WPF,      nullptr,        0,      "Start waypoint following at boot"},
 #endif  // USE_WAYPOINT_FOLLOWING
 #endif  // USE_ZED_F9P
-    {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,            0,      "Return to the main menu"},
+    {"x",       nullptr,            R4A_MENU_MAIN,          nullptr,        0,      "Return to the main menu"},
 };
 #define START_MENU_ENTRIES      sizeof(startMenuTable) / sizeof(startMenuTable[0])
 

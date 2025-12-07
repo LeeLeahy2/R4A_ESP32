@@ -219,13 +219,3 @@ void alfStop()
     alfState = ALF_STATE_STOP;
     r4aRobotStop(&robot, millis());
 }
-
-//*********************************************************************
-// Start the line following at boot
-void menuStartAlf(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
-{
-    startIndex = CHALLENGE_ALF;
-    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
-}

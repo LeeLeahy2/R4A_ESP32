@@ -367,12 +367,3 @@ void blfSx1509Challenge(R4A_ROBOT_CHALLENGE * object)
 }
 #endif  // USE_SPARKFUN_SEN_13582
 
-//*********************************************************************
-// Start the line following at boot
-void menuStartBlf(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
-{
-    startIndex = CHALLENGE_BLF;
-    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
-}

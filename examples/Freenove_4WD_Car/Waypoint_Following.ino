@@ -34,16 +34,6 @@ typedef struct _WAYPOINT_FOLLOWING
 static WAYPOINT_FOLLOWING wpfData;
 
 //*********************************************************************
-// Start the waypoint following at boot
-void menuStartWpf(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
-{
-    startIndex = CHALLENGE_WPF;
-    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
-}
-
-//*********************************************************************
 // Display the heading
 // Inputs:
 //   menuEntry: Address of the object describing the menu entry

@@ -117,13 +117,3 @@ void bltStop(R4A_ROBOT_CHALLENGE * object)
 {
     challengeStop();
 }
-
-//*********************************************************************
-// Start the light tracking at boot
-void menuStartBlt(const struct _R4A_MENU_ENTRY * menuEntry,
-                  const char * command,
-                  Print * display)
-{
-    startIndex = CHALLENGE_BLT;
-    r4aEsp32NvmMenuParameterFileWrite(menuEntry, command, display);
-}
