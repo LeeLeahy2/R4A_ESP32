@@ -112,8 +112,8 @@ void logLineSensorData(uint32_t currentUsec, uint8_t state, uint8_t pow2Length)
 
     // Determine the next buffer location
     logEntry = (LOG_ENTRY *)logBufHead;
-    if (logEntry->_pow2Length)
-        logNext = (LOG_ENTRY *)((uint8_t *)logEntry + (1 << logEntry->_pow2Length));
+    if (pow2Length)
+        logNext = (LOG_ENTRY *)((uint8_t *)logEntry + (1 << pow2Length));
     else
         logNext = logEntry;
     if (logNext >= (LOG_ENTRY *)&logBuffer[logBufferSize])
