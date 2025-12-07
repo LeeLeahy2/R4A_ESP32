@@ -8,7 +8,7 @@
 #ifndef __SECRETS_H__
 #define __SECRETS_H__
 
-const char * mdnsHostName = "Robot";
+const char * r4aWifiHostName = "robot";
 
 const char * wifiSSID1 = "IEEE";
 const char * wifiPassword1 = "IEEE-Robot";
