@@ -581,7 +581,7 @@ void loop()
     static uint32_t loopIndex;
     bool saveLoopTime;
 
-    // Remember the start of the look
+    // Remember the start of the loop
     currentUsec = esp_timer_get_time();
 
     // Determine if the loop times should be saved;
@@ -797,7 +797,7 @@ void loopCore0()
     static uint32_t loopIndex;
     bool saveLoopTime;
 
-    // Remember the start of the look
+    // Remember the start of the loop
     currentUsec = esp_timer_get_time();
 
     // Determine if the loop times should be saved;

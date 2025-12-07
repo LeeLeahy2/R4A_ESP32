@@ -546,7 +546,7 @@ void loop()
     static uint32_t loopIndex;
     bool saveLoopTime;
 
-    // Remember the start of the look
+    // Remember the start of the loop
     currentUsec = esp_timer_get_time();
 
     // Determine if the loop times should be saved;
@@ -615,7 +615,7 @@ void setupCore0(void *parameter)
     // Display the core number
     log_v("setupCore0() running on core %d", xPortGetCoreID());
 
-    // Initialize the SPI controller and WS2812 LEDs
+    // Initialize the SPI controller and WS2812 RGB LEDs
     R4A_4WD_CAR_SPI_WS2812_SETUP(1);
 
     // Start WiFi if enabled
@@ -704,7 +704,7 @@ void loopCore0()
     static uint32_t loopIndex;
     bool saveLoopTime;
 
-    // Remember the start of the look
+    // Remember the start of the loop
     currentUsec = esp_timer_get_time();
 
     // Determine if the loop times should be saved;
