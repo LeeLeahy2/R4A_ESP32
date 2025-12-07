@@ -34,12 +34,6 @@ bool ntpEnable;
 const char * parameterFilePath;
 
 //****************************************
-// PCA9685
-//****************************************
-
-uint32_t pca9685FrequencyHz;
-
-//****************************************
 // Robot
 //****************************************
 
@@ -126,10 +120,6 @@ const R4A_ESP32_NVM_PARAMETER nvmParameters[] =
     // NVM parameters
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
     {true,  R4A_ESP32_NVM_PT_P_CHAR, 0,          0,             &parameterFilePath,         "ParamFile",    R4A_ESP32_NVM_STRING("/Parameters.txt")},
-
-    // PCA9685
-// Required    Type                  Minimum     Maximum        Address                     Name            Default Value
-    {true,  R4A_ESP32_NVM_PT_UINT16, 24,         1525,          &pca9685FrequencyHz,        "pca9685Hz",    50},
 
     // Robot
 // Required    Type                  Minimum     Maximum        Address                     Name            Default Value
