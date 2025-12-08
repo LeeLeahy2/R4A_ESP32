@@ -103,7 +103,7 @@ esp_err_t r4aWebServerError (httpd_req_t *request,
 esp_err_t r4aWebServerFileDownload(httpd_req_t *request)
 {
     uint8_t * buffer;
-    const size_t bufferLength = 8192;
+    const size_t bufferLength = 1200;   //8192;
     size_t bytesRead;
     const char * dataType;
     File file;
@@ -205,7 +205,7 @@ esp_err_t r4aWebServerFileDownload(httpd_req_t *request)
         } while (bytesRead > 0);
 
         // Free the data buffer
-        r4aFree((void **)&buffer, "WebServer data buffer (buffer)");
+        r4aFree((void *)buffer, "WebServer data buffer (buffer)");
 
         // Close the file
         file.close();
